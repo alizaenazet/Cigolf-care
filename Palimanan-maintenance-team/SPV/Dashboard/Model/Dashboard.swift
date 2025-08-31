@@ -61,5 +61,6 @@ struct TaskItem: Codable, Identifiable {
     let needWorker: Int
     let availableWorker: Int
     let workerList: String
+    let urlPhoto: String?
     let isFinished: Bool
 }

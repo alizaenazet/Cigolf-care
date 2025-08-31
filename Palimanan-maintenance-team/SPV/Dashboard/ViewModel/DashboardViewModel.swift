@@ -13,6 +13,7 @@ class DashboardViewModel: ObservableObject {
     @Published var report: ForemanReport?
     @Published var isLoading = false
     @Published var errorMessage: String?
+    
 
     func fetchReport(for foremanId: Int) async {
         isLoading = true

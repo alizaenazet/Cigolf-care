@@ -52,7 +52,7 @@ struct ContentView: View {
                     Label("Program Harian", systemImage: "list.bullet.clipboard")
                 }
             }
-            .listStyle(.sidebar)
+            .listStyle(.automatic)
             .navigationTitle("Menu")
             
         } detail: {
