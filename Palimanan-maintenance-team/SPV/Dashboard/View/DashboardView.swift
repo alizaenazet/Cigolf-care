@@ -11,166 +11,96 @@ import SwiftUI
 struct DashboardView: View {
     @ObservedObject var viewModel: DashboardViewModel
     let foremanId: Int
+    @State private var showApprovalPopup = false
+    @State private var showAddTaskPopup = false
+    @State private var selectedDivision: Division?
+    @State private var selectedLocation: Location?
     
     var body: some View {
-        ScrollView {
-            if viewModel.isLoading {
-                ProgressView("Loading…")
-                    .padding()
-            } else if let report = viewModel.report {
-                VStack(spacing: 20) {
-                    ForemanCard(report: report)
-                    
-                    ForEach(report.divisions) { division in
-                        DivisionCard(division: division)
+        ZStack {
+            ScrollView {
+                if viewModel.isLoading {
+                    ProgressView("Loading…")
+                        .padding()
+                } else if let report = viewModel.report {
+                    VStack(spacing: 20) {
+                        ForemanCard(report: report) {
+                            withAnimation {
+                                showApprovalPopup = true
+                            }
+                        }
+                        
+                        ForEach(report.divisions) { division in
+                            DivisionCard(division: division) { div, loc in
+                                selectedDivision = div
+                                selectedLocation = loc
+                                withAnimation { showAddTaskPopup = true }
+                            }
+                        }
                     }
+                    .padding()
+                } else if let error = viewModel.errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                } else {
+                    Text("No data available")
+                        .foregroundStyle(.secondary)
                 }
-                .padding()
-            } else if let error = viewModel.errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
-            } else {
-                Text("No data available")
-                    .foregroundStyle(.secondary)
+            }
+            .task {
+                // Important: fetch again when the foremanId changes
+                await viewModel.fetchReport(for: foremanId)
+            }
+            .background(Color(.systemGray6))
+            //            .sheet(isPresented: $viewModel.showAddTaskPopup) {
+            //                if let division = viewModel.selectedDivision,
+            //                   let location = viewModel.selectedLocation,
+            //                   let foreman = ForemanMenu.fromId(foremanId) {
+            //                    AddTaskPopup(
+            //                        isPresented: $viewModel.showAddTaskPopup,
+            //                        division: division,
+            //                        location: location,
+            //                        foreman: foreman
+            //                    )
+            //                }
+            //            }
+            
+            if showAddTaskPopup,
+               let division = selectedDivision,
+               let location = selectedLocation,
+               let foreman = ForemanMenu.fromId(foremanId) {
+                AddTaskPopup(
+                    isPresented: $showAddTaskPopup,
+                    division: division,
+                    location: location,
+                    foreman: foreman
+                )
+                .transition(.opacity.combined(with: .scale))
+            }
+            
+            // 👇 Overlay popup if state is true
+            if showApprovalPopup, var report = viewModel.report {
+                ApprovalPopup(
+                    date: DateHelper.formattedDate(report.createdAt),
+                    provider: report.outsourceCompany,
+                    finishedCount: report.finishedTasks,
+                    totalCount: report.totalTasks,
+                    inProgressCount: report.pendingTasks,
+                    onApprove: {
+                        report.approved.isApproved = true
+                        withAnimation { showApprovalPopup = false }
+                    },
+                    onClose: {
+                        withAnimation { showApprovalPopup = false }
+                    }
+                )
+                .transition(.opacity.combined(with: .scale))
             }
         }
-        .task {
-            // Important: fetch again when the foremanId changes
-            await viewModel.fetchReport(for: foremanId)
-        }
-        .background(Color(.systemGray6))
     }
 }
 
-#Preview {
-    let mockReport = ForemanReport(
-        id: 1,
-        createdAt: "28-08-2025",
-        approved: Approval(
-            isApproved: true,
-            approvedAt: "28-08-2025",
-            spvName: "Sal Priadi"
-        ),
-        outsourceCompany: "PT. Yobel Perkasa",
-        foremanName: "Agus Gunandar",
-        totalTasks: 2,
-        finishedTasks: 1,
-        pendingTasks: 1,
-        divisions: [
-            Division(
-                id: 101,
-                name: "Operasional",
-                locations: [
-                    Location(
-                        locationId: 201,
-                        locationName: "Green",
-                        tasks: [
-                            TaskItem(
-                                id: 301,
-                                taskType: "Verticut green",
-                                description: "Potong model cepak",
-                                priority: "P2",
-                                area: "Hole 1, Hole 2, Villa",
-                                needWorker: 3,
-                                availableWorker: 3,
-                                workerList: "Yobel, Mar, Vick",
-                                urlPhoto: "",
-                                isFinished: false
-                            ),
-                            TaskItem(
-                                id: 302,
-                                taskType: "Pupuk granular green",
-                                description: "Pupuk cap cip cup",
-                                priority: "P1",
-                                area: "Hole 9",
-                                needWorker: 1,
-                                availableWorker: 1,
-                                workerList: "Yobel",
-                                urlPhoto: "/eijsd.png",
-                                isFinished: true
-                            )
-                        ]
-                    ),
-                    Location(
-                        locationId: 202,
-                        locationName: "Teebox",
-                        tasks: [
-                            TaskItem(
-                                id: 301,
-                                taskType: "Verticut green",
-                                description: "Potong model cepak",
-                                priority: "P2",
-                                area: "Hole 1, Hole 2, Villa",
-                                needWorker: 3,
-                                availableWorker: 3,
-                                workerList: "Yobel, Mar, Vick",
-                                urlPhoto: "",
-                                isFinished: false
-                            ),
-                            TaskItem(
-                                id: 302,
-                                taskType: "Pupuk granular green",
-                                description: "Pupuk cap cip cup",
-                                priority: "P1",
-                                area: "Hole 9",
-                                needWorker: 1,
-                                availableWorker: 1,
-                                workerList: "Yobel",
-                                urlPhoto: "/eijsd.png",
-                                isFinished: true
-                            )
-                        ]
-                    )
-                ]
-            ),
-            Division(
-                id: 102,
-                name: "Landscape",
-                locations: [
-                    Location(
-                        locationId: 301,
-                        locationName: "Green",
-                        tasks: [
-                            TaskItem(
-                                id: 401,
-                                taskType: "Verticut green",
-                                description: "Potong model cepak",
-                                priority: "P2",
-                                area: "Hole 1, Hole 2, Villa",
-                                needWorker: 3,
-                                availableWorker: 3,
-                                workerList: "Yobel, Mar, Vick",
-                                urlPhoto: "",
-                                isFinished: false
-                            ),
-                            TaskItem(
-                                id: 402,
-                                taskType: "Pupuk granular green",
-                                description: "Pupuk cap cip cup",
-                                priority: "P1",
-                                area: "Hole 9",
-                                needWorker: 1,
-                                availableWorker: 1,
-                                workerList: "Yobel",
-                                urlPhoto: "/eijsd.png",
-                                isFinished: true
-                            )
-                        ]
-                    )
-                ]
-            )
-        ]
-    )
-    
-    // Inject mock data into the VM
-    let mockVM = DashboardViewModel()
-    mockVM.report = mockReport
-    
-    return DashboardView(
-        viewModel: mockVM,
-        foremanId: 1
-    )
-    .previewLayout(.sizeThatFits)
-    .padding()
-}
+//#Preview {
+//    DashboardView()
+//}
 

@@ -9,7 +9,9 @@ import SwiftUI
 
 struct LocationCard: View {
     let location: Location
+    let division: Division
     @State private var isExpanded = false
+    var onAddTask: (Division, Location) -> Void
     
     // Shared grid definition
     private let taskColumns: [GridItem] = [
@@ -31,7 +33,7 @@ struct LocationCard: View {
                 Spacer()
                 
                 Button {
-                    // TODO: Add task logic
+                    onAddTask(division, location)
                 } label: {
                     Label("Tambahkan Pekerjaan", systemImage: "plus")
                         .padding(.horizontal, 12)

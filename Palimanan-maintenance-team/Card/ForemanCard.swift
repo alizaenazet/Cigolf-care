@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ForemanCard: View {
     let report: ForemanReport
+    let onApproveTap: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -32,12 +33,12 @@ struct ForemanCard: View {
                 Spacer()
                 
                 VStack(alignment: .trailing, spacing: 8) {
-                    Text(formattedDate(report.createdAt))
+                    Text(DateHelper.formattedDate(report.createdAt))
                         .font(.headline)
                     
                     if report.approved.isApproved {
                         Button {} label: {
-                            Label("Disetujui", systemImage: "checkmark.circle.fill")
+                            Label("Telah disetujui pada tanggal\(DateHelper.formattedDate(report.approved.approvedAt).split(separator: ",").dropFirst().joined(separator: ","))", systemImage: "checkmark.circle.fill")
                                 .font(.caption)
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 6)
@@ -48,7 +49,7 @@ struct ForemanCard: View {
                         .disabled(true)
                     } else {
                         Button {
-                            // approve action
+                            onApproveTap()
                         } label: {
                             Label("Setujui Laporan", systemImage: "checkmark")
                                 .font(.caption)
@@ -105,19 +106,6 @@ struct ForemanCard: View {
         .frame(maxWidth: .infinity)
         .background(color)
         .cornerRadius(12)
-    }
-    
-    // MARK: - Date formatter (simple)
-    private func formattedDate(_ dateString: String) -> String {
-        // Assuming "28-08-2025" format → output "Rabu, 28 Agustus 2025"
-        let df = DateFormatter()
-        df.dateFormat = "dd-MM-yyyy"
-        if let date = df.date(from: dateString) {
-            df.locale = Locale(identifier: "id_ID")
-            df.dateFormat = "EEEE, dd MMMM yyyy"
-            return df.string(from: date)
-        }
-        return dateString
     }
 }
 

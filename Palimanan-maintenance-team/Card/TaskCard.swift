@@ -11,6 +11,8 @@ struct TaskCard: View {
     let task: TaskItem
     let index: Int
     let columns: [GridItem]
+    @State private var showPreview = false
+    @State private var previewURL: URL?
     
     var body: some View {
         LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
@@ -21,7 +23,14 @@ struct TaskCard: View {
             Text(task.priority)
             if let url = task.urlPhoto, !url.isEmpty {
                 Button {
-                    // TODO: Open Photo
+                    FileDownloader.downloadTempFile(from: url) { fileURL in
+                        if let fileURL = fileURL {
+                            DispatchQueue.main.async {
+                                self.previewURL = fileURL
+                                self.showPreview = true
+                            }
+                        }
+                    }
                 } label: {
                     Label("Klik untuk melihat", systemImage: "")
                         .font(.subheadline)
@@ -51,5 +60,10 @@ struct TaskCard: View {
         .font(.subheadline)
         .padding(.horizontal)
         .padding(.vertical, 10)
+        .sheet(isPresented: $showPreview) {
+            if let previewURL = previewURL {
+                QuickLookPreview(url: previewURL)
+            }
+        }
     }
 }

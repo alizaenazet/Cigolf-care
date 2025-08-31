@@ -11,6 +11,7 @@ import SwiftUI
 struct DivisionCard: View {
     let division: Division
     @State private var isExpanded = false
+    var onAddTask: (Division, Location) -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -41,7 +42,9 @@ struct DivisionCard: View {
             if isExpanded {
                 VStack(alignment: .leading, spacing: 12) {
                     ForEach(division.locations) { location in
-                        LocationCard(location: location)
+                        LocationCard(location: location, division: division) { div, loc in
+                            onAddTask(div, loc)   // bubble up again
+                        }
                     }
                 }
                 .padding(.horizontal)

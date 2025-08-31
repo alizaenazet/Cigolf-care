@@ -9,21 +9,21 @@
 import Foundation
 
 struct DashboardResponse: Codable {
-    let status: String
-    let message: String
-    let data: ForemanReport
+    var status: String
+    var message: String
+    var data: ForemanReport
 }
 
 struct ForemanReport: Codable, Identifiable {
-    let id: Int
-    let createdAt: String
-    let approved: Approval
-    let outsourceCompany: String
-    let foremanName: String
-    let totalTasks: Int
-    let finishedTasks: Int
-    let pendingTasks: Int
-    let divisions: [Division]
+    var id: Int
+    var createdAt: String
+    var approved: Approval
+    var outsourceCompany: String
+    var foremanName: String
+    var totalTasks: Int
+    var finishedTasks: Int
+    var pendingTasks: Int
+    var divisions: [Division]
 
     enum CodingKeys: String, CodingKey {
         case id, createdAt, approved, outsourceCompany, foremanName
@@ -33,34 +33,34 @@ struct ForemanReport: Codable, Identifiable {
 }
 
 struct Approval: Codable {
-    let isApproved: Bool
-    let approvedAt: String
-    let spvName: String
+    var isApproved: Bool
+    var approvedAt: String
+    var spvName: String
 }
 
 struct Division: Codable, Identifiable {
-    let id: Int
-    let name: String
-    let locations: [Location]
+    var id: Int
+    var name: String
+    var locations: [Location]
 }
 
 struct Location: Codable, Identifiable {
-    let locationId: Int
-    let locationName: String
-    let tasks: [TaskItem]
+    var locationId: Int
+    var locationName: String
+    var tasks: [TaskItem]
 
     var id: Int { locationId }
 }
 
 struct TaskItem: Codable, Identifiable {
-    let id: Int
-    let taskType: String
-    let description: String
-    let priority: String
-    let area: String
-    let needWorker: Int
-    let availableWorker: Int
-    let workerList: String
-    let urlPhoto: String?
-    let isFinished: Bool
+    var id: Int
+    var taskType: String
+    var description: String
+    var priority: String
+    var area: String
+    var needWorker: Int
+    var availableWorker: Int
+    var workerList: String
+    var urlPhoto: String?
+    var isFinished: Bool
 }
