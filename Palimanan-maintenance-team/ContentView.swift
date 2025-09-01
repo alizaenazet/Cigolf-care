@@ -14,15 +14,18 @@ struct ContentView: View {
     @State private var selection: SidebarMenu? = nil
     @StateObject private var dashboardVM = DashboardViewModel()
     @StateObject private var dailyVM = DashboardViewModel()
+    @StateObject private var dailyReportVM = DailyReportViewModel()
     @State private var expandDashboard = true
     @State private var expandHarian = true
     
     init(
         dashboardVM: DashboardViewModel? = nil,
-        dailyVM: DashboardViewModel? = nil
+        dailyVM: DashboardViewModel? = nil,
+        dailyReportVM: DailyReportViewModel? = nil
     ) {
         _dashboardVM = StateObject(wrappedValue: dashboardVM ?? DashboardViewModel())
         _dailyVM = StateObject(wrappedValue: dailyVM ?? DashboardViewModel())
+        _dailyReportVM = StateObject(wrappedValue: dailyReportVM ?? DailyReportViewModel())
     }
     
     var body: some View {
@@ -79,8 +82,8 @@ struct ContentView: View {
                     .navigationTitle("Program Mingguan")
                 
             case .programHarian(let foreman):
-                DashboardView(viewModel: dailyVM, foremanId: foreman.foremanId)
-                    .navigationTitle("Program Harian - \(foreman.title)")
+                DailyReportView(viewModel: dailyReportVM, foremanId: foreman.foremanId)
+                        .navigationTitle("Program Harian - \(foreman.title)")
                 
             default:
                 Text("Select a menu")
