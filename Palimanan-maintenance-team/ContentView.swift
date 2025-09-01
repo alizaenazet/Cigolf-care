@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct ContentView: View {
+    // EXAMPLE USAGE OF ENVIRONMENT OBJECT TO ACCESS BASE URL
+    @EnvironmentObject var apiService: NetworkApi
+    
     @State private var selection: SidebarMenu? = nil
     @StateObject private var dashboardVM = DashboardViewModel()
     @StateObject private var dailyVM = DashboardViewModel()
