@@ -47,10 +47,10 @@ struct DashboardView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .task {
-                // Important: fetch again when the foremanId changes
+            .task(id: foremanId) {
                 await viewModel.fetchReport(for: foremanId)
             }
+            
             .background(Color(.systemGray6))
             //            .sheet(isPresented: $viewModel.showAddTaskPopup) {
             //                if let division = viewModel.selectedDivision,

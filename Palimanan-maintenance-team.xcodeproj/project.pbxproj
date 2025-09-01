@@ -11,6 +11,7 @@
 		53A692442E60F3BF00EDA9C2 /* OneSignalExtension in Frameworks */ = {isa = PBXBuildFile; productRef = 53A692432E60F3BF00EDA9C2 /* OneSignalExtension */; };
 		53A692462E60F3BF00EDA9C2 /* OneSignalFramework in Frameworks */ = {isa = PBXBuildFile; productRef = 53A692452E60F3BF00EDA9C2 /* OneSignalFramework */; };
 		53A692482E60F3BF00EDA9C2 /* OneSignalInAppMessages in Frameworks */ = {isa = PBXBuildFile; productRef = 53A692472E60F3BF00EDA9C2 /* OneSignalInAppMessages */; };
+		C15192372E65619200E3F9BE /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = C15192362E65619200E3F9BE /* Alamofire */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -83,6 +84,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C15192372E65619200E3F9BE /* Alamofire in Frameworks */,
 				53A692482E60F3BF00EDA9C2 /* OneSignalInAppMessages in Frameworks */,
 				53A692462E60F3BF00EDA9C2 /* OneSignalFramework in Frameworks */,
 			);
@@ -141,6 +143,7 @@
 			packageProductDependencies = (
 				53A692452E60F3BF00EDA9C2 /* OneSignalFramework */,
 				53A692472E60F3BF00EDA9C2 /* OneSignalInAppMessages */,
+				C15192362E65619200E3F9BE /* Alamofire */,
 			);
 			productName = "Palimanan-maintenance-team";
 			productReference = 53598A452E60101E00AFBF1B /* Palimanan-maintenance-team.app */;
@@ -198,6 +201,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				53A692422E60F3BF00EDA9C2 /* XCRemoteSwiftPackageReference "OneSignal-iOS-SDK" */,
+				C15192352E65619200E3F9BE /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 53598A462E60101E00AFBF1B /* Products */;
@@ -555,6 +559,14 @@
 				minimumVersion = 5.2.14;
 			};
 		};
+		C15192352E65619200E3F9BE /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.10.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -572,6 +584,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 53A692422E60F3BF00EDA9C2 /* XCRemoteSwiftPackageReference "OneSignal-iOS-SDK" */;
 			productName = OneSignalInAppMessages;
+		};
+		C15192362E65619200E3F9BE /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C15192352E65619200E3F9BE /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

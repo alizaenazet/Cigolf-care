@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     // EXAMPLE USAGE OF ENVIRONMENT OBJECT TO ACCESS BASE URL
-    @EnvironmentObject var apiService: NetworkApi
+//    @EnvironmentObject var apiService: NetworkApi
     
     @State private var selection: SidebarMenu? = nil
     @StateObject private var dashboardVM = DashboardViewModel()
@@ -122,10 +122,10 @@ struct ContentView: View {
                                 taskType: "Verticut green",
                                 description: "Potong model cepak",
                                 priority: "P2",
-                                area: "Hole 1, Hole 2, Villa",
+                                area: ["Hole 1", "Hole 2", "Villa"],
                                 needWorker: 3,
                                 availableWorker: 3,
-                                workerList: "Yobel, Mar, Vick",
+                                workerList: ["Yobel", "Mar","Vick"],
                                 urlPhoto: "",
                                 isFinished: false
                             ),
@@ -134,10 +134,10 @@ struct ContentView: View {
                                 taskType: "Pupuk granular green",
                                 description: "Pupuk cap cip cup",
                                 priority: "P1",
-                                area: "Hole 9",
+                                area: ["Hole 9"],
                                 needWorker: 1,
                                 availableWorker: 1,
-                                workerList: "Yobel",
+                                workerList: ["Yobel"],
                                 urlPhoto: "/eijsd.png",
                                 isFinished: true
                             )
@@ -152,10 +152,10 @@ struct ContentView: View {
                                 taskType: "Verticut green",
                                 description: "Potong model cepak",
                                 priority: "P2",
-                                area: "Hole 1, Hole 2, Villa",
+                                area: ["Hole 1", "Hole 2", "Villa"],
                                 needWorker: 3,
                                 availableWorker: 3,
-                                workerList: "Yobel, Mar, Vick",
+                                workerList: ["Yobel", "Mar","Vick"],
                                 urlPhoto: "",
                                 isFinished: false
                             ),
@@ -164,10 +164,10 @@ struct ContentView: View {
                                 taskType: "Pupuk granular green",
                                 description: "Pupuk cap cip cup",
                                 priority: "P1",
-                                area: "Hole 9",
+                                area: ["Hole 9"],
                                 needWorker: 1,
                                 availableWorker: 1,
-                                workerList: "Yobel",
+                                workerList: ["Yobel"],
                                 urlPhoto: "/eijsd.png",
                                 isFinished: true
                             )
@@ -188,10 +188,10 @@ struct ContentView: View {
                                 taskType: "Verticut green 2",
                                 description: "Potong model cepak",
                                 priority: "P2",
-                                area: "Hole 1, Hole 2, Villa",
+                                area: ["Hole 1", "Hole 2", "Villa"],
                                 needWorker: 3,
                                 availableWorker: 3,
-                                workerList: "Yobel, Mar, Vick",
+                                workerList: ["Yobel", "Mar","Vick"],
                                 urlPhoto: "",
                                 isFinished: false
                             ),
@@ -200,10 +200,10 @@ struct ContentView: View {
                                 taskType: "Pupuk granular green",
                                 description: "Pupuk cap cip cup",
                                 priority: "P1",
-                                area: "Hole 9",
+                                area: ["Hole 9"],
                                 needWorker: 1,
                                 availableWorker: 1,
-                                workerList: "Yobel",
+                                workerList: ["Yobel"],
                                 urlPhoto: "https://cdn.donmai.us/original/25/eb/25eb7f80ba5476d96068a3ccc8e17ab3.png",
                                 isFinished: true
                             )
