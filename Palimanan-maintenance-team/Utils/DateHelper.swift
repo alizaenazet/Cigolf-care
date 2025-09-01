@@ -55,5 +55,19 @@ extension Date {
         formatter.locale = Locale(identifier: "en_US")
         return formatter.string(from: self)
     }
+    
+    func getDayOfWeekEN() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE"
+        formatter.locale = Locale(identifier: "en_US")
+        return formatter.string(from: self)
+    }
+    
+    func getDayOfWeekID() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE"
+        formatter.locale = Locale(identifier: "id_ID")
+        return formatter.string(from: self)
+    }
 }
 
