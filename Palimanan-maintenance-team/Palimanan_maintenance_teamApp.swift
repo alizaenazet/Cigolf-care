@@ -18,11 +18,13 @@ class NetworkApi: ObservableObject {
 struct Palimanan_maintenance_teamApp: App {
   //Connect the SwiftUI app to the UIKit app delegate
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-
+    @StateObject private var session = SessionManager()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(NetworkApi())
+                .environmentObject(session)
         }
     }
 }
