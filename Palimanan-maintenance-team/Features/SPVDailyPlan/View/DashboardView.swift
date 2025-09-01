@@ -17,8 +17,11 @@ struct DashboardView: View {
         ZStack {
             ScrollView {
                 if viewModel.isLoading {
-                    ProgressView("Loading…")
-                        .padding()
+                    VStack{
+                        ProgressView("Loading…")
+                            .padding()
+                        
+                    }.frame(maxWidth: .infinity)
                 } else if let report = viewModel.report {
                     VStack(spacing: 20) {
                         ForemanCard(report: report) {

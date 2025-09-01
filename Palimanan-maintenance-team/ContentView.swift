@@ -70,10 +70,7 @@ struct ContentView: View {
                     .navigationTitle("Dashboard - \(foreman.title)")
                 
             case .programMingguan:
-                Text("Program Mingguan (coming soon)")
-                    .font(.title2)
-                    .foregroundColor(.gray)
-                    .navigationTitle("Program Mingguan")
+                    WeeklyPlanHistory()
                 
             case .programHarian(let foreman):
                 DashboardView(viewModel: dailyVM, foremanId: foreman.foremanId)
