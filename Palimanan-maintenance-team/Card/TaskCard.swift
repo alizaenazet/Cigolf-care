@@ -19,7 +19,7 @@ struct TaskCard: View {
             Text(String(format: "%02d", index + 1))
                 .padding(.leading)
             Text(task.taskType)
-            Text(task.area)
+            Text(task.area.joined(separator: ", "))
             Text(task.priority)
             if let url = task.urlPhoto, !url.isEmpty {
                 Button {

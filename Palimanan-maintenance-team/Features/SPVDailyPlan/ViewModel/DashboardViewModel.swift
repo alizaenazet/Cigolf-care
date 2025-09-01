@@ -19,15 +19,13 @@ class DashboardViewModel: ObservableObject {
         defer { isLoading = false }
         
         do {
-            guard let url = URL(string: "https://db7717e5-b4ac-4078-b573-874fe49ddf89.mock.pstmn.io/api/v1/foreman/\(foremanId)/daily-task/latest-day")
-            else { return }
-            
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let response = try JSONDecoder().decode(DashboardResponse.self, from: data)
-            
+            let response: DashboardResponse = try await APIService.shared.request(
+                "/foreman/\(foremanId)/daily-task/latest-day",
+                responseType: DashboardResponse.self
+            )
             self.report = response.data
         } catch {
-            errorMessage = "Failed to load report: \(error.localizedDescription)"
+            self.errorMessage = "Failed to load report: \(error.localizedDescription)"
         }
     }
 }

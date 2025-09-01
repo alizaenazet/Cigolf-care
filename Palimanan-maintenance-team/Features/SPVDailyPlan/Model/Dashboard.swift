@@ -57,10 +57,10 @@ struct TaskItem: Codable, Identifiable {
     var taskType: String
     var description: String
     var priority: String
-    var area: String
-    var needWorker: Int
-    var availableWorker: Int
-    var workerList: String
+    var area: [String]
+    var needWorker: Int?
+    var availableWorker: Int?
+    var workerList: [String]?
     var urlPhoto: String?
     var isFinished: Bool
 }
