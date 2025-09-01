@@ -9,24 +9,40 @@ import Foundation
 
 @MainActor
 class DailyReportViewModel: ObservableObject {
-    @Published var report: ForemanReport?
+    @Published var report: [DailyReport] = [] // di ViewModel
     @Published var isLoading = false
     @Published var errorMessage: String?
     
-    func fetchReport(for foremanId: Int) async {
+    func fetchDailyReport(for foremanId: Int) async {
         isLoading = true
         defer { isLoading = false }
         
         do {
-            guard let url = URL(string: "https://db7717e5-b4ac-4078-b573-874fe49ddf89.mock.pstmn.io/api/v1/foreman/\(foremanId)/daily-task/latest-day")
-            else { return }
-            
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let response = try JSONDecoder().decode(DashboardResponse.self, from: data)
-            
+            let response: DailyReportResponse = try await APIService.shared.request(
+                "/foreman/\(foremanId)/daily-task",
+                method: .get,
+                responseType: DailyReportResponse.self
+            )
             self.report = response.data
         } catch {
-            errorMessage = "Failed to load report: \(error.localizedDescription)"
+            self.errorMessage = "Failed to load report: \(error.localizedDescription)"
         }
     }
+    
+    func fetchDailyReportByDateRange(for foremanId: Int, startDate: String, endDate: String) async {
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            let response: DailyReportResponse = try await APIService.shared.request(
+                "/foreman/\(foremanId)/daily-task?start_at=\(startDate)&end_at=\(endDate)",
+                method: .get,
+                responseType: DailyReportResponse.self
+            )
+            self.report = response.data
+        } catch {
+            self.errorMessage = "Failed to load report: \(error.localizedDescription)"
+        }
+    }
+    
 }

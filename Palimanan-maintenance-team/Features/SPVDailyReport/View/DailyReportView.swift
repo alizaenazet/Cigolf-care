@@ -7,49 +7,85 @@
 
 import SwiftUI
 
-struct DailyReportView: View {
-    @ObservedObject var viewModel: DailyReportViewModel
-    let foremanId: Int
+struct HeaderView: View {
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Penyedia Tenaga Kerja: PT YOBEL SEHAT")
+                    .fontWeight(.regular)
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                
+                Text("Area: Lembah, CH, FC, VILLA, FC")
+                    .fontWeight(.regular)
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            Button(action: {}) {
+                HStack {
+                    Image(systemName: "plus")
+                        .foregroundStyle(.white)
+                    Text("Buat Program Baru")
+                        .fontWeight(.medium)
+                        .font(.headline)
+                        .foregroundColor(.white)
+                }
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(.green)
+            .cornerRadius(12)
+        }
+    }
+}
+
+// MARK: - Filter
+struct FilterView: View {
+    @Binding var startDate: Date
+    @Binding var endDate: Date
+    var onSearch: (() -> Void)?   // ✅ callback
     
-    @State private var startDate = Date()
-    @State private var endDate = Date()
-    
-    @State var rows: [TableRow] = [
-        .init(nomor: "01", hari: "Senin", tanggal: "1 Agustus 2025"),
-        .init(nomor: "02", hari: "Selasa", tanggal: "2 Agustus 2025"),
-        .init(nomor: "03", hari: "Rabu", tanggal: "3 Agustus 2025"),
-        .init(nomor: "04", hari: "Kamis", tanggal: "4 Agustus 2025"),
-        .init(nomor: "05", hari: "Jumat", tanggal: "5 Agustus 2025"),
-        .init(nomor: "06", hari: "Sabtu", tanggal: "6 Agustus 2025"),
-        .init(nomor: "07", hari: "Minggu", tanggal: "7 Agustus 2025"),
-        .init(nomor: "08", hari: "Senin", tanggal: "8 Agustus 2025"),
-        .init(nomor: "08", hari: "Senin", tanggal: "8 Agustus 2025"),
-        .init(nomor: "08", hari: "Senin", tanggal: "8 Agustus 2025"),
-    ]
     
     var body: some View {
-        VStack {
-            // Header atas
+        HStack {
+            Text("Cari Riwayat")
+                .fontWeight(.bold)
+                .font(.title)
+            
+            Spacer()
+            
             HStack {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Penyedia Tenaga Kerja: PT YOBEL SEHAT")
-                        .fontWeight(.regular)
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                    
-                    Text("Area: Lembah, CH, FC, VILLA, FC")
-                        .fontWeight(.regular)
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                }
+                Text("Dari:")
+                    .fontWeight(.semibold)
+                    .font(.title3)
+                DatePicker("", selection: $startDate, displayedComponents: .date)
+                    .labelsHidden()
                 
-                Spacer()
+                Text("Hingga:")
+                    .fontWeight(.semibold)
+                    .font(.title3)
+                DatePicker("", selection: $endDate, displayedComponents: .date)
+                    .labelsHidden()
+                
+                Button(action: {
+                    onSearch?() // ✅ panggil callback
+                }) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(.white)
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+                .background(.green)
+                .cornerRadius(12)
                 
                 Button(action: {}) {
                     HStack {
-                        Image(systemName: "plus")
+                        Image(systemName: "square.and.arrow.up")
                             .foregroundStyle(.white)
-                        Text("Buat Program Baru")
+                        Text("Export")
                             .fontWeight(.medium)
                             .font(.headline)
                             .foregroundColor(.white)
@@ -60,132 +96,148 @@ struct DailyReportView: View {
                 .background(.green)
                 .cornerRadius(12)
             }
-            
-            // Filter tanggal
-            HStack {
-                Text("Cari Riwayat")
-                    .fontWeight(.bold)
-                    .font(.title)
-                
-                Spacer()
-                
-                HStack {
-                    Text("Dari:")
-                        .fontWeight(.semibold)
-                        .font(.title3)
-                    DatePicker("", selection: $startDate, displayedComponents: .date)
-                        .labelsHidden()
-                    
-                    Text("Hingga:")
-                        .fontWeight(.semibold)
-                        .font(.title3)
-                    DatePicker("", selection: $endDate, displayedComponents: .date)
-                        .labelsHidden()
-                    
-                    Button(action: {}) {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundStyle(.white)
-                    }
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 12)
-                    .background(.green)
-                    .cornerRadius(12)
-                    
-                    Button(action: {}) {
-                        HStack {
-                            Image(systemName: "square.and.arrow.up")
-                                .foregroundStyle(.white)
-                            Text("Export")
-                                .fontWeight(.medium)
-                                .font(.headline)
-                                .foregroundColor(.white)
-                        }
-                    }
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 12)
-                    .background(.green)
-                    .cornerRadius(12)
-                }
-            }
-            .padding()
-            .background(.secondary.opacity(0.05))
-            .cornerRadius(20)
-            
-            // Tabel
-            GeometryReader { geo in
-                let totalWidth = geo.size.width
-                
-                VStack {
-                    // Header tabel
-                    HStack {
-                        Text("Nomor").bold()
-                            .frame(width: totalWidth * 0.15, alignment: .center)
-                        Text("Hari").bold()
-                            .frame(width: totalWidth * 0.15, alignment: .center)
-                        Text("Tanggal").bold()
-                            .frame(width: totalWidth * 0.25, alignment: .center)
-                        Text("Detail").bold()
-                            .frame(width: totalWidth * 0.25, alignment: .center)
-                        
-                        Image(systemName: "square")
-                            .foregroundColor(.green).frame(width: totalWidth * 0.15, alignment: .center)
-                    }
-                    .padding(.vertical, 8)
-                    
-                    Divider()
-                    
-                    // Rows dengan scroll
-                    ScrollView(.vertical) {
-                        LazyVStack(spacing: 8) {
-                            ForEach(rows.indices, id: \.self) { index in
-                                HStack {
-                                    Text(rows[index].nomor)
-                                        .frame(width: totalWidth * 0.15, alignment: .center)
-                                    Text(rows[index].hari)
-                                        .frame(width: totalWidth * 0.15, alignment: .center)
-                                    Text(rows[index].tanggal)
-                                        .frame(width: totalWidth * 0.25, alignment: .center)
-                                    
-                                    Button("Buka Detail") {
-                                        print("Detail tapped for \(rows[index].nomor)")
-                                    }
-                                    .padding(.vertical, 6)
-                                    .padding(.horizontal, 12)
-                                    .background(Color.green)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(6)
-                                    .frame(width: totalWidth * 0.25)
-                                    
-                                    Button(action: {
-                                        rows[index].isChecked.toggle()
-                                    }) {
-                                        Image(systemName: rows[index].isChecked ? "checkmark.square" : "square")
-                                            .foregroundColor(.green)
-                                    }
-                                    .frame(width: totalWidth * 0.15)
-                                    .buttonStyle(PlainButtonStyle())
-                                }
-                                .padding(.vertical, 6)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.gray.opacity(0.2))
-                                )
-                            }
-                        }
-                        .padding(.vertical, 4)
-                    }
-                    //                    .frame(height: geo.size.height * 0.5) // tinggi tabel setengah layar
-                }
-            }
-            .padding()
-            .cornerRadius(20)
-            .background(.gray.opacity(0.05))
         }
         .padding()
+        .background(.white)
+        .cornerRadius(20)
+    }
+}
+
+struct ReportTableView: View {
+    @Binding var reports: [DailyReport]  // ✅ binding
+    
+    var body: some View {
+        
+        VStack {
+            // Header tabel
+            HStack {
+                Text("Nomor").bold()
+                    .frame(maxWidth: .infinity, alignment: .center)
+                Text("Hari").bold()
+                    .frame(maxWidth: .infinity, alignment: .center)
+                Text("Tanggal").bold()
+                    .frame(maxWidth: .infinity, alignment: .center)
+                Text("Detail").bold()
+                    .frame(maxWidth: .infinity, alignment: .center)
+                Image(systemName: "square")
+                    .foregroundColor(.green)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+            .padding(.vertical, reports.isEmpty ? 8 : 0)
+            
+            Divider()
+            
+            ScrollView(.vertical) {
+                LazyVStack(spacing: 8) {
+                    ForEach(Array(reports.enumerated()), id: \.element.id) { index, report in
+                        ReportRowView(
+                            id: String(index + 1),
+                            report: $reports[index] // ✅ binding ke row
+                        )
+                    }                }
+                .padding(.vertical, 4)
+            }
+        }
+        .padding()
+        .background(.white)
+        .cornerRadius(20)
+        .onAppear {
+            print("Reports:", reports.count)
+        }
     }
 }
 
 
+// MARK: - Report Row
+struct ReportRowView: View {
+    let id: String
+    @Binding var report: DailyReport // ✅ binding
+    
+    var body: some View {
+        HStack {
+            Text("\(id)")
+                .frame(maxWidth: .infinity, alignment: .center)
+            Text(DateHelper.dayConverter(day: report.day))
+                .frame(maxWidth: .infinity, alignment: .center)
+            Text(DateHelper.formattedDateWithoutDay(dateStr: report.date)) // date jadi string
+                .frame(maxWidth: .infinity, alignment: .center)
+            
+            Button("Buka Detail") {
+                print("Detail tapped for \(report.id)")
+            }
+            .padding(.vertical, 6)
+            .padding(.horizontal, 12)
+            .background(Color.green)
+            .foregroundColor(.white)
+            .cornerRadius(6)
+            .frame(maxWidth: .infinity)
+            
+            Button(action: {
+                report.isChecked.toggle() // ✅ toggle centang
+                print("Checkbox tapped for \(report.id)")
+            }) {
+                Image(systemName: report.isChecked ? "checkmark.square" : "square")
+                    .foregroundColor(.green)
+            }
+            .frame(maxWidth: .infinity)
+            .buttonStyle(PlainButtonStyle())
+        }
+        .padding(.vertical, 6)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.gray.opacity(0.2))
+        )
+    }
+}
+
+
+struct DailyReportView: View {
+    @ObservedObject var viewModel: DailyReportViewModel
+    let foremanId: Int
+    
+    @State private var startDate = Date()
+    @State private var endDate = Date()
+    
+    var body: some View {
+        
+        ScrollView {
+            if viewModel.isLoading {
+                ProgressView("Loading…")
+                    .padding()
+            } else if viewModel.report.count != 0 {
+                VStack {
+                    // Header atas
+                    HeaderView()
+                    // Filter tanggal
+                    FilterView(startDate: $startDate, endDate: $endDate) {
+                        Task {
+                            await viewModel.fetchDailyReportByDateRange(
+                                for: foremanId,
+                                startDate: DateHelper.formatDateToDDMMYYYY(startDate),
+                                endDate: DateHelper.formatDateToDDMMYYYY(endDate),
+                            )
+                        }
+                    }
+                    
+                    ReportTableView(reports: $viewModel.report)
+
+                }
+                .padding()
+                
+            } else if let error = viewModel.errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
+            } else {
+                Text("No data available")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .background(Color.secondary.opacity(0.1)) // ✅ abu-abu rata
+        .task(id: foremanId) {
+            await viewModel.fetchDailyReport(for: foremanId)
+        }
+    }
+}
 
 #Preview {
     var mockReport = ForemanReport(
@@ -215,10 +267,10 @@ struct DailyReportView: View {
                                 taskType: "Verticut green",
                                 description: "Potong model cepak",
                                 priority: "P2",
-                                area: "Hole 1, Hole 2, Villa",
+                                area: ["Hole 1", "Hole 2", "Villa"],
                                 needWorker: 3,
                                 availableWorker: 3,
-                                workerList: "Yobel, Mar, Vick",
+                                workerList: ["Yobel", "Mar","Vick"],
                                 urlPhoto: "",
                                 isFinished: false
                             ),
@@ -227,10 +279,10 @@ struct DailyReportView: View {
                                 taskType: "Pupuk granular green",
                                 description: "Pupuk cap cip cup",
                                 priority: "P1",
-                                area: "Hole 9",
+                                area: ["Hole 9"],
                                 needWorker: 1,
                                 availableWorker: 1,
-                                workerList: "Yobel",
+                                workerList: ["Yobel"],
                                 urlPhoto: "/eijsd.png",
                                 isFinished: true
                             )
@@ -245,10 +297,10 @@ struct DailyReportView: View {
                                 taskType: "Verticut green",
                                 description: "Potong model cepak",
                                 priority: "P2",
-                                area: "Hole 1, Hole 2, Villa",
+                                area: ["Hole 1", "Hole 2", "Villa"],
                                 needWorker: 3,
                                 availableWorker: 3,
-                                workerList: "Yobel, Mar, Vick",
+                                workerList: ["Yobel", "Mar","Vick"],
                                 urlPhoto: "",
                                 isFinished: false
                             ),
@@ -257,10 +309,10 @@ struct DailyReportView: View {
                                 taskType: "Pupuk granular green",
                                 description: "Pupuk cap cip cup",
                                 priority: "P1",
-                                area: "Hole 9",
+                                area: ["Hole 9"],
                                 needWorker: 1,
                                 availableWorker: 1,
-                                workerList: "Yobel",
+                                workerList: ["Yobel"],
                                 urlPhoto: "/eijsd.png",
                                 isFinished: true
                             )
@@ -281,10 +333,10 @@ struct DailyReportView: View {
                                 taskType: "Verticut green 2",
                                 description: "Potong model cepak",
                                 priority: "P2",
-                                area: "Hole 1, Hole 2, Villa",
+                                area: ["Hole 1", "Hole 2", "Villa"],
                                 needWorker: 3,
                                 availableWorker: 3,
-                                workerList: "Yobel, Mar, Vick",
+                                workerList: ["Yobel", "Mar","Vick"],
                                 urlPhoto: "",
                                 isFinished: false
                             ),
@@ -293,10 +345,10 @@ struct DailyReportView: View {
                                 taskType: "Pupuk granular green",
                                 description: "Pupuk cap cip cup",
                                 priority: "P1",
-                                area: "Hole 9",
+                                area: ["Hole 9"],
                                 needWorker: 1,
                                 availableWorker: 1,
-                                workerList: "Yobel",
+                                workerList: ["Yobel"],
                                 urlPhoto: "https://cdn.donmai.us/original/25/eb/25eb7f80ba5476d96068a3ccc8e17ab3.png",
                                 isFinished: true
                             )
@@ -313,4 +365,3 @@ struct DailyReportView: View {
     
     return ContentView(dashboardVM: mockVM, dailyVM: mockVM)
 }
-

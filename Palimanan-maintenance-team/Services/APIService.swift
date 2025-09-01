@@ -44,6 +44,14 @@ final class APIService {
         }
         
         let url = "\(baseURL)\(endpoint)"
+                
+        // ✅ Tambahkan log di sini
+        print("➡️ Request URL: \(method.rawValue) \(url)")
+        if let params = parameters {
+            print("📦 Parameters: \(params)")
+        }
+        print("📝 Headers: \(finalHeaders)")
+
         
         return try await withCheckedThrowingContinuation { continuation in
             AF.request(url, method: method, parameters: parameters, encoding: encoding, headers: finalHeaders)

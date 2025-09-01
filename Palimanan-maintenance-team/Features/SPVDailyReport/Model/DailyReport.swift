@@ -16,7 +16,12 @@ struct DailyReportResponse: Codable {
 struct DailyReport: Codable, Identifiable {
     var id: Int
     var day: String
-    var date: Date
+    var date: String
+    var isChecked: Bool = false // ✅ default tidak tercentang
+    
+    enum CodingKeys: String, CodingKey {
+        case id, day, date // hanya ini yang datang dari backend
+    }
 }
 
 struct TableRow: Identifiable {
