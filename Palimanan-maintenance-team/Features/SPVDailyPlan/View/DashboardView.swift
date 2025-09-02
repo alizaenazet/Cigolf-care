@@ -7,21 +7,21 @@
 
 import SwiftUI
 
-
 struct DashboardView: View {
     @ObservedObject var viewModel: DashboardViewModel
     let foremanId: Int
     @State private var showApprovalPopup = false
-    @State private var showAddTaskPopup = false
-    @State private var selectedDivision: Division?
-    @State private var selectedLocation: Location?
+    @State private var selectedContext: SelectedContext?
     
     var body: some View {
         ZStack {
             ScrollView {
                 if viewModel.isLoading {
-                    ProgressView("Loading…")
-                        .padding()
+                    VStack{
+                        ProgressView("Loading…")
+                            .padding()
+                        
+                    }.frame(maxWidth: .infinity)
                 } else if let report = viewModel.report {
                     VStack(spacing: 20) {
                         ForemanCard(report: report) {
@@ -32,9 +32,9 @@ struct DashboardView: View {
                         
                         ForEach(report.divisions) { division in
                             DivisionCard(division: division) { div, loc in
-                                selectedDivision = div
-                                selectedLocation = loc
-                                withAnimation { showAddTaskPopup = true }
+                                if let foreman = ForemanMenu.fromId(foremanId) {
+                                    selectedContext = SelectedContext(division: div, location: loc, foreman: foreman)
+                                }
                             }
                         }
                     }
@@ -47,54 +47,47 @@ struct DashboardView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .task {
-                // Important: fetch again when the foremanId changes
+            .task(id: foremanId) {
                 await viewModel.fetchReport(for: foremanId)
             }
+            
             .background(Color(.systemGray6))
-            //            .sheet(isPresented: $viewModel.showAddTaskPopup) {
-            //                if let division = viewModel.selectedDivision,
-            //                   let location = viewModel.selectedLocation,
-            //                   let foreman = ForemanMenu.fromId(foremanId) {
-            //                    AddTaskPopup(
-            //                        isPresented: $viewModel.showAddTaskPopup,
-            //                        division: division,
-            //                        location: location,
-            //                        foreman: foreman
-            //                    )
-            //                }
-            //            }
-            
-            if showAddTaskPopup,
-               let division = selectedDivision,
-               let location = selectedLocation,
-               let foreman = ForemanMenu.fromId(foremanId) {
-                AddTaskPopup(
-                    isPresented: $showAddTaskPopup,
-                    division: division,
-                    location: location,
-                    foreman: foreman
-                )
-                .transition(.opacity.combined(with: .scale))
+            .sheet(isPresented: $showApprovalPopup) {
+                if let report = viewModel.report {
+                    ApprovalPopup(
+                        date: DateHelper.formattedDate(report.createdAt),
+                        provider: report.outsourceCompany,
+                        finishedCount: report.finishedTasks,
+                        totalCount: report.totalTasks,
+                        inProgressCount: report.pendingTasks,
+                        onApprove: {
+                            viewModel.report?.approved.isApproved = true
+                            withAnimation { showApprovalPopup = false }
+                        },
+                        onClose: {
+                            withAnimation { showApprovalPopup = false }
+                        }
+                    )
+                    .transition(.opacity.combined(with: .scale))
+                    .presentationDetents([.medium, .large])
+                    .interactiveDismissDisabled(true)
+                    .presentationCornerRadius(24)
+                }
             }
-            
-            // 👇 Overlay popup if state is true
-            if showApprovalPopup, var report = viewModel.report {
-                ApprovalPopup(
-                    date: DateHelper.formattedDate(report.createdAt),
-                    provider: report.outsourceCompany,
-                    finishedCount: report.finishedTasks,
-                    totalCount: report.totalTasks,
-                    inProgressCount: report.pendingTasks,
-                    onApprove: {
-                        report.approved.isApproved = true
-                        withAnimation { showApprovalPopup = false }
-                    },
-                    onClose: {
-                        withAnimation { showApprovalPopup = false }
-                    }
+            .sheet(item: $selectedContext) { context in
+                AddTaskPopup(
+                    isPresented: Binding(
+                        get: { selectedContext != nil },
+                        set: { if !$0 { selectedContext = nil } }
+                    ),
+                    division: context.division,
+                    location: context.location,
+                    foreman: context.foreman
                 )
                 .transition(.opacity.combined(with: .scale))
+                .presentationDetents([.large])
+                .interactiveDismissDisabled(true)
+                .presentationCornerRadius(24)
             }
         }
     }

@@ -7,9 +7,10 @@
 
 import SwiftUI
 
-struct ContentView: View {
-    @EnvironmentObject var session: SessionManager
 
+struct ContentView: View {
+
+    @EnvironmentObject var session: SessionManager
     var body: some View {
         Group {
             if session.isLoggedIn {
@@ -35,4 +36,11 @@ struct ContentView: View {
             }
         }
     }
+ 
+}
+
+
+
+#Preview {
+    ContentView()
 }
