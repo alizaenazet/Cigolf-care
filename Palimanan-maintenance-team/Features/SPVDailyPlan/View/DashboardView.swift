@@ -15,14 +15,12 @@ struct DashboardView: View {
     
     var body: some View {
         ZStack {
-            ScrollView {
-                if viewModel.isLoading {
-                    VStack{
-                        ProgressView("Loading…")
-                            .padding()
-                        
-                    }.frame(maxWidth: .infinity)
-                } else if let report = viewModel.report {
+            if viewModel.isLoading {
+                ProgressView("Loading…")
+                    .padding()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let report = viewModel.report {
+                ScrollView {
                     VStack(spacing: 20) {
                         ForemanCard(report: report) {
                             withAnimation {
@@ -39,56 +37,56 @@ struct DashboardView: View {
                         }
                     }
                     .padding()
-                } else if let error = viewModel.errorMessage {
-                    Text(error)
-                        .foregroundColor(.red)
-                } else {
-                    Text("No data available")
-                        .foregroundStyle(.secondary)
                 }
+            } else if let error = viewModel.errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
+            } else {
+                Text("No data available")
+                    .foregroundStyle(.secondary)
             }
-            .task(id: foremanId) {
-                await viewModel.fetchReport(for: foremanId)
-            }
-            
-            .background(Color(.systemGray6))
-            .sheet(isPresented: $showApprovalPopup) {
-                if let report = viewModel.report {
-                    ApprovalPopup(
-                        date: DateHelper.formattedDate(report.createdAt),
-                        provider: report.outsourceCompany,
-                        finishedCount: report.finishedTasks,
-                        totalCount: report.totalTasks,
-                        inProgressCount: report.pendingTasks,
-                        onApprove: {
-                            viewModel.report?.approved.isApproved = true
-                            withAnimation { showApprovalPopup = false }
-                        },
-                        onClose: {
-                            withAnimation { showApprovalPopup = false }
-                        }
-                    )
-                    .transition(.opacity.combined(with: .scale))
-                    .presentationDetents([.medium, .large])
-                    .interactiveDismissDisabled(true)
-                    .presentationCornerRadius(24)
-                }
-            }
-            .sheet(item: $selectedContext) { context in
-                AddTaskPopup(
-                    isPresented: Binding(
-                        get: { selectedContext != nil },
-                        set: { if !$0 { selectedContext = nil } }
-                    ),
-                    division: context.division,
-                    location: context.location,
-                    foreman: context.foreman
+        }
+        .task(id: foremanId) {
+            await viewModel.fetchReport(for: foremanId)
+        }
+        
+        .background(Color(.systemGray6))
+        .sheet(isPresented: $showApprovalPopup) {
+            if let report = viewModel.report {
+                ApprovalPopup(
+                    date: DateHelper.formattedDate(report.createdAt),
+                    provider: report.outsourceCompany,
+                    finishedCount: report.finishedTasks,
+                    totalCount: report.totalTasks,
+                    inProgressCount: report.pendingTasks,
+                    onApprove: {
+                        viewModel.report?.approved.isApproved = true
+                        withAnimation { showApprovalPopup = false }
+                    },
+                    onClose: {
+                        withAnimation { showApprovalPopup = false }
+                    }
                 )
                 .transition(.opacity.combined(with: .scale))
-                .presentationDetents([.large])
+                .presentationDetents([.medium, .large])
                 .interactiveDismissDisabled(true)
                 .presentationCornerRadius(24)
             }
+        }
+        .sheet(item: $selectedContext) { context in
+            AddTaskPopup(
+                isPresented: Binding(
+                    get: { selectedContext != nil },
+                    set: { if !$0 { selectedContext = nil } }
+                ),
+                division: context.division,
+                location: context.location,
+                foreman: context.foreman
+            )
+            .transition(.opacity.combined(with: .scale))
+            .presentationDetents([.large])
+            .interactiveDismissDisabled(true)
+            .presentationCornerRadius(24)
         }
     }
 }
