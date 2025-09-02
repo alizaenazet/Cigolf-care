@@ -17,7 +17,7 @@ class NetworkApi: ObservableObject {
 struct Palimanan_maintenance_teamApp: App {
   //Connect the SwiftUI app to the UIKit app delegate
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @StateObject private var session = SessionManager()
+    @StateObject private var session = SessionManager.shared
     
     var body: some Scene {
         WindowGroup {

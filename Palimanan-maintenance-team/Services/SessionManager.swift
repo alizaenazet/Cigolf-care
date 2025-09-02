@@ -8,6 +8,7 @@
 import Foundation
 
 class SessionManager: ObservableObject {
+    static var shared = SessionManager()
     @Published var isLoggedIn: Bool = false
     @Published var userRole: String?
     @Published var accessToken: String?
@@ -47,5 +48,8 @@ class SessionManager: ObservableObject {
             self.userRole = nil
             APIService.shared.accessToken = nil
         }
+        SessionManager.shared = SessionManager()
+        
+        print(#function, SessionManager.shared.isLoggedIn)
     }
 }
