@@ -12,6 +12,7 @@
 		53A692442E60F3BF00EDA9C2 /* OneSignalExtension in Frameworks */ = {isa = PBXBuildFile; productRef = 53A692432E60F3BF00EDA9C2 /* OneSignalExtension */; };
 		53A692462E60F3BF00EDA9C2 /* OneSignalFramework in Frameworks */ = {isa = PBXBuildFile; productRef = 53A692452E60F3BF00EDA9C2 /* OneSignalFramework */; };
 		53A692482E60F3BF00EDA9C2 /* OneSignalInAppMessages in Frameworks */ = {isa = PBXBuildFile; productRef = 53A692472E60F3BF00EDA9C2 /* OneSignalInAppMessages */; };
+		C1F55CC12E669F690032FECB /* AlamofireDynamic in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 538F6D332E6582FD00206BA0 /* AlamofireDynamic */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,6 +35,17 @@
 				53A6923B2E60EEB100EDA9C2 /* OneSignalNotificationServiceExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1F55CC22E669F690032FECB /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				C1F55CC12E669F690032FECB /* AlamofireDynamic in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -130,6 +142,7 @@
 				53598A422E60101E00AFBF1B /* Frameworks */,
 				53598A432E60101E00AFBF1B /* Resources */,
 				53A692402E60EEB100EDA9C2 /* Embed Foundation Extensions */,
+				C1F55CC22E669F690032FECB /* Embed Frameworks */,
 			);
 			buildRules = (
 			);

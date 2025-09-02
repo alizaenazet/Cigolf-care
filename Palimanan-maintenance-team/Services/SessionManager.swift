@@ -23,6 +23,7 @@ class SessionManager: ObservableObject {
             self.isLoggedIn = true
             self.accessToken = token
             self.userRole = role
+            APIService.shared.accessToken = token
         }
     }
     
@@ -32,6 +33,7 @@ class SessionManager: ObservableObject {
         DispatchQueue.main.async {
             self.isLoggedIn = true
             self.accessToken = token
+            APIService.shared.accessToken = token
             self.userRole = role
         }
     }
@@ -43,6 +45,7 @@ class SessionManager: ObservableObject {
             self.isLoggedIn = false
             self.accessToken = nil
             self.userRole = nil
+            APIService.shared.accessToken = nil
         }
     }
 }

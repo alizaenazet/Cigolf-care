@@ -15,8 +15,8 @@ struct WeeklyPlanDetailView: View {
             VStack {
                 ProgressView("Loading…")
                     .padding()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .frame(maxWidth: .infinity)
         } else if let detail = viewModel.weeklyPlanDetail {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {

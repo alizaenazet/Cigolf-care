@@ -13,7 +13,9 @@ struct WeeklyPlanHistory: View {
         NavigationStack {
             VStack(spacing: 20){
                 if viewModel.isLoading {
-                    Text("Loading...")
+                    ProgressView("Loading…")
+                        .padding()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     HStack{
                         Text("Cari Riwayat")
