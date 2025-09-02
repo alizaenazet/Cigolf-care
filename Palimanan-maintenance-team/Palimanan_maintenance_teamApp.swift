@@ -8,14 +8,22 @@
 import SwiftUI
 import OneSignalFramework
 
+class NetworkApi: ObservableObject {
+    let apiVersion = "v1"
+    let baseUrl = "https://db7717e5-b4ac-4078-b573-874fe49ddf89.mock.pstmn.io/api/\( "v1" )"
+}
+
 @main
 struct Palimanan_maintenance_teamApp: App {
   //Connect the SwiftUI app to the UIKit app delegate
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-
+    @StateObject private var session = SessionManager()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(NetworkApi())
+                .environmentObject(session)
         }
     }
 }
