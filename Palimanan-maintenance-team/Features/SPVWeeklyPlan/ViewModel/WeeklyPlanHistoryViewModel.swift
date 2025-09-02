@@ -15,6 +15,7 @@ class WeeklyPlanHistoryViewModel: ObservableObject {
     @Published var errorMessage: String?
     
     @Published var weeklyPlanHistoryPreview: [WeeklyPlanPreview] = []
+    @Published var weeklyPlanDetail: WeeklyPlanDetail?
     
     
     func fetchLastWeeklyPlanHistory() async {
@@ -57,5 +58,20 @@ class WeeklyPlanHistoryViewModel: ObservableObject {
         }
         
 //        isLoading = false
+    }
+    
+    func fetchWeeklyPlanDetail(for weeklyId: Int) async {
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            let response: WeeklyPlanDetailResponse = try await APIService.shared.request(
+                "/weekly-plan/\(weeklyId)",
+                responseType: WeeklyPlanDetailResponse.self
+            )
+            self.weeklyPlanDetail = response.data
+        } catch {
+            self.errorMessage = "Failed to load report: \(error.localizedDescription)"
+        }
     }
 }

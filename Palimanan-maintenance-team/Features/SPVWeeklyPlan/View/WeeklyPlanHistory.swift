@@ -10,63 +10,67 @@ import SwiftUI
 struct WeeklyPlanHistory: View {
     @StateObject var viewModel = WeeklyPlanHistoryViewModel()
     var body: some View {
-        VStack(spacing: 20){
-        if viewModel.isLoading {
-            Text("Loading...")
-        } else {
-            HStack{
-                Text("Cari Riwayat")
-                    .font(.title)
-                Spacer()
-                HStack(){
-                    Spacer()
-                    Text("Dari")
-                    DatePicker("", selection: $viewModel.startAt, displayedComponents: .date)
-                        .frame(width: 131)
-                    Text("Hingga")
-                    DatePicker("", selection: $viewModel.endAt, displayedComponents: .date)
-                        .frame(width: 131)
-                    
-                    Button(action: {
-                        Task{
-                            await viewModel.fetchLastWeeklyPlanHistoryByFilter()
+        NavigationStack {
+            VStack(spacing: 20){
+                if viewModel.isLoading {
+                    ProgressView("Loading…")
+                        .padding()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    HStack{
+                        Text("Cari Riwayat")
+                            .font(.title)
+                        Spacer()
+                        HStack(){
+                            Spacer()
+                            Text("Dari")
+                            DatePicker("", selection: $viewModel.startAt, displayedComponents: .date)
+                                .frame(width: 131)
+                            Text("Hingga")
+                            DatePicker("", selection: $viewModel.endAt, displayedComponents: .date)
+                                .frame(width: 131)
+                            
+                            Button(action: {
+                                Task{
+                                    await viewModel.fetchLastWeeklyPlanHistoryByFilter()
+                                }
+                            }){
+                                Label("", systemImage: "magnifyingglass")
+                            }.buttonStyle(.borderedProminent)
+                            
+                            Button("Export", systemImage: "square.and.arrow.up", action: {}).buttonStyle(.borderedProminent)
+                            
                         }
-                    }){
-                        Label("", systemImage: "magnifyingglass")
-                    }.buttonStyle(.borderedProminent)
-                    
-                    Button("Export", systemImage: "square.and.arrow.up", action: {}).buttonStyle(.borderedProminent)
-                    
+                        .frame(width: 800)
+                    }
+                    .padding()
+                    .background(Color(uiColor: UIColor.systemBackground) )
+                    .cornerRadius(16)
+                    ScrollView{
+                        TablePreviews(
+                            weeklyHistory: $viewModel.weeklyPlanHistoryPreview
+                        )
+                    }
+                    .background(Color(uiColor: UIColor.systemBackground) )
+                    .cornerRadius(16)
                 }
-                .frame(width: 800)
             }
             .padding()
-            .background(Color(uiColor: UIColor.systemBackground) )
-            .cornerRadius(16)
-            ScrollView{
-                TablePreviews(
-                    weeklyHistory: $viewModel.weeklyPlanHistoryPreview
-                )
-            }
-            .background(Color(uiColor: UIColor.systemBackground) )
-            .cornerRadius(16)
-        }
-        }
-        .padding()
-        .background(Color(hex: "f4f4f4"))
-        .navigationTitle("Program mingguan")
-        .toolbar{
-            NavigationLink(destination: {Text("NEW WEEKLY PLAN PAGE")}){
-                Button("Buat Program Baru"){
-                    return
+            .background(Color(hex: "f4f4f4"))
+            .navigationTitle("Program mingguan")
+            .toolbar{
+                NavigationLink(destination: {Text("NEW WEEKLY PLAN PAGE")}){
+                    Button("Buat Program Baru"){
+                        return
+                    }
                 }
             }
-        }
-        .task {
-            await viewModel.fetchLastWeeklyPlanHistory()
-            print("fetchLastWeeklyPlanHistory", viewModel.weeklyPlanHistoryPreview)
-            
-            print("\n\n", viewModel.startAt, viewModel.endAt)
+            .task {
+                await viewModel.fetchLastWeeklyPlanHistory()
+                print("fetchLastWeeklyPlanHistory", viewModel.weeklyPlanHistoryPreview)
+                
+                print("\n\n", viewModel.startAt, viewModel.endAt)
+            }
         }
     }
 }
@@ -85,7 +89,7 @@ struct TablePreviews: View {
                     .frame(width: 262, alignment: .leading)
                     .font(.title3)
                     .foregroundColor(.gray)
-
+                
                 Spacer()
                 Text("Detail")
                     .frame(width: 88, alignment: .center)
@@ -120,13 +124,17 @@ struct TablePreviewRow: View {
             Text("\(weeklyPlan.startDate?.toFormattedString() ?? "-") - \(weeklyPlan.endDate?.toFormattedString() ?? "-")")
                 .frame(width: 292, alignment: .leading)
             Spacer()
-            NavigationLink(destination: {Text("WeeklyPlanDetail View")}, label: {Button("Buka Detail") {
-                return
+            NavigationLink {
+                WeeklyPlanDetailViewWrapper(weeklyId: weeklyPlan.id)
+            } label: {
+                Text("Buka Detail")
+                    .bold()
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
             }
             .buttonStyle(.borderedProminent)
             .font(.caption2)
-            }
-            ).frame(width: 128, alignment: .center)
+            .frame(width: 128, alignment: .center)
             Spacer()
             Toggle("", isOn: $isToggled)
                 .toggleStyle(iOSCheckboxToggleStyle())
@@ -144,15 +152,15 @@ struct iOSCheckboxToggleStyle: ToggleStyle {
     func makeBody(configuration: Configuration) -> some View {
         // 1
         Button(action: {
-
+            
             // 2
             configuration.isOn.toggle()
-
+            
         }, label: {
             HStack {
                 // 3
                 Image(systemName: configuration.isOn ? "checkmark.square" : "square")
-
+                
                 configuration.label
             }
         })
@@ -176,7 +184,7 @@ extension Color {
         default:
             (a, r, g, b) = (1, 1, 1, 0)
         }
-
+        
         self.init(
             .sRGB,
             red: Double(r) / 255,

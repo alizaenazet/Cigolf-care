@@ -22,7 +22,7 @@ final class APIService {
     }
     
     // MARK: - Session / Auth State
-    @Published var accessToken: String? = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJUcmVudDY3Iiwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzU2Nzg0NjA4LCJleHAiOjE3NTY3ODgyMDh9.1VC1j3fL5_5Oc5t8tLHmkcgBl-5fgAiaWHZd9bB0ylg"
+    @Published var accessToken: String? = nil
     @Published var userId: String? = nil
     @Published var role: String? = nil
     
@@ -56,7 +56,8 @@ final class APIService {
                         // Detect expired token (401)
                         if response.response?.statusCode == 401 {
                             print("⚠️ Unauthorized — token may be expired")
-                            // Here we could try refresh flow
+                            var sm = SessionManager()
+                            sm.logout()
                         }
                         continuation.resume(throwing: error)
                     }

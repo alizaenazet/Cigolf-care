@@ -7,85 +7,37 @@
 
 import SwiftUI
 
+
 struct ContentView: View {
-    @State private var selection: SidebarMenu? = nil
-    @StateObject private var dashboardVM = DashboardViewModel()
-    @StateObject private var dailyVM = DashboardViewModel()
-    @StateObject private var dailyReportVM = DailyReportViewModel()
-    @State private var expandDashboard = true
-    @State private var expandHarian = true
-    
-    init(
-        dashboardVM: DashboardViewModel? = nil,
-        dailyVM: DashboardViewModel? = nil,
-        dailyReportVM: DailyReportViewModel? = nil
-    ) {
-        _dashboardVM = StateObject(wrappedValue: dashboardVM ?? DashboardViewModel())
-        _dailyVM = StateObject(wrappedValue: dailyVM ?? DashboardViewModel())
-        _dailyReportVM = StateObject(wrappedValue: dailyReportVM ?? DailyReportViewModel())
-    }
-    
+    @EnvironmentObject var session: SessionManager
     var body: some View {
-        NavigationSplitView {
-            List(selection: $selection) {
-                // MARK: Dashboard Dropdown
-                DisclosureGroup(isExpanded: $expandDashboard) {
-                    NavigationLink(value: SidebarMenu.dashboard(.lembah)) {
-                        Label("Lembah", systemImage: "leaf")
+        Group {
+            if session.isLoggedIn {
+                switch session.userRole {
+                case "Admin", "Supervisor":
+                    SupervisorDashboardView()
+                case "Mandor":
+                    ForemanDashboardView()
+                default:
+                    VStack {
+                        Text("Login Successful!")
+                        Text("Error: Unknown user role.")
+                        Text("Received Role: \(session.userRole ?? "Not Provided")")
+                            .padding()
+                        
+                        Button("Logout") {
+                            session.logout()
+                        }
                     }
-                    NavigationLink(value: SidebarMenu.dashboard(.bukit)) {
-                        Label("Bukit", systemImage: "mountain.2")
-                    }
-                    NavigationLink(value: SidebarMenu.dashboard(.danau)) {
-                        Label("Danau", systemImage: "water.waves")
-                    }
-                } label: {
-                    Label("Dashboard", systemImage: "rectangle.grid.2x2")
                 }
-                
-                // MARK: Program Mingguan (standalone)
-                NavigationLink(value: SidebarMenu.programMingguan) {
-                    Label("Program Mingguan", systemImage: "calendar.badge.plus")
-                }
-                
-                // MARK: Program Harian Dropdown
-                DisclosureGroup(isExpanded: $expandHarian) {
-                    NavigationLink(value: SidebarMenu.programHarian(.lembah)) {
-                        Label("Lembah", systemImage: "leaf")
-                    }
-                    NavigationLink(value: SidebarMenu.programHarian(.bukit)) {
-                        Label("Bukit", systemImage: "mountain.2")
-                    }
-                    NavigationLink(value: SidebarMenu.programHarian(.danau)) {
-                        Label("Danau", systemImage: "water.waves")
-                    }
-                } label: {
-                    Label("Program Harian", systemImage: "list.bullet.clipboard")
-                }
-            }
-            .listStyle(.automatic)
-            .navigationTitle("Menu")
-            
-        } detail: {
-            switch selection {
-            case .dashboard(let foreman):
-                DashboardView(viewModel: dashboardVM, foremanId: foreman.foremanId)
-                    .navigationTitle("Dashboard - \(foreman.title)")
-                
-            case .programMingguan:
-                    WeeklyPlanHistory()
-                
-            case .programHarian(let foreman):
-                DailyReportView(viewModel: dailyReportVM, foremanId: foreman.foremanId)
-                        .navigationTitle("Program Harian - \(foreman.title)")
-                
-            default:
-                Text("Select a menu")
-                    .foregroundStyle(.secondary)
+            } else {
+                LoginView()
             }
         }
     }
+ 
 }
+
 
 
 #Preview {
