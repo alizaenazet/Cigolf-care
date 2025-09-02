@@ -18,11 +18,11 @@ struct ForemanReport: Codable, Identifiable {
     var id: Int
     var createdAt: String
     var approved: Approval
-    var outsourceCompany: String
+    var outsourceCompany: String?
     var foremanName: String
-    var totalTasks: Int
-    var finishedTasks: Int
-    var pendingTasks: Int
+    var totalTasks: Int?
+    var finishedTasks: Int?
+    var pendingTasks: Int?
     var divisions: [Division]
 
     enum CodingKeys: String, CodingKey {

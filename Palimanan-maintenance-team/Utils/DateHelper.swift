@@ -10,7 +10,7 @@ import Foundation
 struct DateHelper {
     static func formattedDate(_ dateString: String) -> String {
         let df = DateFormatter()
-        df.dateFormat = "dd-MM-yyyy"
+        df.dateFormat = "yyyy-MM-dd"
         if let date = df.date(from: dateString) {
             df.locale = Locale(identifier: "id_ID")
             df.dateFormat = "EEEE, dd MMMM yyyy"
@@ -35,14 +35,14 @@ struct DateHelper {
     
     static func formatDateToDDMMYYYY(_ date: Date) -> String {
         let df = DateFormatter()
-        df.dateFormat = "dd-MM-yyyy"
+        df.dateFormat = "yyyy-MM-dd"
         df.locale = Locale(identifier: "id_ID")
         return df.string(from: date)
     }
     
     static func formattedDateWithoutDay(dateStr: String) -> String {
         let df = DateFormatter()
-        df.dateFormat = "dd-MM-yyyy"
+        df.dateFormat = "yyyy-MM-dd"
         if let date = df.date(from: dateStr) {
             df.locale = Locale(identifier: "id_ID")
             df.dateFormat = "dd MMMM yyyy"
