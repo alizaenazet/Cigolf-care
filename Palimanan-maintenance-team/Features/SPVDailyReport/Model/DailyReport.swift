@@ -27,22 +27,22 @@ struct DailyReport: Codable, Identifiable {
 struct CigolfDivision: Identifiable{
     var id: Int
     var name: String
-    var isActive: Bool = false
     var isSelected: Bool = false
+    var locations: [CigolfLocation] = []
 }
 
-struct CigolfLocation: Identifiable{
-    var id: Int
-    var name: String
-    var isSelected: Bool = false
-}
-
-struct DailyJob: Identifiable {
-    let id = UUID()
-    var location: CigolfLocation?
-    var day: String = ""
+struct DailyJob: Codable, Identifiable, Hashable {
+    var id: UUID = UUID()
+    var day: String? = nil
     var jobType: String = ""
     var holeArea: String = ""
-    var priority: Int = 1
-    var notes: String = ""
+    var priority: String = ""
+    var description: String = ""
+}
+
+struct CigolfLocation: Identifiable, Hashable {
+    var id: Int
+    var name: String = ""
+    var isSelected: Bool = false
+    var jobs: [DailyJob] = []
 }

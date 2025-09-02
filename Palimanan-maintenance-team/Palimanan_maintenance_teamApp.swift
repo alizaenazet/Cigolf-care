@@ -21,9 +21,10 @@ struct Palimanan_maintenance_teamApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(NetworkApi())
-                .environmentObject(session)
+//            ContentView()
+//                .environmentObject(NetworkApi())
+//                .environmentObject(session)
+            AddDailyProgramView(foremanId: 1)
         }
     }
 }

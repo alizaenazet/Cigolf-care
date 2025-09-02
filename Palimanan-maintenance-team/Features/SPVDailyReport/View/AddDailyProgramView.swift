@@ -37,23 +37,7 @@ struct AddDailyProgramView: View {
         "Irigasi": 4,
         "Mekanik": 5
     ]
-    @State private var location: [String: Int] = [
-        "All": 1,
-        "Green": 2,
-        "Tee Box": 3,
-        "Fairway": 4,
-        "Apron": 5,
-        "Rough": 6,
-        "Bunker": 7,
-        "Nursery": 8,
-        "Driving Range": 9,
-        "Maingate": 10,
-        "Putting 10": 11,
-        "Paving Room": 12,
-        "Resto": 13,
-        "Mekanik": 14,
-        "Irigasi": 15
-    ]
+
     @StateObject private var viewModel = DailyReportViewModel()
     
     var body: some View {
@@ -117,7 +101,8 @@ struct DivisionSection: View {
             // Header Divisi
             HStack {
                 Text(division.name)
-                    .font(.headline)
+                    .font(.title)
+                    .fontWeight(.bold)
                 Button {
                     division.isSelected = false
                 } label: {
@@ -128,9 +113,48 @@ struct DivisionSection: View {
                 
             }
             
-            // Tombol Tambah Lokasi
+            // List Jobs
+//            ForEach($division.locations) { $location in
+////                if location.isSelected == true {
+////                    LocationSection(
+////                        division: $division,
+////                        location: $location,
+////                        viewModel: viewModel
+////                    )
+////                }
+//                LocationSection(
+//                    division: $division,
+//                    location: $location,
+//                    viewModel: viewModel
+//                )
+//                
+//            }
+            
+            ForEach(division.locations.indices, id: \.self) { locIndex in
+                LocationSection(
+                    division: $division,
+                    location: $division.locations[locIndex],
+                    viewModel: viewModel,
+                    locIndex: locIndex, // <-- kirim index asli
+                )
+            }
+            
+//            if (!viewModel.isSelectedAllLocation(id: division.id - 1)) {
+//                Button {
+//                    viewModel.addLocation(id: division.id - 1)
+//                } label: {
+//                    Text("Tambah Lokasi")
+//                        .font(.headline)
+//                        .foregroundColor(.white)
+//                        .padding()
+//                        .frame(maxWidth: .infinity)
+//                        .background(Color.green)
+//                        .cornerRadius(10)
+//                }
+//            }
+            
             Button {
-                //                division.jobs.append(DailyJob())
+                viewModel.addLocation(id: division.id - 1)
             } label: {
                 Text("Tambah Lokasi")
                     .font(.headline)
@@ -140,6 +164,22 @@ struct DivisionSection: View {
                     .background(Color.green)
                     .cornerRadius(10)
             }
+            
+//            Button {
+//                division.locations.append(
+//                    CigolfLocation(id: division.locations.count + 1)
+//                )
+//            } label: {
+//                Text("Tambah Lokasi")
+//                    .font(.headline)
+//                    .foregroundColor(.white)
+//                    .padding()
+//                    .frame(maxWidth: .infinity)
+//                    .background(Color.green)
+//                    .cornerRadius(10)
+//            }
+
+            
         }
         .padding()
         .background(Color.white)
@@ -148,181 +188,228 @@ struct DivisionSection: View {
     }
 }
 
-//// MARK: - Subview untuk 1 Job
-//struct JobItemView: View {
-//    @Binding var job: DailyJob
-//    @Binding var division: CigolfDivision
-//    var locations: [CigolfLocation]
-//
-//    var body: some View {
-//        VStack(spacing: 8) {
-//            HStack {
-//                Picker("Lokasi", selection: $job.location) {
-//                    ForEach(locations) { loc in
-//                        Text(loc.name).tag(Optional(loc))
-//                    }
-//                }
-//                .pickerStyle(MenuPickerStyle())
-//
-//                Spacer()
-//
-//                Button {
-//                    if let index = division.jobs.firstIndex(where: { $0.id == job.id }) {
-//                        division.jobs.remove(at: index)
-//                    }
-//                } label: {
-//                    Image(systemName: "trash")
-//                        .foregroundColor(.red)
+struct LocationSection: View {
+    @Binding var division: CigolfDivision
+    @Binding var location: CigolfLocation
+    //    var jobs: [DailyJob]
+    let viewModel: DailyReportViewModel
+    let locIndex: Int
+    
+    @State var selectedLocation: String = "Pilih Lokasi"
+    
+    @State private var locationsPicker: [String] = [
+        "All",
+        "Green",
+        "Tee Box",
+        "Fairway",
+        "Apron",
+        "Rough",
+        "Bunker",
+        "Nursery",
+        "Driving Range",
+        "Maingate",
+        "Putting 10",
+        "Paving Room",
+        "Resto",
+        "Mekanik",
+        "Irigasi"
+    ]
+    
+    var body: some View {
+        
+        VStack {
+            HStack {
+                Picker("Lokasi", selection: $selectedLocation) {
+                    
+                    Text("Pilih Lokasi")
+                        .tag("Pilih Lokasi")
+                        .frame(alignment: .leading)
+                    
+                    ForEach(locationsPicker, id: \.self) { loc in
+                        Text(loc).tag(loc)
+                    }
+                }
+                .pickerStyle(MenuPickerStyle())
+                .onChange(of: selectedLocation) { newValue in
+                    
+                    location.id = viewModel.locationMap[newValue] ?? 0
+                    location.name = newValue
+                    
+                    print("Lokasi dipilih: \(location.id) \(location.name)")
+                }
+                //                Text(location.name)
+                //                    .font(.title2)
+                //                    .fontWeight(.semibold)
+                
+                Button {
+                    location.isSelected = false
+                } label: {
+                    Image(systemName: "trash")
+                        .foregroundColor(.red)
+                }
+                Spacer()
+                
+            }
+            
+            JobTable()
+            
+            ForEach(location.jobs.indices, id: \.self) { index in
+                JobRow(
+                    job: $location.jobs[index],
+                    number: index + 1, // increment mulai dari 1,
+                    viewModel: viewModel,
+                    onDelete: {
+                        location.jobs.remove(at: index)
+                    }
+                )
+            }
+            
+            
+            Button(action: {
+                viewModel.addJob(divId: division.id - 1, locId: locIndex)
+//                print(location)
+            }) {
+                Text("Tambah Baris")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.green)
+                    .cornerRadius(10)
+            }
+            
+        }
+        .padding()
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                .shadow(radius: 2)
+        )
+        
+    }
+}
+
+struct JobTable : View {
+    
+    var body: some View {
+        HStack {
+            Text("Nomor")
+                .fontWeight(.semibold)
+                .foregroundStyle(.secondary)
+                .frame(width: 60, alignment: .leading)
+            
+            
+            Text("Hari")
+                .fontWeight(.semibold)
+                .foregroundStyle(.secondary)
+                .frame(width: 100, alignment: .leading)
+            
+            Text("Jenis Pekerjaan")
+                .fontWeight(.semibold)
+                .foregroundStyle(.secondary)
+                .frame(minWidth: 150, maxWidth: .infinity, alignment: .leading)
+            
+            Text("Hole/Area")
+                .fontWeight(.semibold)
+                .foregroundStyle(.secondary)
+                .frame(width: 100, alignment: .leading)
+            
+            Text("Prioritas")
+                .fontWeight(.semibold)
+                .foregroundStyle(.secondary)
+                .frame(width: 100, alignment: .leading)
+            
+            Text("Keterangan")
+                .fontWeight(.semibold)
+                .foregroundStyle(.secondary)
+                .frame(minWidth: 150, maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.vertical, 8)
+        
+        Divider()
+    }
+}
+
+struct JobRow: View {
+    @Binding var job: DailyJob
+    let number: Int
+    let viewModel: DailyReportViewModel
+    var onDelete: () -> Void
+    
+    @State private var days: [String] = [
+        "Minggu",
+        "Senin",
+        "Selasa",
+        "Rabu",
+        "Kamis",
+        "Jumat",
+        "Sabtu",
+    ]
+    
+    var body: some View {
+        HStack {
+            Text("0\(String(number))")
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .frame(width: 60, alignment: .leading)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                )
+                .foregroundStyle(.secondary)
+            
+//            TextField("Hari", text: $job.day)
+//                .textFieldStyle(RoundedBorderTextFieldStyle())
+//                .frame(width: 100, alignment: .leading)
+            
+//            Picker("Hari", selection: $job.day) {
+//                
+//                ForEach(days, id: \.self) { day in
+//                    Text(day).tag(day)
 //                }
 //            }
-//
-//            TextField("Jenis pekerjaan", text: $job.jobType)
-//                .textFieldStyle(RoundedBorderTextFieldStyle())
-//
-//            TextField("Hole/Area", text: $job.holeArea)
-//                .textFieldStyle(RoundedBorderTextFieldStyle())
-//
-//            Picker("Prioritas", selection: $job.priority) {
-//                ForEach(1..<6) { i in
-//                    Text("\(i)").tag(i)
-//                }
-//            }
-//            .pickerStyle(SegmentedPickerStyle())
-//
-//            TextField("Keterangan ...", text: $job.notes)
-//                .textFieldStyle(RoundedBorderTextFieldStyle())
-//        }
-//        .padding()
-//        .background(Color.gray.opacity(0.05))
-//        .cornerRadius(8)
-//    }
-//}
+//            .pickerStyle(MenuPickerStyle())
+            
+            Picker("Hari", selection: $job.day) {
+                Text("Pilih").tag(nil as String?)        // placeholder
+                ForEach(days, id: \.self) { day in
+                    Text(day).tag(Optional(day))              // pilihan nyata
+                }
+            }
+            .pickerStyle(MenuPickerStyle())
+            .background(
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+            )
+            
+            TextField("Jenis Pekerjaan", text: $job.jobType)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .frame(minWidth: 150, maxWidth: .infinity, alignment: .leading)
+            
+            TextField("Hole/Area", text: $job.holeArea)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .frame(width: 100, alignment: .leading)
+            
+            TextField("Prioritas", text: $job.priority)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .frame(width: 100, alignment: .leading)
+            
+            TextField("Keterangan", text: $job.description)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .frame(minWidth: 150, maxWidth: .infinity, alignment: .leading)
+            
+            
+            Button(action: onDelete) {
+                Image(systemName: "trash")
+                    .foregroundColor(.red)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}
 
 
 #Preview {
-    var mockReport = ForemanReport(
-        id: 1,
-        createdAt: "28-08-2025",
-        approved: Approval(
-            isApproved: false,
-            approvedAt: "28-08-2025",
-            spvName: "Sal Priadi"
-        ),
-        outsourceCompany: "PT. Yobel Perkasa",
-        foremanName: "Agus Gunandar",
-        totalTasks: 2,
-        finishedTasks: 1,
-        pendingTasks: 1,
-        divisions: [
-            Division(
-                id: 1,
-                name: "Operasional",
-                locations: [
-                    Location(
-                        locationId: 1,
-                        locationName: "Green",
-                        tasks: [
-                            TaskItem(
-                                id: 301,
-                                taskType: "Verticut green",
-                                description: "Potong model cepak",
-                                priority: "P2",
-                                area: ["Hole 1", "Hole 2", "Villa"],
-                                needWorker: 3,
-                                availableWorker: 3,
-                                workerList: ["Yobel", "Mar","Vick"],
-                                urlPhoto: "",
-                                isFinished: false
-                            ),
-                            TaskItem(
-                                id: 302,
-                                taskType: "Pupuk granular green",
-                                description: "Pupuk cap cip cup",
-                                priority: "P1",
-                                area: ["Hole 9"],
-                                needWorker: 1,
-                                availableWorker: 1,
-                                workerList: ["Yobel"],
-                                urlPhoto: "/eijsd.png",
-                                isFinished: true
-                            )
-                        ]
-                    ),
-                    Location(
-                        locationId: 2,
-                        locationName: "Teebox",
-                        tasks: [
-                            TaskItem(
-                                id: 301,
-                                taskType: "Verticut green",
-                                description: "Potong model cepak",
-                                priority: "P2",
-                                area: ["Hole 1", "Hole 2", "Villa"],
-                                needWorker: 3,
-                                availableWorker: 3,
-                                workerList: ["Yobel", "Mar","Vick"],
-                                urlPhoto: "",
-                                isFinished: false
-                            ),
-                            TaskItem(
-                                id: 302,
-                                taskType: "Pupuk granular green",
-                                description: "Pupuk cap cip cup",
-                                priority: "P1",
-                                area: ["Hole 9"],
-                                needWorker: 1,
-                                availableWorker: 1,
-                                workerList: ["Yobel"],
-                                urlPhoto: "/eijsd.png",
-                                isFinished: true
-                            )
-                        ]
-                    )
-                ]
-            ),
-            Division(
-                id: 2,
-                name: "Landscape",
-                locations: [
-                    Location(
-                        locationId: 1,
-                        locationName: "Green",
-                        tasks: [
-                            TaskItem(
-                                id: 401,
-                                taskType: "Verticut green 2",
-                                description: "Potong model cepak",
-                                priority: "P2",
-                                area: ["Hole 1", "Hole 2", "Villa"],
-                                needWorker: 3,
-                                availableWorker: 3,
-                                workerList: ["Yobel", "Mar","Vick"],
-                                urlPhoto: "",
-                                isFinished: false
-                            ),
-                            TaskItem(
-                                id: 402,
-                                taskType: "Pupuk granular green",
-                                description: "Pupuk cap cip cup",
-                                priority: "P1",
-                                area: ["Hole 9"],
-                                needWorker: 1,
-                                availableWorker: 1,
-                                workerList: ["Yobel"],
-                                urlPhoto: "https://cdn.donmai.us/original/25/eb/25eb7f80ba5476d96068a3ccc8e17ab3.png",
-                                isFinished: true
-                            )
-                        ]
-                    )
-                ]
-            )
-        ]
-    )
-    
-    // Inject mock data into the VM
-    let mockVM = DashboardViewModel()
-    mockVM.report = mockReport
-    
-    return ContentView(dashboardVM: mockVM, dailyVM: mockVM)
+    AddDailyProgramView(foremanId: 1)
 }
-
