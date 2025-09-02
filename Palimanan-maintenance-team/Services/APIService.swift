@@ -22,7 +22,7 @@ final class APIService {
     }
     
     // MARK: - Session / Auth State
-    @Published var accessToken: String? = ""
+    @Published var accessToken: String? = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJCcmlnaXR0ZS5Sb2hhbiIsInJvbGUiOiJTdXBlcnZpc29yIiwiaWF0IjoxNzU2NzMwMzkxLCJleHAiOjE3NTY3MzM5OTF9.ijgrNkgHbUOYsbLyheODR9GzQgDTNMenzcOEnWlAdOo"
     @Published var userId: String? = nil
     @Published var role: String? = nil
     
@@ -44,14 +44,6 @@ final class APIService {
         }
         
         let url = "\(baseURL)\(endpoint)"
-                
-        // ✅ Tambahkan log di sini
-        print("➡️ Request URL: \(method.rawValue) \(url)")
-        if let params = parameters {
-            print("📦 Parameters: \(params)")
-        }
-        print("📝 Headers: \(finalHeaders)")
-
         
         return try await withCheckedThrowingContinuation { continuation in
             AF.request(url, method: method, parameters: parameters, encoding: encoding, headers: finalHeaders)
