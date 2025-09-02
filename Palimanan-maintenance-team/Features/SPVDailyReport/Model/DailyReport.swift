@@ -24,10 +24,25 @@ struct DailyReport: Codable, Identifiable {
     }
 }
 
-struct TableRow: Identifiable {
+struct CigolfDivision: Identifiable{
+    var id: Int
+    var name: String
+    var isActive: Bool = false
+    var isSelected: Bool = false
+}
+
+struct CigolfLocation: Identifiable{
+    var id: Int
+    var name: String
+    var isSelected: Bool = false
+}
+
+struct DailyJob: Identifiable {
     let id = UUID()
-    let nomor: String
-    let hari: String
-    let tanggal: String
-    var isChecked: Bool = false
+    var location: CigolfLocation?
+    var day: String = ""
+    var jobType: String = ""
+    var holeArea: String = ""
+    var priority: Int = 1
+    var notes: String = ""
 }

@@ -8,12 +8,13 @@
 import SwiftUI
 
 struct HeaderView: View {
+    let foremanId: Int
+    
     var body: some View {
         HStack {
-            
             Spacer()
             
-            Button(action: {}) {
+            NavigationLink(destination: AddDailyProgramView(foremanId: foremanId)) {
                 HStack {
                     Image(systemName: "plus")
                         .foregroundStyle(.white)
@@ -22,14 +23,15 @@ struct HeaderView: View {
                         .font(.headline)
                         .foregroundColor(.white)
                 }
+                .padding(.vertical, 12)
+                .padding(.horizontal, 12)
+                .background(.green)
+                .cornerRadius(12)
             }
-            .padding(.vertical, 12)
-            .padding(.horizontal, 12)
-            .background(.green)
-            .cornerRadius(12)
         }
     }
 }
+
 
 // MARK: - Filter
 struct FilterView: View {
@@ -121,7 +123,6 @@ struct ReportTableView: View {
                     
                     if (reports.isEmpty) {
                         HStack {
-                                
                                 Text("No data available")
                                     .frame(maxWidth: .infinity, alignment: .center)
                             }
@@ -205,38 +206,41 @@ struct DailyReportView: View {
     
     var body: some View {
         
-        ScrollView {
-            if viewModel.isLoading {
-                ProgressView("Loading…")
-                    .padding()
-            } else if let error = viewModel.errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
-            } else {
-                VStack {
-                    // Header atas
-                    HeaderView()
-                    // Filter tanggal
-                    FilterView(startDate: $startDate, endDate: $endDate) {
-                        Task {
-                            await viewModel.fetchDailyReportByDateRange(
-                                for: foremanId,
-                                startDate: DateHelper.formatDateToDDMMYYYY(startDate),
-                                endDate: DateHelper.formatDateToDDMMYYYY(endDate),
-                            )
+        NavigationStack {
+            ScrollView {
+                if viewModel.isLoading {
+                    ProgressView("Loading…")
+                        .padding()
+                } else if let error = viewModel.errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                } else {
+                    VStack {
+                        // Header atas
+                        HeaderView(foremanId: foremanId)
+                        // Filter tanggal
+                        FilterView(startDate: $startDate, endDate: $endDate) {
+                            Task {
+                                await viewModel.fetchDailyReportByDateRange(
+                                    for: foremanId,
+                                    startDate: DateHelper.formatDateToDDMMYYYY(startDate),
+                                    endDate: DateHelper.formatDateToDDMMYYYY(endDate),
+                                )
+                            }
                         }
+                        
+                        ReportTableView(reports: $viewModel.report)
+                        
                     }
-                    
-                    ReportTableView(reports: $viewModel.report)
-
+                    .padding()
                 }
-                .padding()
+            }
+            .background(Color.secondary.opacity(0.1)) // ✅ abu-abu rata
+            .task(id: foremanId) {
+                await viewModel.fetchDailyReport(for: foremanId)
             }
         }
-        .background(Color.secondary.opacity(0.1)) // ✅ abu-abu rata
-        .task(id: foremanId) {
-            await viewModel.fetchDailyReport(for: foremanId)
-        }
+        
     }
 }
 
