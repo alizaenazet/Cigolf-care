@@ -10,7 +10,7 @@ import Foundation
 struct DailyReportResponse: Codable {
     var status: String
     var message: String
-    var data: [DailyReport]
+    var data: [DailyReport]?
 }
 
 struct DailyReport: Codable, Identifiable {

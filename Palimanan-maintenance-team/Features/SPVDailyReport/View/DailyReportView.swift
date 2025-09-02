@@ -118,12 +118,28 @@ struct ReportTableView: View {
             
             ScrollView(.vertical) {
                 LazyVStack(spacing: 8) {
-                    ForEach(Array(reports.enumerated()), id: \.element.id) { index, report in
-                        ReportRowView(
-                            id: String(index + 1),
-                            report: $reports[index] // ✅ binding ke row
-                        )
-                    }                }
+                    
+                    if (reports.isEmpty) {
+                        HStack {
+                                
+                                Text("No data available")
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                            }
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.gray.opacity(0.2))
+                            )
+                    } else {
+                        ForEach(Array(reports.enumerated()), id: \.element.id) { index, report in
+                            ReportRowView(
+                                id: String(index + 1),
+                                report: $reports[index] // ✅ binding ke row
+                            )
+                        }
+                    }
+                    
+                }
                 .padding(.vertical, 4)
             }
         }
@@ -193,7 +209,10 @@ struct DailyReportView: View {
             if viewModel.isLoading {
                 ProgressView("Loading…")
                     .padding()
-            } else if viewModel.report.count != 0 {
+            } else if let error = viewModel.errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
+            } else {
                 VStack {
                     // Header atas
                     HeaderView()
@@ -212,13 +231,6 @@ struct DailyReportView: View {
 
                 }
                 .padding()
-                
-            } else if let error = viewModel.errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
-            } else {
-                Text("No data available")
-                    .foregroundStyle(.secondary)
             }
         }
         .background(Color.secondary.opacity(0.1)) // ✅ abu-abu rata

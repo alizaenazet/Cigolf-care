@@ -9,7 +9,7 @@ import Foundation
 
 @MainActor
 class DailyReportViewModel: ObservableObject {
-    @Published var report: [DailyReport] = [] // di ViewModel
+    @Published var report: [DailyReport] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     
@@ -23,7 +23,7 @@ class DailyReportViewModel: ObservableObject {
                 method: .get,
                 responseType: DailyReportResponse.self
             )
-            self.report = response.data
+            self.report = response.data ?? []
         } catch {
             self.errorMessage = "Failed to load report: \(error.localizedDescription)"
         }
@@ -39,8 +39,9 @@ class DailyReportViewModel: ObservableObject {
                 method: .get,
                 responseType: DailyReportResponse.self
             )
-            self.report = response.data
+            self.report = response.data ?? []
         } catch {
+            print(error.localizedDescription)
             self.errorMessage = "Failed to load report: \(error.localizedDescription)"
         }
     }
