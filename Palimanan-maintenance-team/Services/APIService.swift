@@ -56,8 +56,7 @@ final class APIService {
                         // Detect expired token (401)
                         if response.response?.statusCode == 401 {
                             print("⚠️ Unauthorized — token may be expired")
-                            var sm = SessionManager()
-                            sm.logout()
+                            SessionManager.shared.logout()
                         }
                         continuation.resume(throwing: error)
                     }

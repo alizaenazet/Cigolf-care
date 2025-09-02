@@ -59,6 +59,24 @@ struct SupervisorDashboardView: View {
                     } label: {
                         Label("Program Harian", systemImage: "list.bullet.clipboard")
                     }
+                    
+                    NavigationLink(value: SidebarMenu.programMingguan) {
+                        Label("Program Mingguan", systemImage: "calendar.badge.plus")
+                    }
+                    
+                    Spacer()
+                    
+                    Button {
+                        SessionManager.shared.logout()
+                    } label: {
+                        Label("Logout", systemImage: "")
+                            .font(.subheadline)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(4)
+                    }
                 }
                 .listStyle(.automatic)
                 .navigationTitle("Menu")

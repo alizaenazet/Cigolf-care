@@ -61,6 +61,8 @@ class LoginViewModel: ObservableObject {
                     print("Role: \(loginResponse.data.user.role), Token: \(loginResponse.data.accessToken)")
                     self.errorMessage = nil // Clear any previous errors
                     completion(true, loginResponse.data.accessToken, loginResponse.data.user.role)
+                    APIService.shared.accessToken = loginResponse.data.accessToken
+                    print("API Service Token: \(APIService.shared.accessToken), SM Token: \(SessionManager.shared.accessToken)")
                 
                 } else if let errorResponse = try? JSONDecoder().decode(LoginErrorResponse.self, from: data) {
                     print("❌ Error: Decoded LoginErrorResponse.")
