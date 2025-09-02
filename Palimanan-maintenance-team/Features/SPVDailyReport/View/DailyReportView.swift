@@ -10,17 +10,6 @@ import SwiftUI
 struct HeaderView: View {
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Penyedia Tenaga Kerja: PT YOBEL SEHAT")
-                    .fontWeight(.regular)
-                    .font(.headline)
-                    .foregroundColor(.secondary)
-                
-                Text("Area: Lembah, CH, FC, VILLA, FC")
-                    .fontWeight(.regular)
-                    .font(.headline)
-                    .foregroundColor(.secondary)
-            }
             
             Spacer()
             
@@ -34,7 +23,7 @@ struct HeaderView: View {
                         .foregroundColor(.white)
                 }
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, 12)
             .padding(.horizontal, 12)
             .background(.green)
             .cornerRadius(12)
