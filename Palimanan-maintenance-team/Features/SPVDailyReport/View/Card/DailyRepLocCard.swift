@@ -10,7 +10,9 @@ import SwiftUI
 struct DailyRepLocCard: View {
     let location: Location
     let division: Division
+    let isReportApproved: Bool
     @State private var isExpanded = false
+    var onAddTask: (Division, Location) -> Void
     
     // Shared grid definition
     private let taskColumns: [GridItem] = [
@@ -30,6 +32,19 @@ struct DailyRepLocCard: View {
                     .font(.headline)
                 
                 Spacer()
+                
+                if !isReportApproved {
+                    Button {
+                        onAddTask(division, location)
+                    } label: {
+                        Label("Tambahkan Pekerjaan", systemImage: "plus")
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(6)
+                    }
+                }
                 
                 Button {
                     withAnimation {

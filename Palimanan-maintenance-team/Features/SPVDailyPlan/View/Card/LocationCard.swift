@@ -10,6 +10,7 @@ import SwiftUI
 struct LocationCard: View {
     let location: Location
     let division: Division
+    let isReportApproved: Bool
     @State private var isExpanded = false
     var onAddTask: (Division, Location) -> Void
     
@@ -32,15 +33,17 @@ struct LocationCard: View {
                 
                 Spacer()
                 
-                Button {
-                    onAddTask(division, location)
-                } label: {
-                    Label("Tambahkan Pekerjaan", systemImage: "plus")
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(6)
+                if !isReportApproved {
+                    Button {
+                        onAddTask(division, location)
+                    } label: {
+                        Label("Tambahkan Pekerjaan", systemImage: "plus")
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(6)
+                    }
                 }
                 
                 Button {
