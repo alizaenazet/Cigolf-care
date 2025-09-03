@@ -53,24 +53,34 @@ struct DashboardView: View {
         .background(Color(.systemGray6))
         .sheet(isPresented: $showApprovalPopup) {
             if let report = viewModel.report {
-                ApprovalPopup(
-                    date: DateHelper.formattedDate(report.createdAt),
-                    provider: report.outsourceCompany!,
-                    finishedCount: report.finishedTasks!,
-                    totalCount: report.totalTasks!,
-                    inProgressCount: report.pendingTasks!,
-                    onApprove: {
-                        viewModel.report?.approved.isApproved = true
-                        withAnimation { showApprovalPopup = false }
-                    },
-                    onClose: {
-                        withAnimation { showApprovalPopup = false }
+                if SessionManager.shared.isLoggedIn {
+                    if SessionManager.shared.userRole != "Mandor" {
+                        ApprovalPopup(
+                            date: DateHelper.formattedDate(report.createdAt),
+                            provider: report.outsourceCompany!,
+                            finishedCount: report.finishedTasks!,
+                            totalCount: report.totalTasks!,
+                            inProgressCount: report.pendingTasks!,
+                            onApprove: {
+                                Task {
+                                    await viewModel.approveReport(for: foremanId, taskId: report.id)
+                                    withAnimation { showApprovalPopup = false }
+                                }
+                            },
+                            onClose: {
+                                withAnimation { showApprovalPopup = false }
+                            }
+                        )
+                        .transition(.opacity.combined(with: .scale))
+                        .presentationDetents([.medium, .large])
+                        .interactiveDismissDisabled(true)
+                        .presentationCornerRadius(24)
                     }
-                )
-                .transition(.opacity.combined(with: .scale))
-                .presentationDetents([.medium, .large])
-                .interactiveDismissDisabled(true)
-                .presentationCornerRadius(24)
+                    else {
+                        Text("You don't have permission to view this report.")
+                            .foregroundColor(.red)
+                    }
+                }
             }
         }
         .sheet(item: $selectedContext) { context in

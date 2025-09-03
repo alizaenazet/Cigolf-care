@@ -8,6 +8,11 @@
 
 import Foundation
 
+struct NormalResponse: Codable {
+    var status: String
+    var message: String
+}
+
 struct DashboardResponse: Codable {
     var status: String
     var message: String
