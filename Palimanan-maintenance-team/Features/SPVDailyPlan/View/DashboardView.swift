@@ -29,7 +29,7 @@ struct DashboardView: View {
                         }
                         
                         ForEach(report.divisions) { division in
-                            DivisionCard(division: division) { div, loc in
+                            DivisionCard(division: division, isReportApproved: report.approved.isApproved) { div, loc in
                                 if let foreman = ForemanMenu.fromId(foremanId) {
                                     selectedContext = SelectedContext(division: div, location: loc, foreman: foreman)
                                 }
