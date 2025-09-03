@@ -235,7 +235,7 @@ struct DailyReportView: View {
                             await viewModel.fetchDailyReportByDateRange(
                                 for: foremanId,
                                 startDate: DateHelper.formatDateToDDMMYYYY(startDate),
-                                endDate: DateHelper.formatDateToDDMMYYYY(endDate),
+                                endDate: DateHelper.formatDateToDDMMYYYY(endDate)
                             )
                         }
                     }
