@@ -133,10 +133,6 @@ class DailyReportViewModel: ObservableObject {
         if let index = cigolfDivision.firstIndex(where: { !$0.isSelected }) {
             cigolfDivision[index].isSelected = true
             addLocation(id: index)
-            
-            //            if cigolfDivision[index].jobs.isEmpty {
-            //                cigolfDivision[index].jobs = Array(repeating: DailyJob(), count: 3)
-            //            }
             print("Divisi ditambahkan:", cigolfDivision[index].name)
         } else {
             print("Semua divisi sudah dipilih")
@@ -144,28 +140,12 @@ class DailyReportViewModel: ObservableObject {
     }
     
     func addJob(divId: Int, locId: Int) {
-        print(divId)
-        print(locId)
-        print(cigolfDivision[divId].name)
-        print(cigolfDivision[divId].locations[locId].name)
         cigolfDivision[divId].locations[locId].jobs.append(DailyJob())
     }
     
     func addLocation(id: Int) {
         cigolfDivision[id].locations.append(CigolfLocation(id: cigolfLocation.count + 1))
         cigolfDivision[id].locations[cigolfDivision[id].locations.count - 1].jobs.append(DailyJob())
-        cigolfDivision[id].locations[cigolfDivision[id].locations.count - 1].jobs.append(DailyJob())
-        
-        //        if let index = cigolfDivision[id].locations.firstIndex(where: { !$0.isSelected }) {
-        //            cigolfDivision[id].locations[index].isSelected = true
-        //
-        //            //            if cigolfDivision[id].locations.isEmpty {
-        //            //                cigolfDivision[id].locations = Array(repeating: CigolfLocation(), count: 3)
-        //            //            }
-        //            print("Lokasi ditambahkan:", cigolfDivision[id].locations[index].name)
-        //        } else {
-        //            print("Semua lokasi sudah dipilih")
-        //        }
     }
     
     func isSelectedAllLocation(id: Int) -> Bool {

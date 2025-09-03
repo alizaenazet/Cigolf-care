@@ -36,6 +36,7 @@ struct DailyJob: Codable, Identifiable, Hashable {
     var day: String? = nil
     var jobType: String = ""
     var holeArea: String = ""
+    var holes: [String] = []   // ⬅️ tambahkan ini
     var priority: String = ""
     var description: String = ""
 }

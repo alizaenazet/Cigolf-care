@@ -12,7 +12,7 @@ import Combine
 final class APIService {
     static let shared = APIService()
     private init() {}
-
+    
     // MARK: - Base URL
     private let apiVersion = "v1"
     private let baseHost = "http://localhost:3000"
@@ -25,6 +25,22 @@ final class APIService {
     @Published var accessToken: String? = nil
     @Published var userId: String? = nil
     @Published var role: String? = nil
+    
+    func post<T: Decodable>(
+        _ endpoint: String,
+        parameters: Parameters,
+        headers: HTTPHeaders? = nil,
+        responseType: T.Type
+    ) async throws -> T {
+        try await request(
+            endpoint,
+            method: .post,
+            parameters: parameters,
+            encoding: JSONEncoding.default, // ✅ POST usually uses JSON
+            headers: headers,
+            responseType: responseType
+        )
+    }
     
     // MARK: - Generic Request
     func request<T: Decodable>(

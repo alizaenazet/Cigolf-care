@@ -31,12 +31,8 @@ struct HeaderViewAddDailyProgram: View {
                 .font(.title3)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.gray.opacity(0.2)) // isi kotak abu
+                        .fill(Color.gray.opacity(0.2))
                 )
-                
-                
-                //                DatePicker("", selection: $start, displayedComponents: .date)
-                //                    .labelsHidden()
                 
             }
             HStack {
@@ -69,7 +65,7 @@ struct HeaderViewAddDailyProgram: View {
 struct AddDailyProgramView: View {
     let foremanId: Int
     
-    @State private var start: Date = Date()  // ✅ jadi state
+    @State private var start: Date = Date()
     
     @State private var division: [String: Int] = [
         "Operasional": 1,
@@ -85,7 +81,6 @@ struct AddDailyProgramView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    // Header atas
                     HeaderViewAddDailyProgram(start: start, foremanId: foremanId, viewModel: viewModel)
                     
                     DivisionListView(viewModel: viewModel)
@@ -93,8 +88,8 @@ struct AddDailyProgramView: View {
                 .padding()
             }
         }
-        .navigationTitle("Buat Program Harian") // judul navigation bar
-        .navigationBarTitleDisplayMode(.large) // bisa .large atau .inline
+        .navigationTitle("Buat Program Harian")
+        .navigationBarTitleDisplayMode(.large)
     }
 }
 
@@ -140,7 +135,6 @@ struct DivisionSection: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Header Divisi
             HStack {
                 Text(division.name)
                     .font(.title)
@@ -165,9 +159,7 @@ struct DivisionSection: View {
                         .overlay(
                             Rectangle()
                                 .foregroundStyle(Color.secondary.opacity(0.2))
-                            // garis kotak
-//                                .frame(width: 24, height: 24)
-                                .cornerRadius(8)// ukuran kotaknya
+                                .cornerRadius(8)
                         )
                         .shadow(radius: 2)
                 }
@@ -180,7 +172,10 @@ struct DivisionSection: View {
                         division: $division,
                         location: $division.locations[locIndex],
                         viewModel: viewModel,
-                        locIndex: locIndex
+                        locIndex: locIndex,
+                        onDeleteLocation: {
+                            division.locations.remove(at: locIndex)   // ✅ hapus location
+                        }
                     )
                 }
                 
@@ -208,9 +203,9 @@ struct DivisionSection: View {
 struct LocationSection: View {
     @Binding var division: CigolfDivision
     @Binding var location: CigolfLocation
-    //    var jobs: [DailyJob]
     let viewModel: DailyReportViewModel
     let locIndex: Int
+    let onDeleteLocation: () -> Void   // ✅ tambahin ini
     
     @State var selectedLocation: String = "Pilih Lokasi"
     
@@ -268,7 +263,7 @@ struct LocationSection: View {
                 }
                 
                 Button {
-                    location.isSelected = false
+                    onDeleteLocation()
                 } label: {
                     Image(systemName: "trash")
                         .foregroundColor(.red)
@@ -282,26 +277,16 @@ struct LocationSection: View {
             ForEach(location.jobs.indices, id: \.self) { index in
                 JobRow(
                     job: $location.jobs[index],
-                    number: index + 1, // increment mulai dari 1,
+                    number: index + 1,
                     viewModel: viewModel,
+                    isLastRow: index == location.jobs.count - 1,
+                    onAddRow: {
+                        viewModel.addJob(divId: division.id - 1, locId: locIndex)
+                    },
                     onDelete: {
                         location.jobs.remove(at: index)
                     }
                 )
-            }
-            
-            
-            Button(action: {
-                viewModel.addJob(divId: division.id - 1, locId: locIndex)
-                //                print(location)
-            }) {
-                Text("Tambah Baris")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.green)
-                    .cornerRadius(10)
             }
             
         }
@@ -333,7 +318,7 @@ struct JobTable : View {
             Text("Hole/Area")
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
-                .frame(width: 100, alignment: .leading)
+                .frame(width: 150, alignment: .leading)
             
             Text("Prioritas")
                 .fontWeight(.semibold)
@@ -355,17 +340,11 @@ struct JobRow: View {
     @Binding var job: DailyJob
     let number: Int
     let viewModel: DailyReportViewModel
+    let isLastRow: Bool
+    var onAddRow: () -> Void
     var onDelete: () -> Void
     
-    @State private var days: [String] = [
-        "Minggu",
-        "Senin",
-        "Selasa",
-        "Rabu",
-        "Kamis",
-        "Jumat",
-        "Sabtu",
-    ]
+    @State private var holes: [String] = (1...27).map { "\($0)" } + ["CH", "FC", "Villa", "Main Gate", "Driving Range", "Parkiran"]
     
     var body: some View {
         HStack {
@@ -381,30 +360,57 @@ struct JobRow: View {
             
             TextField("Jenis Pekerjaan", text: $job.jobType)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                .onChange(of: job.jobType) { _ in triggerAddRowIfNeeded() } // ✅ cek otomatis
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            TextField("Hole/Area", text: $job.holeArea)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(width: 100, alignment: .leading)
+            Menu {
+                ForEach(holes, id: \.self) { hole in
+                    Button {
+                        if job.holes.contains(hole) {
+                            job.holes.removeAll { $0 == hole }
+                        } else {
+                            job.holes.append(hole)
+                        }
+                        triggerAddRowIfNeeded() // ✅ cek otomatis
+                    } label: {
+                        HStack {
+                            Text(hole)
+                            if job.holes.contains(hole) {
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+                }
+            } label: {
+                Text(job.holes.isEmpty ? "Pilih" : job.holes.joined(separator: ", "))
+                    .font(.subheadline)
+                    .foregroundColor(job.holes.isEmpty ? .gray : .primary)
+                    .frame(width: 150, alignment: .leading)
+                    .padding(6)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+            }
             
             Picker("Prioritas", selection: $job.priority) {
-                Text("Pilih").tag("") // placeholder
+                Text("Pilih").tag("")
                 ForEach(1...5, id: \.self) { value in
                     Text("\(value)").tag(String(value))
                 }
             }
-            .pickerStyle(MenuPickerStyle()) // atau .menu, bisa diganti sesuai kebutuhan
+            .pickerStyle(MenuPickerStyle())
+            .onChange(of: job.priority) { _ in triggerAddRowIfNeeded() } // ✅ cek otomatis
             .frame(width: 80, alignment: .leading)
             .overlay(
                 RoundedRectangle(cornerRadius: 4)
                     .stroke(Color.gray.opacity(0.3), lineWidth: 1)
             )
             
-            
             TextField("Keterangan", text: $job.description)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                .onChange(of: job.description) { _ in triggerAddRowIfNeeded() } // ✅ cek otomatis
                 .frame(maxWidth: .infinity, alignment: .leading)
-            
             
             Button(action: onDelete) {
                 Image(systemName: "trash")
@@ -412,6 +418,14 @@ struct JobRow: View {
             }
         }
         .padding(.vertical, 4)
+    }
+    
+    // ✅ Function untuk cek apakah perlu tambah baris baru
+    private func triggerAddRowIfNeeded() {
+        if isLastRow &&
+            (!job.jobType.isEmpty || !job.holes.isEmpty || !job.priority.isEmpty || !job.description.isEmpty) {
+            onAddRow()
+        }
     }
 }
 
