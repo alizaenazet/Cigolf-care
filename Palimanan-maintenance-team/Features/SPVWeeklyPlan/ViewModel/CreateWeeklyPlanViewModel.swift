@@ -79,7 +79,9 @@ class WeeklyDivision : ObservableObject{
 class DivisionLocation : ObservableObject{
     @Published var locationId: Int
     @Published var location: String
-    @Published var tasks: [DivisionTask] = []
+    @Published var tasks: [DivisionTask] = [
+        DivisionTask(id: 1,taskType: "",day: "",description: "",area: [])
+    ]
     
     private var cancellables = Set<AnyCancellable>()
     

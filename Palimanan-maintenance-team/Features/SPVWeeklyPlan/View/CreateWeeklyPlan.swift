@@ -220,19 +220,10 @@ struct CreateWeeklyPlan: View {
             ForEach(location.tasks.indices, id: \.self) { index in
                 taskRow(for: location.tasks[index], at: index, in: location)
             }
-            
-            // Add Task Button for this location
-            Button("+ Tambah Task") {
-                addTaskToLocation(location)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(Color.blue.opacity(0.1))
-            .cornerRadius(6)
         }
         .padding()
         .background(Color.gray.opacity(0.01))
-        .clipShape(.rect(cornerRadius: 8)) // shorthand for RoundedRectangle(cornerRadius: 6)
+        .clipShape(.rect(cornerRadius: 8))
         .overlay(
             RoundedRectangle(cornerRadius: 8)
                 .stroke(.gray.opacity(0.15), lineWidth: 2)
@@ -250,7 +241,10 @@ struct CreateWeeklyPlan: View {
             // Jenis Pekerjaan
             TextField("Jenis Pekerjaan", text: Binding(
                 get: { task.taskType },
-                set: { task.taskType = $0 }
+                set: { newValue in
+                    task.taskType = newValue
+                    checkAndAddNewTaskIfNeeded(for: location, at: index)
+                }
             ))
                 .textFieldStyle(.roundedBorder)
                 .frame(width: 150)
@@ -265,6 +259,7 @@ struct CreateWeeklyPlan: View {
                         } else {
                             task.area.append(area)
                         }
+                        checkAndAddNewTaskIfNeeded(for: location, at: index)
                     } label: {
                         HStack {
                             if task.area.contains(area) {
@@ -301,6 +296,7 @@ struct CreateWeeklyPlan: View {
                 ForEach(viewModel.getBahasaDays(), id: \.self) { day in
                     Button(day) {
                         task.day = viewModel.getEnglishDay(fromBahasa: day) ?? day
+                        checkAndAddNewTaskIfNeeded(for: location, at: index)
                     }
                 }
             } label: {
@@ -322,7 +318,10 @@ struct CreateWeeklyPlan: View {
             // Keterangan
             TextField("Potong dengan ukuran...", text: Binding(
                 get: { task.description },
-                set: { task.description = $0 }
+                set: { newValue in
+                    task.description = newValue
+                    checkAndAddNewTaskIfNeeded(for: location, at: index)
+                }
             ))
                 .textFieldStyle(.roundedBorder)
                 .frame(maxWidth: .infinity)
@@ -402,6 +401,25 @@ struct CreateWeeklyPlan: View {
         division.id = newDivision.id
         division.name = newDivision.name
         // Don't reset locations - keep existing locations and tasks intact
+    }
+    
+    // MARK: - Check and Add New Task
+    private func checkAndAddNewTaskIfNeeded(for location: DivisionLocation, at index: Int) {
+        // Check if this is the last task in the location
+        guard index == location.tasks.count - 1 else { return }
+        
+        let task = location.tasks[index]
+        
+        // Check if any field has been filled (task type, day, description, or area)
+        let hasTaskType = !task.taskType.isEmpty
+        let hasDay = !task.day.isEmpty
+        let hasDescription = !task.description.isEmpty
+        let hasArea = !task.area.isEmpty
+        
+        // If any field is filled and this is the last task, add a new empty task
+        if hasTaskType || hasDay || hasDescription || hasArea {
+            addTaskToLocation(location)
+        }
     }
 }
 
