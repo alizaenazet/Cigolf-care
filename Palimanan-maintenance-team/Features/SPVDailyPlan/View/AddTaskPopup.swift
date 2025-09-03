@@ -19,6 +19,8 @@ struct AddTaskPopup: View {
     let division: Division
     let location: Location
     let foreman: ForemanMenu
+    let onSubmit: (_ jobType: String, _ area: [String], _ priority: Int, _ description: String) -> Void
+    let onClose: () -> Void
     
     // Form states
     @State private var jobType: String = ""
@@ -121,12 +123,8 @@ struct AddTaskPopup: View {
             
             // Submit Button
             Button(action: {
-                print("📝 Task Saved:",
-                      jobType,
-                      selectedHoles,
-                      priority,
-                      notes)
-                isPresented = false
+                let priorityValue = Int(priority.dropFirst()) ?? 1 // "P1" → 1
+                onSubmit(jobType, selectedHoles.map { String($0) }, priorityValue, notes)
             }) {
                 Text("Submit")
                     .font(.headline)

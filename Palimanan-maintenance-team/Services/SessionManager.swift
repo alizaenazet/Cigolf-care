@@ -31,6 +31,7 @@ class SessionManager: ObservableObject {
             self.isLoggedIn = true
             self.accessToken = token
             self.userRole = role
+            self.userId = userId
             APIService.shared.accessToken = token
             if id != 0 {
                 self.userId = id

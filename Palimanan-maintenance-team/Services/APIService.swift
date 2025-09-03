@@ -65,4 +65,20 @@ final class APIService {
                 }
         }
     }
+    
+    func post<T: Decodable>(
+        _ endpoint: String,
+        parameters: Parameters,
+        headers: HTTPHeaders? = nil,
+        responseType: T.Type
+    ) async throws -> T {
+        try await request(
+            endpoint,
+            method: .post,
+            parameters: parameters,
+            encoding: JSONEncoding.default, // ✅ POST usually uses JSON
+            headers: headers,
+            responseType: responseType
+        )
+    }
 }

@@ -17,8 +17,7 @@ struct LoginView: View {
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
-            
-            VStack(spacing: 25) {
+          VStack(spacing: 25) {
                 Image("logo_ciputra")
                     .resizable()
                     .scaledToFit()

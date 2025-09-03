@@ -10,7 +10,9 @@ import SwiftUI
 
 struct DailyRepDivCard: View {
     let division: Division
+    let isReportApproved: Bool
     @State private var isExpanded = false
+    var onAddTask: (Division, Location) -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -41,7 +43,9 @@ struct DailyRepDivCard: View {
             if isExpanded {
                 VStack(alignment: .leading, spacing: 12) {
                     ForEach(division.locations) { location in
-                        DailyRepLocCard(location: location, division: division)
+                        DailyRepLocCard(location: location, division: division, isReportApproved: isReportApproved) { div, loc in
+                            onAddTask(div, loc)   // bubble up again
+                        }
                     }
                 }
                 .padding(.horizontal)

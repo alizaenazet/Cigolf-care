@@ -13,7 +13,7 @@ struct DailyReportDetailViewWrapper: View {
     let reportId: Int
     
     var body: some View {
-        DailyReportDetailView(viewModel: viewModel)
+        DailyReportDetailView(viewModel: viewModel, foremanId: foremanId)
             .task(id: reportId) {
                 await viewModel.fetchReportDetail(for: foremanId, reportId: reportId)
             }
