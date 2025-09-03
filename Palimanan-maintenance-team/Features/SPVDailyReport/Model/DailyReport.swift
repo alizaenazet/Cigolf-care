@@ -36,7 +36,7 @@ struct DailyJob: Codable, Identifiable, Hashable {
     var day: String? = nil
     var jobType: String = ""
     var holeArea: String = ""
-    var holes: [String] = []   // ⬅️ tambahkan ini
+    var holes: [String] = []
     var priority: String = ""
     var description: String = ""
 }
@@ -51,6 +51,11 @@ struct CigolfLocation: Identifiable, Hashable {
 struct DailyProgramRequest: Codable {
     var date: String
     var divisions: [DivisionRequest]
+}
+
+struct CreateDailyProgramResponse: Codable {
+    var status: String
+    var message: String
 }
 
 struct DivisionRequest: Codable {

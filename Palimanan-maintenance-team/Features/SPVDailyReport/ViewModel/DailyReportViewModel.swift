@@ -12,8 +12,12 @@ class DailyReportViewModel: ObservableObject {
     @Published var report: [DailyReport] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var showSuccessAlert = false
+    @Published var successMessage = ""
     @Published var cigolfDivision: [CigolfDivision] = []
     @Published var cigolfLocation: [CigolfLocation] = []
+    @Published var dailyProgramRequest: DailyProgramRequest?
+    @Published var divisionRequests: [DivisionRequest] = []
     @Published var locationMap: [String: Int] = [
         "All": 1,
         "Green": 2,
@@ -31,15 +35,15 @@ class DailyReportViewModel: ObservableObject {
         "Mekanik": 14,
         "Irigasi": 15
     ]
-//    @Published var dayMap: [String: String] = [
-//        "Minggu": "sunday",
-//        "Senin": "monday",
-//        "Selasa": "tueday",
-//        "Rabu": "wednesday",
-//        "Kamis": "thursday",
-//        "Jumat": "friday",
-//        "Sabtu": "saturday",
-//    ]
+    //    @Published var dayMap: [String: String] = [
+    //        "Minggu": "sunday",
+    //        "Senin": "monday",
+    //        "Selasa": "tueday",
+    //        "Rabu": "wednesday",
+    //        "Kamis": "thursday",
+    //        "Jumat": "friday",
+    //        "Sabtu": "saturday",
+    //    ]
     enum DailyProgramError: Error, LocalizedError {
         case locationNotSelected(String)   // pesan error lokasi
         case jobIncomplete(String)         // pesan error job
@@ -65,6 +69,17 @@ class DailyReportViewModel: ObservableObject {
         addLocation(id: 1)
     }
     
+    func removeJob(divId: Int, locId: Int, jobId: UUID) {
+        print(divId)
+        print(locId)
+        print(jobId)
+        if let divIndex = cigolfDivision.firstIndex(where: { $0.id == divId }),
+           let locIndex = cigolfDivision[divIndex].locations.firstIndex(where: { $0.id == locId }),
+           let jobIndex = cigolfDivision[divIndex].locations[locIndex].jobs.firstIndex(where: { $0.id == jobId }) {
+            cigolfDivision[divIndex].locations[locIndex].jobs.remove(at: jobIndex)
+        }
+    }
+    
     func submitProgram(foremanId: Int) {
         do {
             let request = try formatToDailyProgramRequest()
@@ -74,16 +89,16 @@ class DailyReportViewModel: ObservableObject {
             }
         } catch {
             print("❌ Error: \(error.localizedDescription)")
-            // bisa ditampilkan ke UI juga
         }
     }
-
+    
     func formatToDailyProgramRequest() throws -> DailyProgramRequest {
+        self.dailyProgramRequest = nil
+        self.divisionRequests = []
+        
         let now = Date()
         let formatter = DateFormatter()
         formatter.dateFormat = "dd-MM-yyyy"
-        
-        var divisionRequests: [DivisionRequest] = []
         
         for division in cigolfDivision.filter({ $0.isSelected }) {
             for location in division.locations {
@@ -96,14 +111,11 @@ class DailyReportViewModel: ObservableObject {
                 
                 var tasks: [TaskRequest] = []
                 for job in location.jobs {
-                    let areas = job.holeArea
-                        .split(separator: ",")
-                        .map { $0.trimmingCharacters(in: .whitespaces) }
                     let priority = Int(job.priority) ?? 0
                     
                     // 🔴 validasi job
                     guard !job.jobType.isEmpty,
-                          !areas.isEmpty,
+                          !job.holes.isEmpty,
                           priority > 0,
                           !job.description.isEmpty else {
                         throw DailyProgramError.jobIncomplete(
@@ -111,9 +123,17 @@ class DailyReportViewModel: ObservableObject {
                         )
                     }
                     
+                    let formattedHoles = job.holes.map { hole in
+                            if let number = Int(hole) {
+                                return "Hole \(number)"
+                            } else {
+                                return hole  // tetap CH, FC, dll
+                            }
+                        }
+                    
                     tasks.append(TaskRequest(
                         jobType: job.jobType,
-                        area: areas,
+                        area: formattedHoles,
                         priority: priority,
                         description: job.description
                     ))
@@ -134,8 +154,6 @@ class DailyReportViewModel: ObservableObject {
             divisions: divisionRequests
         )
     }
-
-
     
     func addDivision() {
         if let index = cigolfDivision.firstIndex(where: { !$0.isSelected }) {
@@ -163,6 +181,39 @@ class DailyReportViewModel: ObservableObject {
     
     func isSelectedAllDivision() -> Bool {
         return cigolfDivision.allSatisfy { $0.isSelected }
+    }
+    
+    func createDailyProgram(foremanId: Int) async {
+        isLoading = true
+        defer { isLoading = false }
+        
+        guard let request = dailyProgramRequest else {
+            print("❌ dailyProgramRequest masih nil!")
+            return
+        }
+        
+        do {
+            let jsonData = try JSONEncoder().encode(request)
+            let jsonObject = try JSONSerialization.jsonObject(with: jsonData) as? [String: Any] ?? [:]
+
+            let response: CreateDailyProgramResponse = try await APIService.shared.post(
+                "/foreman/\(foremanId)/daily-task",
+                parameters: jsonObject,
+                responseType: CreateDailyProgramResponse.self
+            )
+            print("Daily program created ✅ status:", response.status)
+            await MainActor.run {
+                self.successMessage = "Program harian berhasil dibuat!"
+                self.showSuccessAlert = true
+            }
+//            self.resetForm()
+        } catch {
+            print("❌ Failed to create daily program:", error.localizedDescription)
+            await MainActor.run {
+                self.successMessage = "Gagal membuat program: \(error.localizedDescription)"
+                self.showSuccessAlert = true
+            }
+        }
     }
     
     func fetchDailyReport(for foremanId: Int) async {

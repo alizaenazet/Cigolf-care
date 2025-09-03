@@ -11,7 +11,7 @@ struct HeaderViewAddDailyProgram: View {
     
     @State var start: Date
     let foremanId: Int
-    let viewModel: DailyReportViewModel
+    @StateObject var viewModel: DailyReportViewModel
     
     // Tambahan state untuk alert
     @State private var showConfirmation = false
@@ -62,39 +62,34 @@ struct HeaderViewAddDailyProgram: View {
         .alert("Error", isPresented: $showError, actions: {
             Button("OK", role: .cancel) {}
         }, message: {
-            Text(errorMessage)
+            Text(errorMessage.isEmpty ? "Terjadi kesalahan" : errorMessage)
         })
         .alert("Simpan Program Harian", isPresented: $showConfirmation, actions: {
-            Button("Batal", role: .cancel) {}
             Button("Ya") {
-                // Panggil API / simpan ke backend
-                print("✅ Program harian berhasil disimpan!")
+                Task {
+                    await viewModel.createDailyProgram(foremanId: foremanId)
+                    print("✅ Program harian berhasil disimpan!")
+                }
             }
+            Button("Batal", role: .cancel) {}
+            
         }, message: {
             Text("Periode: \(DateHelper.formattedIndonesianDate(start))")
         })
-        .alert("Error", isPresented: $showError, actions: {
+        .alert("Info", isPresented: $viewModel.showSuccessAlert) {
             Button("OK", role: .cancel) {}
-        }, message: {
-            Text(errorMessage)
-        })
-//        .alert("Simpan Program Harian", isPresented: $showError, actions: {
-//            Button("Ya") {
-//                // Panggil API / simpan ke backend
-//                print("✅ Program harian berhasil disimpan!")
-//            }
-//            Button("Batal", role: .cancel) {}
-//        }, message: {
-//            Text("Periode: \(DateHelper.formattedIndonesianDate(start))")
-//        })
-
+        } message: {
+            Text(viewModel.successMessage)
+        }
     }
     
     private func submitProgram() {
         do {
-            let _ = try viewModel.formatToDailyProgramRequest()
+            let request = try viewModel.formatToDailyProgramRequest()
             // Jika sukses, tampilkan konfirmasi
+            viewModel.dailyProgramRequest = request  // ✅ simpan ke property
             showConfirmation = true
+            
         } catch {
             // Tampilkan error modal
             errorMessage = error.localizedDescription
@@ -122,12 +117,18 @@ struct AddDailyProgramView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 20) {
-                    HeaderViewAddDailyProgram(start: start, foremanId: foremanId, viewModel: viewModel)
-                    
-                    DivisionListView(viewModel: viewModel)
+                
+                if (viewModel.isLoading) {
+                    ProgressView("Loading…")
                 }
-                .padding()
+                else {
+                    VStack(spacing: 20) {
+                        HeaderViewAddDailyProgram(start: start, foremanId: foremanId, viewModel: viewModel)
+                        
+                        DivisionListView(viewModel: viewModel)
+                    }
+                    .padding()
+                }
             }
         }
         .navigationTitle("Buat Program Harian")
@@ -183,6 +184,7 @@ struct DivisionSection: View {
                     .fontWeight(.bold)
                 Button {
                     division.isSelected = false
+                    division.locations.removeAll()
                 } label: {
                     Image(systemName: "trash")
                         .foregroundColor(.red)
@@ -316,20 +318,47 @@ struct LocationSection: View {
             
             JobTable()
             
-            ForEach(location.jobs.indices, id: \.self) { index in
+//            ForEach(location.jobs.indices, id: \.self) { index in
+//                JobRow(
+//                    job: $location.jobs[index],
+//                    number: index + 1,
+//                    viewModel: viewModel, isLastRow: index == location.jobs.count - 1,
+//                    onAddRow: {
+//                        viewModel.addJob(divId: division.id - 1, locId: locIndex)
+//                    },
+//                    onDelete: {
+//                        if index >= 0 && index < location.jobs.count {
+//                            location.jobs.remove(at: index)
+//                            if location.jobs.isEmpty {
+//                                onDeleteLocation()
+//                            }
+//                        } else {
+//                            print("⚠️ Index \(index) out of range, tidak bisa menghapus job")
+//                        }
+//                    }
+//                )
+//            }
+            
+            ForEach($location.jobs, id: \.id) { $job in
                 JobRow(
-                    job: $location.jobs[index],
-                    number: index + 1,
+                    job: $job,
+                    number: location.jobs.firstIndex(where: { $0.id == job.id })! + 1,
                     viewModel: viewModel,
-                    isLastRow: index == location.jobs.count - 1,
+                    isLastRow: location.jobs.last?.id == job.id,
                     onAddRow: {
                         viewModel.addJob(divId: division.id - 1, locId: locIndex)
                     },
                     onDelete: {
-                        location.jobs.remove(at: index)
+                        if let idx = location.jobs.firstIndex(where: { $0.id == job.id }) {
+                            location.jobs.remove(at: idx)
+                            if location.jobs.isEmpty {
+                                onDeleteLocation()
+                            }
+                        }
                     }
                 )
             }
+
             
         }
         .padding()
@@ -462,7 +491,7 @@ struct JobRow: View {
         .padding(.vertical, 4)
     }
     
-
+    
     private func triggerAddRowIfNeeded() {
         if isLastRow &&
             (!job.jobType.isEmpty || !job.holes.isEmpty || !job.priority.isEmpty || !job.description.isEmpty) {
