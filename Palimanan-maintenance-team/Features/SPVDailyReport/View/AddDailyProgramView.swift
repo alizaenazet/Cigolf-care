@@ -13,8 +13,12 @@ struct HeaderViewAddDailyProgram: View {
     let foremanId: Int
     let viewModel: DailyReportViewModel
     
+    // Tambahan state untuk alert
+    @State private var showConfirmation = false
+    @State private var showError = false
+    @State private var errorMessage = ""
+    
     var body: some View {
-        
         VStack {
             HStack {
                 Spacer()
@@ -33,12 +37,12 @@ struct HeaderViewAddDailyProgram: View {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.gray.opacity(0.2))
                 )
-                
             }
+            
             HStack {
                 Spacer()
                 Button(action: {
-                    viewModel.submitProgram(foremanId: foremanId)
+                    submitProgram()
                 }) {
                     HStack {
                         Image(systemName: "checkmark.circle")
@@ -48,19 +52,57 @@ struct HeaderViewAddDailyProgram: View {
                             .font(.headline)
                             .foregroundColor(.white)
                     }
-                    
                 }
                 .padding(.vertical, 12)
                 .padding(.horizontal, 12)
-                .background(.green)
+                .background(Color(red: 121/255, green: 162/255, blue: 34/255))
                 .cornerRadius(12)
             }
-            
         }
-        
-        
+        .alert("Error", isPresented: $showError, actions: {
+            Button("OK", role: .cancel) {}
+        }, message: {
+            Text(errorMessage)
+        })
+        .alert("Simpan Program Harian", isPresented: $showConfirmation, actions: {
+            Button("Batal", role: .cancel) {}
+            Button("Ya") {
+                // Panggil API / simpan ke backend
+                print("✅ Program harian berhasil disimpan!")
+            }
+        }, message: {
+            Text("Periode: \(DateHelper.formattedIndonesianDate(start))")
+        })
+        .alert("Error", isPresented: $showError, actions: {
+            Button("OK", role: .cancel) {}
+        }, message: {
+            Text(errorMessage)
+        })
+//        .alert("Simpan Program Harian", isPresented: $showError, actions: {
+//            Button("Ya") {
+//                // Panggil API / simpan ke backend
+//                print("✅ Program harian berhasil disimpan!")
+//            }
+//            Button("Batal", role: .cancel) {}
+//        }, message: {
+//            Text("Periode: \(DateHelper.formattedIndonesianDate(start))")
+//        })
+
+    }
+    
+    private func submitProgram() {
+        do {
+            let _ = try viewModel.formatToDailyProgramRequest()
+            // Jika sukses, tampilkan konfirmasi
+            showConfirmation = true
+        } catch {
+            // Tampilkan error modal
+            errorMessage = error.localizedDescription
+            showError = true
+        }
     }
 }
+
 
 struct AddDailyProgramView: View {
     let foremanId: Int
@@ -117,7 +159,7 @@ struct DivisionListView: View {
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.green)
+                        .background(Color(red: 121/255, green: 162/255, blue: 34/255))
                         .cornerRadius(10)
                 }
             }
@@ -187,7 +229,7 @@ struct DivisionSection: View {
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.green)
+                        .background(Color(red: 121/255, green: 162/255, blue: 34/255))
                         .cornerRadius(10)
                 }
             }
@@ -420,7 +462,7 @@ struct JobRow: View {
         .padding(.vertical, 4)
     }
     
-    // ✅ Function untuk cek apakah perlu tambah baris baru
+
     private func triggerAddRowIfNeeded() {
         if isLastRow &&
             (!job.jobType.isEmpty || !job.holes.isEmpty || !job.priority.isEmpty || !job.description.isEmpty) {

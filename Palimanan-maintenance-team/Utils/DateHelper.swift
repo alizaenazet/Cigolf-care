@@ -51,6 +51,13 @@ struct DateHelper {
         return dateStr
     }
     
+    static func formattedIndonesianDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d MMMM yyyy" // misal 10 Juni 2024
+        formatter.locale = Locale(identifier: "id_ID") // pakai locale Indonesia
+        return formatter.string(from: date)
+    }
+    
 }
 
 

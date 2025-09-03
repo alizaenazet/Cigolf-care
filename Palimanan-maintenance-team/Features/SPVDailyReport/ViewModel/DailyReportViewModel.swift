@@ -31,38 +31,28 @@ class DailyReportViewModel: ObservableObject {
         "Mekanik": 14,
         "Irigasi": 15
     ]
-    @Published var dayMap: [String: String] = [
-        "Minggu": "sunday",
-        "Senin": "monday",
-        "Selasa": "tueday",
-        "Rabu": "wednesday",
-        "Kamis": "thursday",
-        "Jumat": "friday",
-        "Sabtu": "saturday",
-    ]
+//    @Published var dayMap: [String: String] = [
+//        "Minggu": "sunday",
+//        "Senin": "monday",
+//        "Selasa": "tueday",
+//        "Rabu": "wednesday",
+//        "Kamis": "thursday",
+//        "Jumat": "friday",
+//        "Sabtu": "saturday",
+//    ]
+    enum DailyProgramError: Error, LocalizedError {
+        case locationNotSelected(String)   // pesan error lokasi
+        case jobIncomplete(String)         // pesan error job
+        
+        var errorDescription: String? {
+            switch self {
+            case .locationNotSelected(let msg): return msg
+            case .jobIncomplete(let msg): return msg
+            }
+        }
+    }
     
     init() {
-        
-        //        cigolfLocation.append(contentsOf: [
-        //            CigolfLocation(id: 1, name: "All"),
-        //            CigolfLocation(id: 2, name: "Green", isSelected: true),
-        //            CigolfLocation(id: 3, name: "Tee Box", isSelected: true),
-        //            CigolfLocation(id: 4, name: "Fairway"),
-        //            CigolfLocation(id: 5, name: "Apron"),
-        //            CigolfLocation(id: 6, name: "Rough"),
-        //            CigolfLocation(id: 7, name: "Bunker"),
-        //            CigolfLocation(id: 8, name: "Nursery"),
-        //            CigolfLocation(id: 9, name: "Driving Range"),
-        //            CigolfLocation(id: 10, name: "Maingate"),
-        //            CigolfLocation(id: 11, name: "Putting 10"),
-        //            CigolfLocation(id: 12, name: "Paving Room"),
-        //            CigolfLocation(id: 13, name: "Resto"),
-        //            CigolfLocation(id: 14, name: "Mekanik"),
-        //            CigolfLocation(id: 15, name: "Irigasi"),
-        //        ])
-        //        cigolfLocation[1].jobs = Array(repeating: DailyJob(), count: 2)
-        //        cigolfLocation[2].jobs = Array(repeating: DailyJob(), count: 2)
-        
         cigolfDivision.append(contentsOf: [
             CigolfDivision(id: 1, name: "Operasional", isSelected: true),
             CigolfDivision(id: 2, name: "Landscape", isSelected: true),
@@ -76,57 +66,75 @@ class DailyReportViewModel: ObservableObject {
     }
     
     func submitProgram(foremanId: Int) {
-        let request = formatToDailyProgramRequest()
-        
-        if let jsonData = try? JSONEncoder().encode(request),
-           let jsonString = String(data: jsonData, encoding: .utf8) {
-            print(jsonString)
-        } else {
-            print("Failed to encode DailyProgramRequest")
+        do {
+            let request = try formatToDailyProgramRequest()
+            if let jsonData = try? JSONEncoder().encode(request),
+               let jsonString = String(data: jsonData, encoding: .utf8) {
+                print(jsonString)
+            }
+        } catch {
+            print("❌ Error: \(error.localizedDescription)")
+            // bisa ditampilkan ke UI juga
         }
     }
-    
-    func formatToDailyProgramRequest() -> DailyProgramRequest {
+
+    func formatToDailyProgramRequest() throws -> DailyProgramRequest {
         let now = Date()
         let formatter = DateFormatter()
         formatter.dateFormat = "dd-MM-yyyy"
         
-        return DailyProgramRequest(
-            date: formatter.string(from: now),
-            divisions: cigolfDivision
-                .filter { $0.isSelected }
-                .flatMap { division in
-                    division.locations.map { location in
-                        DivisionRequest(
-                            divisionId: division.id,
-                            locationId: location.id,
-                            tasks: location.jobs.compactMap { job in
-                                let areas = job.holeArea
-                                    .split(separator: ",")
-                                    .map { $0.trimmingCharacters(in: .whitespaces) }
-                                
-                                let priority = Int(job.priority) ?? 0
-                                
-                                // validasi → hanya return TaskRequest jika atribut tidak kosong
-                                guard !job.jobType.isEmpty,
-                                      !areas.isEmpty,
-                                      priority > 0,
-                                      !job.description.isEmpty else {
-                                    return nil
-                                }
-                                
-                                return TaskRequest(
-                                    jobType: job.jobType,
-                                    area: areas,
-                                    priority: priority,
-                                    description: job.description
-                                )
-                            }
+        var divisionRequests: [DivisionRequest] = []
+        
+        for division in cigolfDivision.filter({ $0.isSelected }) {
+            for location in division.locations {
+                // 🔴 validasi lokasi
+                if location.id == 0 {
+                    throw DailyProgramError.locationNotSelected(
+                        "Ada lokasi yang belum dipilih pada divisi \(division.name)"
+                    )
+                }
+                
+                var tasks: [TaskRequest] = []
+                for job in location.jobs {
+                    let areas = job.holeArea
+                        .split(separator: ",")
+                        .map { $0.trimmingCharacters(in: .whitespaces) }
+                    let priority = Int(job.priority) ?? 0
+                    
+                    // 🔴 validasi job
+                    guard !job.jobType.isEmpty,
+                          !areas.isEmpty,
+                          priority > 0,
+                          !job.description.isEmpty else {
+                        throw DailyProgramError.jobIncomplete(
+                            "Wajib mengisi semua input pada divisi \(division.name) dan lokasi \(location.name)"
                         )
                     }
+                    
+                    tasks.append(TaskRequest(
+                        jobType: job.jobType,
+                        area: areas,
+                        priority: priority,
+                        description: job.description
+                    ))
                 }
+                
+                divisionRequests.append(
+                    DivisionRequest(
+                        divisionId: division.id,
+                        locationId: location.id,
+                        tasks: tasks
+                    )
+                )
+            }
+        }
+        
+        return DailyProgramRequest(
+            date: formatter.string(from: now),
+            divisions: divisionRequests
         )
     }
+
 
     
     func addDivision() {
