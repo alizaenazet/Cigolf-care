@@ -8,27 +8,68 @@
 import SwiftUI
 
 struct HeaderViewAddDailyProgram: View {
+    
+    @State var start: Date
+    let foremanId: Int
+    let viewModel: DailyReportViewModel
+    
     var body: some View {
-        HStack {
-            Spacer()
+        
+        VStack {
             HStack {
-                Image(systemName: "checkmark.circle")
-                    .foregroundStyle(.white)
-                Text("Simpan Program")
-                    .fontWeight(.medium)
-                    .font(.headline)
-                    .foregroundColor(.white)
+                Spacer()
+                Text("Tanggal: ")
+                    .fontWeight(.regular)
+                    .font(.title3)
+                
+                Text(start, format: Date.FormatStyle()
+                    .day(.defaultDigits)
+                    .month(.abbreviated)
+                    .year())
+                .padding(8)
+                .fontWeight(.medium)
+                .font(.title3)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.gray.opacity(0.2)) // isi kotak abu
+                )
+                
+                
+                //                DatePicker("", selection: $start, displayedComponents: .date)
+                //                    .labelsHidden()
+                
             }
-            .padding(.vertical, 12)
-            .padding(.horizontal, 12)
-            .background(.green)
-            .cornerRadius(12)
+            HStack {
+                Spacer()
+                Button(action: {
+                    viewModel.submitProgram(foremanId: foremanId)
+                }) {
+                    HStack {
+                        Image(systemName: "checkmark.circle")
+                            .foregroundStyle(.white)
+                        Text("Simpan Program")
+                            .fontWeight(.medium)
+                            .font(.headline)
+                            .foregroundColor(.white)
+                    }
+                    
+                }
+                .padding(.vertical, 12)
+                .padding(.horizontal, 12)
+                .background(.green)
+                .cornerRadius(12)
+            }
+            
         }
+        
+        
     }
 }
 
 struct AddDailyProgramView: View {
     let foremanId: Int
+    
+    @State private var start: Date = Date()  // ✅ jadi state
     
     @State private var division: [String: Int] = [
         "Operasional": 1,
@@ -37,7 +78,7 @@ struct AddDailyProgramView: View {
         "Irigasi": 4,
         "Mekanik": 5
     ]
-
+    
     @StateObject private var viewModel = DailyReportViewModel()
     
     var body: some View {
@@ -45,7 +86,7 @@ struct AddDailyProgramView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     // Header atas
-                    HeaderViewAddDailyProgram()
+                    HeaderViewAddDailyProgram(start: start, foremanId: foremanId, viewModel: viewModel)
                     
                     DivisionListView(viewModel: viewModel)
                 }
@@ -94,6 +135,7 @@ struct DivisionSection: View {
     @Binding var division: CigolfDivision
     var locations: [CigolfLocation]
     let viewModel: DailyReportViewModel
+    @State private var isExpanded: Bool = true
     
     
     var body: some View {
@@ -111,74 +153,49 @@ struct DivisionSection: View {
                 }
                 Spacer()
                 
+                Button {
+                    withAnimation {
+                        isExpanded.toggle()
+                    }
+                } label: {
+                    Image(systemName: isExpanded ? "chevron.down" : "chevron.up")
+                        .padding(8)
+                        .bold(true)
+                        .foregroundColor(.black)
+                        .overlay(
+                            Rectangle()
+                                .foregroundStyle(Color.secondary.opacity(0.2))
+                            // garis kotak
+//                                .frame(width: 24, height: 24)
+                                .cornerRadius(8)// ukuran kotaknya
+                        )
+                        .shadow(radius: 2)
+                }
+                
             }
             
-            // List Jobs
-//            ForEach($division.locations) { $location in
-////                if location.isSelected == true {
-////                    LocationSection(
-////                        division: $division,
-////                        location: $location,
-////                        viewModel: viewModel
-////                    )
-////                }
-//                LocationSection(
-//                    division: $division,
-//                    location: $location,
-//                    viewModel: viewModel
-//                )
-//                
-//            }
-            
-            ForEach(division.locations.indices, id: \.self) { locIndex in
-                LocationSection(
-                    division: $division,
-                    location: $division.locations[locIndex],
-                    viewModel: viewModel,
-                    locIndex: locIndex, // <-- kirim index asli
-                )
+            if isExpanded {
+                ForEach(division.locations.indices, id: \.self) { locIndex in
+                    LocationSection(
+                        division: $division,
+                        location: $division.locations[locIndex],
+                        viewModel: viewModel,
+                        locIndex: locIndex
+                    )
+                }
+                
+                Button {
+                    viewModel.addLocation(id: division.id - 1)
+                } label: {
+                    Text("Tambah Lokasi")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.green)
+                        .cornerRadius(10)
+                }
             }
-            
-//            if (!viewModel.isSelectedAllLocation(id: division.id - 1)) {
-//                Button {
-//                    viewModel.addLocation(id: division.id - 1)
-//                } label: {
-//                    Text("Tambah Lokasi")
-//                        .font(.headline)
-//                        .foregroundColor(.white)
-//                        .padding()
-//                        .frame(maxWidth: .infinity)
-//                        .background(Color.green)
-//                        .cornerRadius(10)
-//                }
-//            }
-            
-            Button {
-                viewModel.addLocation(id: division.id - 1)
-            } label: {
-                Text("Tambah Lokasi")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.green)
-                    .cornerRadius(10)
-            }
-            
-//            Button {
-//                division.locations.append(
-//                    CigolfLocation(id: division.locations.count + 1)
-//                )
-//            } label: {
-//                Text("Tambah Lokasi")
-//                    .font(.headline)
-//                    .foregroundColor(.white)
-//                    .padding()
-//                    .frame(maxWidth: .infinity)
-//                    .background(Color.green)
-//                    .cornerRadius(10)
-//            }
-
             
         }
         .padding()
@@ -232,14 +249,23 @@ struct LocationSection: View {
                 .pickerStyle(MenuPickerStyle())
                 .onChange(of: selectedLocation) { newValue in
                     
-                    location.id = viewModel.locationMap[newValue] ?? 0
-                    location.name = newValue
-                    
-                    print("Lokasi dipilih: \(location.id) \(location.name)")
+                    if newValue == "Pilih Lokasi" {
+                        location.id = 0
+                        location.name = ""
+                    } else {
+                        location.id = viewModel.locationMap[newValue] ?? 0
+                        location.name = newValue
+                    }
                 }
-                //                Text(location.name)
-                //                    .font(.title2)
-                //                    .fontWeight(.semibold)
+                .onAppear {
+                    if selectedLocation == "Pilih Lokasi" {
+                        location.id = 0
+                        location.name = ""
+                    } else {
+                        location.id = viewModel.locationMap[selectedLocation] ?? 0
+                        location.name = selectedLocation
+                    }
+                }
                 
                 Button {
                     location.isSelected = false
@@ -267,7 +293,7 @@ struct LocationSection: View {
             
             Button(action: {
                 viewModel.addJob(divId: division.id - 1, locId: locIndex)
-//                print(location)
+                //                print(location)
             }) {
                 Text("Tambah Baris")
                     .font(.headline)
@@ -299,16 +325,10 @@ struct JobTable : View {
                 .foregroundStyle(.secondary)
                 .frame(width: 60, alignment: .leading)
             
-            
-            Text("Hari")
-                .fontWeight(.semibold)
-                .foregroundStyle(.secondary)
-                .frame(width: 100, alignment: .leading)
-            
             Text("Jenis Pekerjaan")
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
-                .frame(minWidth: 150, maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
             
             Text("Hole/Area")
                 .fontWeight(.semibold)
@@ -318,12 +338,12 @@ struct JobTable : View {
             Text("Prioritas")
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
-                .frame(width: 100, alignment: .leading)
+                .frame(width: 80, alignment: .leading)
             
             Text("Keterangan")
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
-                .frame(minWidth: 150, maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.vertical, 8)
         
@@ -359,45 +379,31 @@ struct JobRow: View {
                 )
                 .foregroundStyle(.secondary)
             
-//            TextField("Hari", text: $job.day)
-//                .textFieldStyle(RoundedBorderTextFieldStyle())
-//                .frame(width: 100, alignment: .leading)
-            
-//            Picker("Hari", selection: $job.day) {
-//                
-//                ForEach(days, id: \.self) { day in
-//                    Text(day).tag(day)
-//                }
-//            }
-//            .pickerStyle(MenuPickerStyle())
-            
-            Picker("Hari", selection: $job.day) {
-                Text("Pilih").tag(nil as String?)        // placeholder
-                ForEach(days, id: \.self) { day in
-                    Text(day).tag(Optional(day))              // pilihan nyata
-                }
-            }
-            .pickerStyle(MenuPickerStyle())
-            .background(
-                RoundedRectangle(cornerRadius: 4)
-                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-            )
-            
             TextField("Jenis Pekerjaan", text: $job.jobType)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(minWidth: 150, maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
             
             TextField("Hole/Area", text: $job.holeArea)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .frame(width: 100, alignment: .leading)
             
-            TextField("Prioritas", text: $job.priority)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(width: 100, alignment: .leading)
+            Picker("Prioritas", selection: $job.priority) {
+                Text("Pilih").tag("") // placeholder
+                ForEach(1...5, id: \.self) { value in
+                    Text("\(value)").tag(String(value))
+                }
+            }
+            .pickerStyle(MenuPickerStyle()) // atau .menu, bisa diganti sesuai kebutuhan
+            .frame(width: 80, alignment: .leading)
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+            )
+            
             
             TextField("Keterangan", text: $job.description)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(minWidth: 150, maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
             
             
             Button(action: onDelete) {

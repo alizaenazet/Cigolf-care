@@ -46,3 +46,21 @@ struct CigolfLocation: Identifiable, Hashable {
     var isSelected: Bool = false
     var jobs: [DailyJob] = []
 }
+
+struct DailyProgramRequest: Codable {
+    var date: String
+    var divisions: [DivisionRequest]
+}
+
+struct DivisionRequest: Codable {
+    var divisionId: Int
+    var locationId: Int
+    var tasks: [TaskRequest]
+}
+
+struct TaskRequest: Codable {
+    var jobType: String
+    var area: [String]
+    var priority: Int
+    var description: String
+}

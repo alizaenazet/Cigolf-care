@@ -43,25 +43,25 @@ class DailyReportViewModel: ObservableObject {
     
     init() {
         
-//        cigolfLocation.append(contentsOf: [
-//            CigolfLocation(id: 1, name: "All"),
-//            CigolfLocation(id: 2, name: "Green", isSelected: true),
-//            CigolfLocation(id: 3, name: "Tee Box", isSelected: true),
-//            CigolfLocation(id: 4, name: "Fairway"),
-//            CigolfLocation(id: 5, name: "Apron"),
-//            CigolfLocation(id: 6, name: "Rough"),
-//            CigolfLocation(id: 7, name: "Bunker"),
-//            CigolfLocation(id: 8, name: "Nursery"),
-//            CigolfLocation(id: 9, name: "Driving Range"),
-//            CigolfLocation(id: 10, name: "Maingate"),
-//            CigolfLocation(id: 11, name: "Putting 10"),
-//            CigolfLocation(id: 12, name: "Paving Room"),
-//            CigolfLocation(id: 13, name: "Resto"),
-//            CigolfLocation(id: 14, name: "Mekanik"),
-//            CigolfLocation(id: 15, name: "Irigasi"),
-//        ])
-//        cigolfLocation[1].jobs = Array(repeating: DailyJob(), count: 2)
-//        cigolfLocation[2].jobs = Array(repeating: DailyJob(), count: 2)
+        //        cigolfLocation.append(contentsOf: [
+        //            CigolfLocation(id: 1, name: "All"),
+        //            CigolfLocation(id: 2, name: "Green", isSelected: true),
+        //            CigolfLocation(id: 3, name: "Tee Box", isSelected: true),
+        //            CigolfLocation(id: 4, name: "Fairway"),
+        //            CigolfLocation(id: 5, name: "Apron"),
+        //            CigolfLocation(id: 6, name: "Rough"),
+        //            CigolfLocation(id: 7, name: "Bunker"),
+        //            CigolfLocation(id: 8, name: "Nursery"),
+        //            CigolfLocation(id: 9, name: "Driving Range"),
+        //            CigolfLocation(id: 10, name: "Maingate"),
+        //            CigolfLocation(id: 11, name: "Putting 10"),
+        //            CigolfLocation(id: 12, name: "Paving Room"),
+        //            CigolfLocation(id: 13, name: "Resto"),
+        //            CigolfLocation(id: 14, name: "Mekanik"),
+        //            CigolfLocation(id: 15, name: "Irigasi"),
+        //        ])
+        //        cigolfLocation[1].jobs = Array(repeating: DailyJob(), count: 2)
+        //        cigolfLocation[2].jobs = Array(repeating: DailyJob(), count: 2)
         
         cigolfDivision.append(contentsOf: [
             CigolfDivision(id: 1, name: "Operasional", isSelected: true),
@@ -72,9 +72,62 @@ class DailyReportViewModel: ObservableObject {
         ])
         
         addLocation(id: 0)
-        
         addLocation(id: 1)
     }
+    
+    func submitProgram(foremanId: Int) {
+        let request = formatToDailyProgramRequest()
+        
+        if let jsonData = try? JSONEncoder().encode(request),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            print(jsonString)
+        } else {
+            print("Failed to encode DailyProgramRequest")
+        }
+    }
+    
+    func formatToDailyProgramRequest() -> DailyProgramRequest {
+        let now = Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd-MM-yyyy"
+        
+        return DailyProgramRequest(
+            date: formatter.string(from: now),
+            divisions: cigolfDivision
+                .filter { $0.isSelected }
+                .flatMap { division in
+                    division.locations.map { location in
+                        DivisionRequest(
+                            divisionId: division.id,
+                            locationId: location.id,
+                            tasks: location.jobs.compactMap { job in
+                                let areas = job.holeArea
+                                    .split(separator: ",")
+                                    .map { $0.trimmingCharacters(in: .whitespaces) }
+                                
+                                let priority = Int(job.priority) ?? 0
+                                
+                                // validasi → hanya return TaskRequest jika atribut tidak kosong
+                                guard !job.jobType.isEmpty,
+                                      !areas.isEmpty,
+                                      priority > 0,
+                                      !job.description.isEmpty else {
+                                    return nil
+                                }
+                                
+                                return TaskRequest(
+                                    jobType: job.jobType,
+                                    area: areas,
+                                    priority: priority,
+                                    description: job.description
+                                )
+                            }
+                        )
+                    }
+                }
+        )
+    }
+
     
     func addDivision() {
         if let index = cigolfDivision.firstIndex(where: { !$0.isSelected }) {
@@ -103,16 +156,16 @@ class DailyReportViewModel: ObservableObject {
         cigolfDivision[id].locations[cigolfDivision[id].locations.count - 1].jobs.append(DailyJob())
         cigolfDivision[id].locations[cigolfDivision[id].locations.count - 1].jobs.append(DailyJob())
         
-//        if let index = cigolfDivision[id].locations.firstIndex(where: { !$0.isSelected }) {
-//            cigolfDivision[id].locations[index].isSelected = true
-//            
-//            //            if cigolfDivision[id].locations.isEmpty {
-//            //                cigolfDivision[id].locations = Array(repeating: CigolfLocation(), count: 3)
-//            //            }
-//            print("Lokasi ditambahkan:", cigolfDivision[id].locations[index].name)
-//        } else {
-//            print("Semua lokasi sudah dipilih")
-//        }
+        //        if let index = cigolfDivision[id].locations.firstIndex(where: { !$0.isSelected }) {
+        //            cigolfDivision[id].locations[index].isSelected = true
+        //
+        //            //            if cigolfDivision[id].locations.isEmpty {
+        //            //                cigolfDivision[id].locations = Array(repeating: CigolfLocation(), count: 3)
+        //            //            }
+        //            print("Lokasi ditambahkan:", cigolfDivision[id].locations[index].name)
+        //        } else {
+        //            print("Semua lokasi sudah dipilih")
+        //        }
     }
     
     func isSelectedAllLocation(id: Int) -> Bool {
