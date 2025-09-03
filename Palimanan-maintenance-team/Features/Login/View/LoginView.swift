@@ -27,9 +27,9 @@ struct LoginView: View {
                 ProgressView()
             } else {
                 Button("Login") {
-                    viewModel.login { success, accessToken, role in
-                        if success, let token = accessToken, let userRole = role {
-                            session.login(token: token, role: userRole)
+                    viewModel.login { success, accessToken, role, userId  in
+                        if success, let token = accessToken, let userRole = role, let userId = userId {
+                            session.login(token: token, role: userRole, userId: userId)
                         }
                     }
                 }
