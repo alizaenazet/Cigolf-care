@@ -34,10 +34,14 @@ struct MandorDashboardView: View {
                     Text("No data available.")
                 }
             }
-            .navigationTitle("Program Hari Ini")
-            .navigationBarItems(trailing: Button("Logout") {
-                session.logout()
-            })
+            
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Label(viewModel.mandorArea, systemImage: "leaf.fill")
+                        .foregroundColor(.green)
+                }
+            }
+            
             .onAppear {
                 if viewModel.dailyPlan == nil {
                     Task {
@@ -51,14 +55,37 @@ struct MandorDashboardView: View {
     @ViewBuilder
     private func dashboardContent(plan: DailyPlanData) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Mandor: \(viewModel.mandorArea) (\(plan.foremanName))")
-                Text("Tanggal: \(plan.createdAt)")
-                Text("Perusahaan: \(plan.outsourceCompany)")
-                Text("Area Kerja Hari Ini: \(viewModel.allTaskAreas)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            
+            Text("Program Hari Ini")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .padding(.horizontal)
+            
+            VStack(spacing: 0) {
+                infoRow(
+                    icon: "calendar",
+                    title: "Tanggal",
+                    subtitle: viewModel.formattedDate
+                )
+                
+                Divider().padding(.leading, 60)
+                
+                infoRow(
+                    icon: "person.3.fill",
+                    title: "Penyedia Tenaga Kerja",
+                    subtitle: plan.outsourceCompany
+                )
+                
+                Divider().padding(.leading, 60)
+                
+                infoRow(
+                    icon: "map.fill",
+                    title: "Area",
+                    subtitle: viewModel.allTaskAreas
+                )
             }
+            .background(Color(.white))
+            .cornerRadius(12)
             .padding(.horizontal)
             
             Divider()
@@ -126,6 +153,24 @@ struct MandorDashboardView: View {
         }
         .padding(.vertical, 4)
     }
+}
+
+private func infoRow(icon: String, title: String, subtitle: String) -> some View {
+    HStack(spacing: 16) {
+        Image(systemName: icon)
+            .font(.title2)
+            .foregroundColor(.green)
+            .frame(width: 24)
+        
+        VStack(alignment: .leading) {
+            Text(title)
+                .fontWeight(.bold)
+            Text(subtitle)
+                .foregroundColor(.secondary)
+        }
+        Spacer()
+    }
+    .padding()
 }
 
 

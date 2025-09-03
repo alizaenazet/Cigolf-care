@@ -83,4 +83,21 @@ class MandorDashboardViewModel: ObservableObject {
         
         return []
     }
+    
+    var formattedDate: String {
+        guard let dateString = dailyPlan?.createdAt else { return "Tanggal tidak tersedia" }
+        
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd"
+        
+        guard let date = inputFormatter.date(from: dateString) else {
+            return dateString
+        }
+        
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "EEEE, dd MMMM yyyy"
+        outputFormatter.locale = Locale(identifier: "id_ID")
+        
+        return outputFormatter.string(from: date)
+    }
 }
