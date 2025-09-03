@@ -35,7 +35,7 @@ struct DateHelper {
     
     static func formatDateToDDMMYYYY(_ date: Date) -> String {
         let df = DateFormatter()
-        df.dateFormat = "yyyy-MM-dd"
+        df.dateFormat = "dd-MM-yyyy"
         df.locale = Locale(identifier: "id_ID")
         return df.string(from: date)
     }

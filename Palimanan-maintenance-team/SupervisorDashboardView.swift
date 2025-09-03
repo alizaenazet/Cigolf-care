@@ -10,16 +10,16 @@ import SwiftUI
 struct SupervisorDashboardView: View {
     @State private var selection: SidebarMenu? = nil
         @StateObject private var dashboardVM = DashboardViewModel()
-        @StateObject private var dailyVM = DashboardViewModel()
+        @StateObject private var dailyVM = DailyReportViewModel()
         @State private var expandDashboard = true
         @State private var expandHarian = true
         
         init(
             dashboardVM: DashboardViewModel? = nil,
-            dailyVM: DashboardViewModel? = nil
+            dailyVM: DailyReportViewModel? = nil
         ) {
             _dashboardVM = StateObject(wrappedValue: dashboardVM ?? DashboardViewModel())
-            _dailyVM = StateObject(wrappedValue: dailyVM ?? DashboardViewModel())
+            _dailyVM = StateObject(wrappedValue: dailyVM ?? DailyReportViewModel())
         }
         
         var body: some View {
@@ -88,7 +88,7 @@ struct SupervisorDashboardView: View {
                         WeeklyPlanHistory()
                     
                 case .programHarian(let foreman):
-                    DashboardView(viewModel: dailyVM, foremanId: foreman.foremanId)
+                    DailyReportView(viewModel: dailyVM, foremanId: foreman.foremanId)
                         .navigationTitle("Program Harian - \(foreman.title)")
                     
                 default:

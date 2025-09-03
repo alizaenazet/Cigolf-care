@@ -15,14 +15,16 @@ final class APIService {
     
     // MARK: - Base URL
     private let apiVersion = "v1"
-    private let baseHost = "http://localhost:3000"
+    private let baseHost = "https://cigolf-backend-yebology3212-s53p6k3p.apn.leapcell.dev"
+//    private let baseHost = "http://localhost:3000"
+
     
     var baseURL: String {
         "\(baseHost)/api/\(apiVersion)"
     }
     
     // MARK: - Session / Auth State
-    @Published var accessToken: String? = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJUcmVudDY3Iiwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzU2ODk2MTczLCJleHAiOjE3NTY4OTk3NzN9.x38vlh5X5k90hLzjRZU-RN1O5za7czKfpKd1BlnnHn4"
+    @Published var accessToken: String? = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJUcmVudDY3Iiwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzU2ODk4NTUyLCJleHAiOjE3NTY5MDIxNTJ9.ra2Mn6PuKtgnae5tJvQfX9QhXoRnCpgtVp-738iQ7W8"
     @Published var userId: String? = nil
     @Published var role: String? = nil
     
@@ -82,19 +84,19 @@ final class APIService {
         }
     }
     
-    func post<T: Decodable>(
-        _ endpoint: String,
-        parameters: Parameters,
-        headers: HTTPHeaders? = nil,
-        responseType: T.Type
-    ) async throws -> T {
-        try await request(
-            endpoint,
-            method: .post,
-            parameters: parameters,
-            encoding: JSONEncoding.default, // ✅ POST usually uses JSON
-            headers: headers,
-            responseType: responseType
-        )
-    }
+//    func post<T: Decodable>(
+//        _ endpoint: String,
+//        parameters: Parameters,
+//        headers: HTTPHeaders? = nil,
+//        responseType: T.Type
+//    ) async throws -> T {
+//        try await request(
+//            endpoint,
+//            method: .post,
+//            parameters: parameters,
+//            encoding: JSONEncoding.default, // ✅ POST usually uses JSON
+//            headers: headers,
+//            responseType: responseType
+//        )
+//    }
 }
