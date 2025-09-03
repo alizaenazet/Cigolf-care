@@ -8,12 +8,13 @@
 import SwiftUI
 
 struct HeaderView: View {
+    let foremanId: Int
+    
     var body: some View {
         HStack {
-            
             Spacer()
             
-            Button(action: {}) {
+            NavigationLink(destination: AddDailyProgramView(foremanId: foremanId)) {
                 HStack {
                     Image(systemName: "plus")
                         .foregroundStyle(.white)
@@ -22,14 +23,14 @@ struct HeaderView: View {
                         .font(.headline)
                         .foregroundColor(.white)
                 }
+                .padding(.vertical, 12)
+                .padding(.horizontal, 12)
+                .background(Color(red: 121/255, green: 162/255, blue: 34/255))                .cornerRadius(12)
             }
-            .padding(.vertical, 12)
-            .padding(.horizontal, 12)
-            .background(.green)
-            .cornerRadius(12)
         }
     }
 }
+
 
 // MARK: - Filter
 struct FilterView: View {
@@ -67,7 +68,7 @@ struct FilterView: View {
                 }
                 .padding(.vertical, 8)
                 .padding(.horizontal, 12)
-                .background(.green)
+                .background(Color(red: 121/255, green: 162/255, blue: 34/255))
                 .cornerRadius(12)
                 
                 Button(action: {}) {
@@ -82,8 +83,7 @@ struct FilterView: View {
                 }
                 .padding(.vertical, 8)
                 .padding(.horizontal, 12)
-                .background(.green)
-                .cornerRadius(12)
+                .background(Color(red: 121/255, green: 162/255, blue: 34/255))                .cornerRadius(12)
             }
         }
         .padding()
@@ -110,7 +110,7 @@ struct ReportTableView: View {
                 Text("Detail").bold()
                     .frame(maxWidth: .infinity, alignment: .center)
                 Image(systemName: "square")
-                    .foregroundColor(.green)
+                    .foregroundColor(Color(red: 121/255, green: 162/255, blue: 34/255))
                     .frame(maxWidth: .infinity, alignment: .center)
             }
             .padding(.vertical, reports.isEmpty ? 8 : 0)
@@ -122,7 +122,6 @@ struct ReportTableView: View {
                     
                     if (reports.isEmpty) {
                         HStack {
-                                
                                 Text("No data available")
                                     .frame(maxWidth: .infinity, alignment: .center)
                             }
@@ -183,8 +182,7 @@ struct ReportRowView: View {
                 
                 .padding(.vertical, 6)
                 .padding(.horizontal, 12)
-                .background(Color.green)
-                .foregroundColor(.white)
+                .background(Color(red: 121/255, green: 162/255, blue: 34/255))                .foregroundColor(.white)
                 .cornerRadius(6)
                 .frame(maxWidth: .infinity)
                 
@@ -193,7 +191,7 @@ struct ReportRowView: View {
                     print("Checkbox tapped for \(report.id)")
                 }) {
                     Image(systemName: report.isChecked ? "checkmark.square" : "square")
-                        .foregroundColor(.green)
+                        .foregroundColor(Color(red: 121/255, green: 162/255, blue: 34/255))
                 }
                 .frame(maxWidth: .infinity)
                 .buttonStyle(PlainButtonStyle())
@@ -217,165 +215,44 @@ struct DailyReportView: View {
     
     var body: some View {
         
-        VStack {
-            if viewModel.isLoading {
-                ProgressView("Loading…")
-                    .padding()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if let error = viewModel.errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
-            } else {
-                ScrollView {
-                    // Header atas
-                    HeaderView()
-                    // Filter tanggal
-                    FilterView(startDate: $startDate, endDate: $endDate) {
-                        Task {
-                            await viewModel.fetchDailyReportByDateRange(
-                                for: foremanId,
-                                startDate: DateHelper.formatDateToDDMMYYYY(startDate),
-                                endDate: DateHelper.formatDateToDDMMYYYY(endDate)
-                            )
+        NavigationStack {
+            ScrollView {
+                if viewModel.isLoading {
+                    ProgressView("Loading…")
+                        .padding()
+                } else if let error = viewModel.errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                } else {
+                    VStack {
+                        // Header atas
+                        HeaderView(foremanId: foremanId)
+                        // Filter tanggal
+                        FilterView(startDate: $startDate, endDate: $endDate) {
+                            Task {
+                                await viewModel.fetchDailyReportByDateRange(
+                                    for: foremanId,
+                                    startDate: DateHelper.formatDateToDDMMYYYY(startDate),
+                                    endDate: DateHelper.formatDateToDDMMYYYY(endDate),
+                                )
+                            }
                         }
+                        
+                        ReportTableView(reports: $viewModel.report, foremanId: foremanId)
+                        
                     }
-                    
-                    ReportTableView(reports: $viewModel.report, foremanId: foremanId)
-
+                    .padding()
                 }
-                .padding()
+            }
+            .background(Color.secondary.opacity(0.1)) // ✅ abu-abu rata
+            .task(id: foremanId) {
+                await viewModel.fetchDailyReport(for: foremanId)
             }
         }
-        .background(Color.secondary.opacity(0.1)) // ✅ abu-abu rata
-        .task(id: foremanId) {
-            await viewModel.fetchDailyReport(for: foremanId)
-        }
+        
     }
 }
 
-//#Preview {
-//    var mockReport = ForemanReport(
-//        id: 1,
-//        createdAt: "28-08-2025",
-//        approved: Approval(
-//            isApproved: false,
-//            approvedAt: "28-08-2025",
-//            spvName: "Sal Priadi"
-//        ),
-//        outsourceCompany: "PT. Yobel Perkasa",
-//        foremanName: "Agus Gunandar",
-//        totalTasks: 2,
-//        finishedTasks: 1,
-//        pendingTasks: 1,
-//        divisions: [
-//            Division(
-//                id: 1,
-//                name: "Operasional",
-//                locations: [
-//                    Location(
-//                        locationId: 1,
-//                        locationName: "Green",
-//                        tasks: [
-//                            TaskItem(
-//                                id: 301,
-//                                taskType: "Verticut green",
-//                                description: "Potong model cepak",
-//                                priority: "P2",
-//                                area: ["Hole 1", "Hole 2", "Villa"],
-//                                needWorker: 3,
-//                                availableWorker: 3,
-//                                workerList: ["Yobel", "Mar","Vick"],
-//                                urlPhoto: "",
-//                                isFinished: false
-//                            ),
-//                            TaskItem(
-//                                id: 302,
-//                                taskType: "Pupuk granular green",
-//                                description: "Pupuk cap cip cup",
-//                                priority: "P1",
-//                                area: ["Hole 9"],
-//                                needWorker: 1,
-//                                availableWorker: 1,
-//                                workerList: ["Yobel"],
-//                                urlPhoto: "/eijsd.png",
-//                                isFinished: true
-//                            )
-//                        ]
-//                    ),
-//                    Location(
-//                        locationId: 2,
-//                        locationName: "Teebox",
-//                        tasks: [
-//                            TaskItem(
-//                                id: 301,
-//                                taskType: "Verticut green",
-//                                description: "Potong model cepak",
-//                                priority: "P2",
-//                                area: ["Hole 1", "Hole 2", "Villa"],
-//                                needWorker: 3,
-//                                availableWorker: 3,
-//                                workerList: ["Yobel", "Mar","Vick"],
-//                                urlPhoto: "",
-//                                isFinished: false
-//                            ),
-//                            TaskItem(
-//                                id: 302,
-//                                taskType: "Pupuk granular green",
-//                                description: "Pupuk cap cip cup",
-//                                priority: "P1",
-//                                area: ["Hole 9"],
-//                                needWorker: 1,
-//                                availableWorker: 1,
-//                                workerList: ["Yobel"],
-//                                urlPhoto: "/eijsd.png",
-//                                isFinished: true
-//                            )
-//                        ]
-//                    )
-//                ]
-//            ),
-//            Division(
-//                id: 2,
-//                name: "Landscape",
-//                locations: [
-//                    Location(
-//                        locationId: 1,
-//                        locationName: "Green",
-//                        tasks: [
-//                            TaskItem(
-//                                id: 401,
-//                                taskType: "Verticut green 2",
-//                                description: "Potong model cepak",
-//                                priority: "P2",
-//                                area: ["Hole 1", "Hole 2", "Villa"],
-//                                needWorker: 3,
-//                                availableWorker: 3,
-//                                workerList: ["Yobel", "Mar","Vick"],
-//                                urlPhoto: "",
-//                                isFinished: false
-//                            ),
-//                            TaskItem(
-//                                id: 402,
-//                                taskType: "Pupuk granular green",
-//                                description: "Pupuk cap cip cup",
-//                                priority: "P1",
-//                                area: ["Hole 9"],
-//                                needWorker: 1,
-//                                availableWorker: 1,
-//                                workerList: ["Yobel"],
-//                                urlPhoto: "https://cdn.donmai.us/original/25/eb/25eb7f80ba5476d96068a3ccc8e17ab3.png",
-//                                isFinished: true
-//                            )
-//                        ]
-//                    )
-//                ]
-//            )
-//        ]
-//    )
-//    
-//    // Inject mock data into the VM
-//    let mockVM = DashboardViewModel()
-//    mockVM.report = mockReport
-//    
-//    return ContentView(dashboardVM: mockVM, dailyVM: mockVM)
-//}
+#Preview {
+    DailyReportView(viewModel: .init(), foremanId: 1)
+}

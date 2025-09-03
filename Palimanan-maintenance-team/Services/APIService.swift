@@ -22,9 +22,25 @@ final class APIService {
     }
     
     // MARK: - Session / Auth State
-    @Published var accessToken: String? = nil
+    @Published var accessToken: String? = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJUcmVudDY3Iiwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzU2ODk2MTczLCJleHAiOjE3NTY4OTk3NzN9.x38vlh5X5k90hLzjRZU-RN1O5za7czKfpKd1BlnnHn4"
     @Published var userId: String? = nil
     @Published var role: String? = nil
+    
+    func post<T: Decodable>(
+        _ endpoint: String,
+        parameters: Parameters,
+        headers: HTTPHeaders? = nil,
+        responseType: T.Type
+    ) async throws -> T {
+        try await request(
+            endpoint,
+            method: .post,
+            parameters: parameters,
+            encoding: JSONEncoding.default, // ✅ POST usually uses JSON
+            headers: headers,
+            responseType: responseType
+        )
+    }
     
     // MARK: - Generic Request
     func request<T: Decodable>(
