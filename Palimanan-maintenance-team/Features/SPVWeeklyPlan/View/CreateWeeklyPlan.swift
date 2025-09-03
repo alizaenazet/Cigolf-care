@@ -9,6 +9,7 @@ import SwiftUI
 struct CreateWeeklyPlan: View {
     @ObservedObject var viewModel = CreateWeeklyPlanViewModel()
     @State private var showSaveConfirmation = false
+    @State private var expandedDivisions: Set<Int> = []
     
     var body: some View {
         ScrollView {
@@ -66,7 +67,18 @@ struct CreateWeeklyPlan: View {
     private var mainContentSection: some View {
         VStack(spacing: 15) {
             ForEach(viewModel.divisions, id: \.id) { division in
-                DisclosureGroup {
+                DisclosureGroup(
+                    isExpanded: Binding(
+                        get: { expandedDivisions.contains(division.id) },
+                        set: { isExpanded in
+                            if isExpanded {
+                                expandedDivisions.insert(division.id)
+                            } else {
+                                expandedDivisions.remove(division.id)
+                            }
+                        }
+                    )
+                ) {
                     divisionContent(for: division)
                 } label: {
                     HStack {
@@ -114,6 +126,12 @@ struct CreateWeeklyPlan: View {
                 .padding()
                 .background(Color.gray.opacity(0.1))
                 .cornerRadius(8)
+            }
+        }
+        .onAppear {
+            // Initialize all divisions to be expanded by default
+            for division in viewModel.divisions {
+                expandedDivisions.insert(division.id)
             }
         }
     }
