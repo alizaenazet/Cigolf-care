@@ -10,6 +10,7 @@ import Foundation
 @MainActor
 class DailyReportViewModel: ObservableObject {
     @Published var report: [DailyReport] = []
+    @Published var reportDetail: ForemanReport?
     @Published var isLoading = false
     @Published var errorMessage: String?
     
@@ -46,4 +47,18 @@ class DailyReportViewModel: ObservableObject {
         }
     }
     
+    func fetchReportDetail(for foremanId: Int, reportId: Int) async {
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            let response: DashboardResponse = try await APIService.shared.request(
+                "/foreman/\(foremanId)/daily-task/\(reportId)",
+                responseType: DashboardResponse.self
+            )
+            self.reportDetail = response.data
+        } catch {
+            self.errorMessage = "Failed to load report: \(error.localizedDescription)"
+        }
+    }
 }
