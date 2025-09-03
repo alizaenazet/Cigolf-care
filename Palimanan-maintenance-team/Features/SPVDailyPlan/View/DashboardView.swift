@@ -91,7 +91,26 @@ struct DashboardView: View {
                 ),
                 division: context.division,
                 location: context.location,
-                foreman: context.foreman
+                foreman: context.foreman,
+                onSubmit: { jobType, area, priority, description in
+                    Task {
+                        await viewModel.addNewDailyTask(
+                            for: foremanId,
+                            taskId: viewModel.report?.id ?? 0,
+                            divisionId: context.division.id,
+                            locationId: context.location.id,
+                            jobType: jobType,
+                            area: area,
+                            priority: priority,
+                            description: description
+                        )
+                        selectedContext = nil
+                        await viewModel.fetchReport(for: foremanId) // refresh
+                    }
+                },
+                onClose: {
+                    selectedContext = nil
+                }
             )
             .transition(.opacity.combined(with: .scale))
             .presentationDetents([.large])

@@ -56,5 +56,31 @@ class DashboardViewModel: ObservableObject {
             self.errorMessage = "Failed to approve report: \(error.localizedDescription)"
         }
     }
+    
+    func addNewDailyTask(for foremanId: Int, taskId: Int, divisionId: Int, locationId: Int, jobType: String, area: [String], priority: Int, description: String) async {
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            let response: NormalResponse = try await APIService.shared.post(
+                "/foreman/\(foremanId)/daily-task/\(taskId)/add-new",
+                parameters: [
+                    "divisionId": divisionId,
+                    "locationId": locationId,
+                    "jobType": jobType,
+                    "area": area,
+                    "priority": priority,
+                    "description": description
+                ],
+                responseType: NormalResponse.self)
+            print("✅ Weekly plan created:", response.message)
+        } catch {
+            print("❌ Add new daily task failed:", error) // 👈 log actual error
+            if let afError = error.asAFError {
+                print("🔍 Alamofire error:", afError.errorDescription ?? "")
+            }
+            self.errorMessage = "Failed to add new daily task: \(error.localizedDescription)"
+        }
+    }
 }
 
