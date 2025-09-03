@@ -222,7 +222,7 @@ struct DailyReportView: View {
                             await viewModel.fetchDailyReportByDateRange(
                                 for: foremanId,
                                 startDate: DateHelper.formatDateToDDMMYYYY(startDate),
-                                endDate: DateHelper.formatDateToDDMMYYYY(endDate),
+                                endDate: DateHelper.formatDateToDDMMYYYY(endDate)
                             )
                         }
                     }
@@ -364,5 +364,5 @@ struct DailyReportView: View {
     let mockVM = DashboardViewModel()
     mockVM.report = mockReport
     
-    return ContentView(dashboardVM: mockVM, dailyVM: mockVM)
+    return DailyReportView(viewModel: DailyReportViewModel(), foremanId: 1)
 }

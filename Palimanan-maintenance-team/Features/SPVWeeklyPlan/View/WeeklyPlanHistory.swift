@@ -59,7 +59,7 @@ struct WeeklyPlanHistory: View {
             .background(Color(hex: "f4f4f4"))
             .navigationTitle("Program mingguan")
             .toolbar{
-                NavigationLink(destination: {Text("NEW WEEKLY PLAN PAGE")}){
+                NavigationLink(destination: {CreateWeeklyPlan()}){
                     Button("Buat Program Baru"){
                         return
                     }

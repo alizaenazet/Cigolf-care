@@ -60,9 +60,6 @@ struct SupervisorDashboardView: View {
                         Label("Program Harian", systemImage: "list.bullet.clipboard")
                     }
                     
-                    NavigationLink(value: SidebarMenu.programMingguan) {
-                        Label("Program Mingguan", systemImage: "calendar.badge.plus")
-                    }
                     
                     Spacer()
                     
