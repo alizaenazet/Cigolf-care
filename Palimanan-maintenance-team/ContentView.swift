@@ -17,7 +17,7 @@ struct ContentView: View {
                 case "Admin", "Supervisor":
                     SupervisorDashboardView()
                 case "Mandor":
-                    ForemanDashboardView()
+                    MandorDashboardView()
                 default:
                     VStack {
                         Text("Login Successful!")

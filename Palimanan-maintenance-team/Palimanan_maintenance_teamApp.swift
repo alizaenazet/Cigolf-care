@@ -15,15 +15,29 @@ class NetworkApi: ObservableObject {
 
 @main
 struct Palimanan_maintenance_teamApp: App {
-  //Connect the SwiftUI app to the UIKit app delegate
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @StateObject private var session = SessionManager.shared
+    
+    @StateObject private var session: SessionManager
+    
+    init() {
+        // 1. We create ONE instance of SessionManager.
+        let sessionManagerInstance = SessionManager()
+        
+        // 2. We use a special syntax to initialize the @StateObject with our instance.
+        // This makes the UI own this single source of truth.
+        _session = StateObject(wrappedValue: sessionManagerInstance)
+        
+        // 3. We assign that SAME instance to the static 'shared' variable.
+        // Now, APIService.shared.logout() will call the logout() method on the
+        // exact same object that the UI is observing.
+        SessionManager.shared = sessionManagerInstance
+    }
     
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(NetworkApi())
-                .environmentObject(session)
+                .environmentObject(session) // We pass the single source of truth to the UI.
         }
     }
 }

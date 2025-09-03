@@ -12,7 +12,7 @@ import Combine
 final class APIService {
     static let shared = APIService()
     private init() {}
-
+    
     // MARK: - Base URL
     private let apiVersion = "v1"
     private let baseHost = "http://localhost:3000"
@@ -53,6 +53,8 @@ final class APIService {
                     case .success(let decoded):
                         continuation.resume(returning: decoded)
                     case .failure(let error):
+                        print("🚨 API Request Failed. Error: \(error.localizedDescription)")
+                        print("📄 Raw failure data: \(String(data: response.data ?? Data(), encoding: .utf8) ?? "Unable to decode raw data")")
                         // Detect expired token (401)
                         if response.response?.statusCode == 401 {
                             print("⚠️ Unauthorized — token may be expired")
