@@ -25,8 +25,7 @@ struct HeaderView: View {
                 }
                 .padding(.vertical, 12)
                 .padding(.horizontal, 12)
-                .background(.green)
-                .cornerRadius(12)
+                .background(Color(red: 121/255, green: 162/255, blue: 34/255))                .cornerRadius(12)
             }
         }
     }
@@ -69,8 +68,7 @@ struct FilterView: View {
                 }
                 .padding(.vertical, 8)
                 .padding(.horizontal, 12)
-                .background(.green)
-                .cornerRadius(12)
+                .background(Color(red: 121/255, green: 162/255, blue: 34/255))                .cornerRadius(12)
                 
                 Button(action: {}) {
                     HStack {
@@ -84,8 +82,7 @@ struct FilterView: View {
                 }
                 .padding(.vertical, 8)
                 .padding(.horizontal, 12)
-                .background(.green)
-                .cornerRadius(12)
+                .background(Color(red: 121/255, green: 162/255, blue: 34/255))                .cornerRadius(12)
             }
         }
         .padding()
@@ -111,7 +108,7 @@ struct ReportTableView: View {
                 Text("Detail").bold()
                     .frame(maxWidth: .infinity, alignment: .center)
                 Image(systemName: "square")
-                    .foregroundColor(.green)
+                    .foregroundColor(Color(red: 121/255, green: 162/255, blue: 34/255))
                     .frame(maxWidth: .infinity, alignment: .center)
             }
             .padding(.vertical, reports.isEmpty ? 8 : 0)
@@ -173,7 +170,7 @@ struct ReportRowView: View {
             }
             .padding(.vertical, 6)
             .padding(.horizontal, 12)
-            .background(Color.green)
+            .background(Color(red: 121/255, green: 162/255, blue: 34/255))
             .foregroundColor(.white)
             .cornerRadius(6)
             .frame(maxWidth: .infinity)
@@ -183,7 +180,7 @@ struct ReportRowView: View {
                 print("Checkbox tapped for \(report.id)")
             }) {
                 Image(systemName: report.isChecked ? "checkmark.square" : "square")
-                    .foregroundColor(.green)
+                    .foregroundColor(Color(red: 121/255, green: 162/255, blue: 34/255))
             }
             .frame(maxWidth: .infinity)
             .buttonStyle(PlainButtonStyle())
