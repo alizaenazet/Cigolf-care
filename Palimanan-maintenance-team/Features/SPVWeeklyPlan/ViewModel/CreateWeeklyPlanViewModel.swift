@@ -283,9 +283,53 @@ class CreateWeeklyPlanViewModel: ObservableObject {
         return dayMappings.first(where: { $0.id == id })
     }
     
+//    func createWeeklyPlan() {
+//        print("Creating Weekly Plan...")
+//        // FOR NOW JUST MOCK WITH PRINT STATEMENT
+//    }
     
     func createWeeklyPlan() {
-        print("Creating Weekly Plan...")
-        // FOR NOW JUST MOCK WITH PRINT STATEMENT
-    }
+            Task {
+                do {
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyy-MM-dd"
+                    formatter.locale = Locale(identifier: "en_US_POSIX")
+
+                    let payload: [String: Any] = [
+                        "startAt": formatter.string(from: startAt),
+                        "endAt": formatter.string(from: endAt),
+                        "divisions": divisions.map { division in
+                            [
+                                "id": division.id,
+                                "locations": division.locations.map { location in
+                                    [
+                                        "locationId": location.locationId,
+                                        "tasks": location.tasks.map { task in
+                                            [
+                                                "taskType": task.taskType,
+                                                "day": task.day.lowercased(), // match your backend expectations
+                                                "description": task.description,
+                                                "Area": task.area
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                    
+                    print(payload)
+
+                    let response: NormalResponse = try await APIService.shared.post(
+                        "/weekly-plan",
+                        parameters: payload,
+                        responseType: NormalResponse.self
+                    )
+
+                    print("✅ Weekly plan created: \(response.message)")
+                } catch {
+                    print("❌ Failed to create weekly plan:", error)
+                }
+            }
+        }
 }
