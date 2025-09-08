@@ -26,6 +26,7 @@ struct CreateWeeklyPlan: View {
             }
             .padding()
         }
+        .background(Color.gray.opacity(0.1))
         .navigationTitle("Buat Program Mingguan")
         .alert("Konfirmasi Simpan", isPresented: $showSaveConfirmation) {
             Button("Batal", role: .cancel) {}
@@ -42,26 +43,27 @@ struct CreateWeeklyPlan: View {
     // MARK: - Header Section
     private var headerSection: some View {
         VStack(alignment: .leading) {
-
-            HStack(spacing: 15) {
-                HStack(spacing: 20) {
+    
+            
+            HStack() {
+                HStack(){
                     Text("Dari")
-                    DatePicker(
-                        "",
-                        selection: $viewModel.startAt,
-                        displayedComponents: .date
-                    )
-                    .datePickerStyle(.compact)
-                    .frame(width: 100)
-
+                        .fontWeight(.semibold)
+                        .font(.title3)
+                    DatePicker("", selection: $viewModel.startAt, displayedComponents: .date)
+                        .labelsHidden()
+                        .padding(9)
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(6)
+                    
                     Text("Hingga")
-                    DatePicker(
-                        "",
-                        selection: $viewModel.endAt,
-                        displayedComponents: .date
-                    )
-                    .datePickerStyle(.compact)
-                    .frame(width: 60)
+                        .fontWeight(.semibold)
+                        .font(.title3)
+                    DatePicker("", selection: $viewModel.endAt, displayedComponents: .date)
+                        .labelsHidden()
+                        .padding(9)
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(6)
                 }
                 Spacer()
                 Button("Simpan Program") {
@@ -115,31 +117,39 @@ struct CreateWeeklyPlan: View {
                                     }
                                 }
                             }
-                        } label: {
-                            HStack {
+                        } label : {
+                            HStack() {
                                 Text(division.name)
-                                    .font(.headline)
-                                Image(systemName: "chevron.down")
-                                    .font(.caption)
+                                    .font(.title2)
+                                    .fontWeight(.medium)
+                                    .multilineTextAlignment(.leading)
+                                    .foregroundStyle(.black)
                             }
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
+                            .frame(width: 120, alignment: .leading)
+                            .padding(6)
+                            .background(Color.white.opacity(0.9))
                             .cornerRadius(6)
                         }
                         .buttonStyle(.plain)
+                        Spacer()
 
                         Button {
                             viewModel.deleteDivision(DivisionId: division.id)
                         } label: {
-                            Image(systemName: "trash")
-                                .foregroundColor(.red)
+//                            Image(systemName: "xmark")
+//                                .font(.title3)
+//                                .foregroundColor(.white.opacity(0.6))
+                            Text("Hapus")
+                                .foregroundStyle(.red)
+                                .underline()
+                                .padding(.horizontal, 10)
+                            
                         }
                         .buttonStyle(.plain)
-                        .padding(.horizontal)
                     }
                 }
                 .padding()
-                .background(Color.gray.opacity(0.1))
+                .background(Color.white)
                 .cornerRadius(8)
             }
         }
@@ -157,15 +167,19 @@ struct CreateWeeklyPlan: View {
             ForEach(division.locations, id: \.locationId) { location in
                 locationSection(for: location, in: division)
             }
-
-            Button("Tambah Lokasi") {
+            
+            Button {
                 addLocationToDivision(division)
+            } label: {
+                Text("Tambah Lokasi")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.accent)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .animation(nil)
             }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.accent)
-            .foregroundColor(.white)
-            .cornerRadius(8)
+            .transition(.opacity)
         }
         .padding(.top)
     }
@@ -200,24 +214,30 @@ struct CreateWeeklyPlan: View {
                         }
                     }
                 } label: {
-                    HStack {
+                    HStack() {
                         Text(location.location)
-                            .font(.subheadline)
+                            .font(.title3)
                             .fontWeight(.medium)
-                        Image(systemName: "chevron.down")
-                            .font(.caption)
+                            .multilineTextAlignment(.leading)
                     }
+                    .frame(width: 150, alignment: .leading)
+                    .padding(6)
+                    .background(Color.white.opacity(0.9))
+                    .cornerRadius(10)
+                    .shadow(radius: 2)
                 }
                 .disabled(division.getAvailableLocation().isEmpty)
-
+                
+                Spacer()
                 Button {
                     division.deleteLocation(locationId: location.locationId)
                 } label: {
-                    Image(systemName: "trash")
-                        .foregroundColor(.red)
-                        .font(.caption)
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title)
+                        .foregroundStyle(.gray.opacity(0.3))
                 }
                 .buttonStyle(.plain)
+                
             }
             .padding(.horizontal)
             .padding(.vertical, 5)
@@ -225,28 +245,28 @@ struct CreateWeeklyPlan: View {
             // Task Headers
             HStack(spacing: 10) {
                 Text("Nomor")
-                    .frame(width: 50, alignment: .leading)
-                    .font(.caption)
+                    .frame(width: 55, alignment: .leading)
+                    .font(.body)
                     .foregroundColor(.secondary)
 
                 Text("Jenis Pekerjaan")
-                    .frame(width: 150, alignment: .leading)
-                    .font(.caption)
+                    .frame(width: 550, alignment: .leading)
+                    .font(.body)
                     .foregroundColor(.secondary)
 
                 Text("Hole/Area")
-                    .frame(width: 100, alignment: .center)
-                    .font(.caption)
+                    .frame(width: 250, alignment: .center)
+                    .font(.body)
                     .foregroundColor(.secondary)
 
                 Text("Hari")
                     .frame(width: 100, alignment: .center)
-                    .font(.caption)
+                    .font(.body)
                     .foregroundColor(.secondary)
 
                 Text("Keterangan")
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .font(.caption)
+                    .font(.body)
                     .foregroundColor(.secondary)
 
                 Text("")
@@ -262,7 +282,7 @@ struct CreateWeeklyPlan: View {
             }
         }
         .padding()
-        .background(Color.gray.opacity(0.01))
+        .background(Color.white.opacity(0.01))
         .clipShape(.rect(cornerRadius: 8))
         .overlay(
             RoundedRectangle(cornerRadius: 8)
@@ -280,23 +300,20 @@ struct CreateWeeklyPlan: View {
             // Nomor
             Text(String(format: "%02d", index + 1))
                 .frame(width: 50, alignment: .leading)
-                .font(.caption)
-
+                .font(.body)
+            
             // Jenis Pekerjaan
-            TextField(
-                "Jenis Pekerjaan",
-                text: Binding(
-                    get: { task.taskType },
-                    set: { newValue in
-                        task.taskType = newValue
-                        checkAndAddNewTaskIfNeeded(for: location, at: index)
-                    }
-                )
-            )
-            .textFieldStyle(.roundedBorder)
-            .frame(width: 150)
-            .font(.footnote)
-
+            TextField("Jenis Pekerjaan", text: Binding(
+                get: { task.taskType },
+                set: { newValue in
+                    task.taskType = newValue
+                    checkAndAddNewTaskIfNeeded(for: location, at: index)
+                }
+            ))
+                .textFieldStyle(.roundedBorder)
+                .frame(width: 550)
+                .font(.body)
+            
             // Hole/Area - Using available locations as options
             Menu {
                 ForEach(availableAreas, id: \.self) { area in
@@ -314,7 +331,7 @@ struct CreateWeeklyPlan: View {
                                     .foregroundColor(.blue)
                             } else {
                                 Image(systemName: "circle")
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(.white)
                             }
                             Text(area)
                                 .foregroundColor(
@@ -325,21 +342,18 @@ struct CreateWeeklyPlan: View {
                 }
             } label: {
                 HStack {
-                    Text(
-                        task.area.isEmpty
-                            ? "Pilih" : task.area.joined(separator: ", ")
-                    )
-                    .foregroundColor(task.area.isEmpty ? .secondary : .primary)
-                    .font(.footnote)
-                    .lineLimit(1)
+                    Text(task.area.isEmpty ? "Pilih" : task.area.joined(separator: ", "))
+                        .foregroundColor(task.area.isEmpty ? .secondary : .primary)
+                        .font(.body)
+                        .lineLimit(1)
                     Spacer()
                     Image(systemName: "chevron.down")
-                        .font(.caption)
+                        .font(.body)
                 }
-                .frame(width: 100)
+                .frame(width: 250)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 6)
-                .background(Color.gray.opacity(0.1))
+                .background(Color.white.opacity(0.1))
                 .cornerRadius(6)
             }
 
@@ -357,45 +371,39 @@ struct CreateWeeklyPlan: View {
                 }
             } label: {
                 HStack {
-                    Text(
-                        viewModel.getBahasaDay(fromEnglish: task.day)
-                            ?? (task.day.isEmpty ? "Pilih" : task.day)
-                    )
-                    .foregroundColor(task.day.isEmpty ? .secondary : .primary)
-                    .font(.footnote)
+                    Text(viewModel.getBahasaDay(fromEnglish: task.day) ?? (task.day.isEmpty ? "Pilih" : task.day))
+                        .foregroundColor(task.day.isEmpty ? .secondary : .primary)
+                        .font(.body)
                     Spacer()
                     Image(systemName: "chevron.down")
-                        .font(.caption)
+                        .font(.body)
                 }
                 .frame(width: 80)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 6)
-                .background(Color.gray.opacity(0.1))
+                .background(Color.white.opacity(0.1))
                 .cornerRadius(6)
             }
 
             // Keterangan
-            TextField(
-                "Potong dengan ukuran...",
-                text: Binding(
-                    get: { task.description },
-                    set: { newValue in
-                        task.description = newValue
-                        checkAndAddNewTaskIfNeeded(for: location, at: index)
-                    }
-                )
-            )
-            .textFieldStyle(.roundedBorder)
-            .frame(maxWidth: .infinity)
-            .font(.footnote)
-
+            TextField("Potong dengan ukuran...", text: Binding(
+                get: { task.description },
+                set: { newValue in
+                    task.description = newValue
+                    checkAndAddNewTaskIfNeeded(for: location, at: index)
+                }
+            ))
+                .textFieldStyle(.roundedBorder)
+                .frame(maxWidth: .infinity)
+                .font(.body)
+            
             // Delete Button
             Button {
                 location.deleteTask(taskId: task.id)
             } label: {
-                Image(systemName: "trash")
-                    .foregroundColor(.red)
-                    .font(.caption)
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundColor(.gray.opacity(0.3))
+                    .font(.title2)
             }
             .buttonStyle(.plain)
             .frame(width: 30)
@@ -405,14 +413,21 @@ struct CreateWeeklyPlan: View {
 
     // MARK: - Footer Section
     private var footerSection: some View {
-        Button("Tambah Divisi") {
-            addDivision()
+        VStack{
+            Button {
+                addDivision()
+            } label: {
+                Text("Tambah Divisi")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .foregroundColor(Color.accent)
+                    .background(Color.white)
+                    .cornerRadius(8)
+                    .animation(nil)
+            }
+            .transition(.opacity)
         }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .foregroundColor(Color.accent)
-        .background(Color.gray.opacity(0.2))
-        .cornerRadius(8)
+        .padding(.vertical,15)
     }
 
     // MARK: - Helper Functions
