@@ -10,6 +10,7 @@ struct CreateWeeklyPlan: View {
     @ObservedObject var viewModel = CreateWeeklyPlanViewModel()
     @State private var showSaveConfirmation = false
     @State private var expandedDivisions: Set<Int> = []
+    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         ScrollView {
@@ -29,7 +30,9 @@ struct CreateWeeklyPlan: View {
         .alert("Konfirmasi Simpan", isPresented: $showSaveConfirmation) {
             Button("Batal", role: .cancel) {}
             Button("Simpan") {
-                viewModel.createWeeklyPlan()
+                viewModel.createWeeklyPlan() {
+                    presentationMode.wrappedValue.dismiss()
+                }
             }
         } message: {
             Text("Apakah Anda yakin ingin menyimpan program mingguan ini?")
