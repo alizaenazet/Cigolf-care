@@ -10,15 +10,18 @@ import SwiftUI
 struct MandorDashboardView: View {
     @StateObject var viewModel: MandorDashboardViewModel
     @EnvironmentObject var session: SessionManager
-    
+    @State private var showAddTaskSheet: Bool = false
+    @State private var selectedTask: TaskDetail? = nil
+    @State private var selectedTaskLocationId: Int = -1
+
     init() {
         _viewModel = StateObject(wrappedValue: MandorDashboardViewModel())
     }
-    
+
     init(viewModel: MandorDashboardViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
-    
+
     var body: some View {
         NavigationView {
             VStack {
@@ -35,13 +38,34 @@ struct MandorDashboardView: View {
                             "Terjadi kesalahan: \(errorMessage)"
                         )
                 } else if let plan = viewModel.dailyPlan {
-                    dashboardContent(plan: plan)
+                    if DateHelper.isToday(plan.createdAt) {
+                        dashboardContent(plan: plan)
+                    } else {
+                        VStack(spacing: 12) {
+                            Text(
+                                "Tidak ada pekerjaan, silakan menambahkan pekerjaan"
+                            )
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding()
+
+                            Button(action: { showAddTaskSheet = true }) {
+                                Label("Tambah Pekerjaan", systemImage: "plus")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.green)
+                            .padding(.horizontal)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
                 } else {
                     Text("No data available.")
                         .accessibilityLabel("Tidak ada data yang tersedia")
                 }
             }
-            
+
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Label(viewModel.mandorArea, systemImage: "leaf.fill")
@@ -51,7 +75,7 @@ struct MandorDashboardView: View {
                         )
                 }
             }
-            
+
             .onAppear {
                 if viewModel.dailyPlan == nil {
                     Task {
@@ -59,36 +83,119 @@ struct MandorDashboardView: View {
                     }
                 }
             }
+
+            .sheet(isPresented: $showAddTaskSheet) {
+                AddTaskView(foremanId: SessionManager.shared.foremanId!) {
+                    divisionId,
+                    locationId,
+                    jobType,
+                    area,
+                    priority,
+                    description in
+                    Task {
+                        if let plan = viewModel.dailyPlan {
+                            if DateHelper.isToday(plan.createdAt) {
+                                await viewModel.addSelfNewDailyTask(
+                                    for: SessionManager().foremanId!,
+                                    taskId: plan.id,
+                                    divisionId: divisionId,
+                                    locationId: locationId,
+                                    jobType: jobType,
+                                    area: area,
+                                    priority: priority,
+                                    description: description
+                                )
+                            } else {
+                                // ❌ Not today → create new plan + task
+                                await viewModel.createNewDailyPlanAndTask(
+                                    for: SessionManager().foremanId!,
+                                    divisionId: divisionId,
+                                    locationId: locationId,
+                                    jobType: jobType,
+                                    area: area,
+                                    priority: priority,
+                                    description: description
+                                )
+                            }
+                            await viewModel.fetchLatestDailyPlan()
+                        } else {
+                            // no plan at all → create new one
+                            await viewModel.createNewDailyPlanAndTask(
+                                for: SessionManager().foremanId!,
+                                divisionId: divisionId,
+                                locationId: locationId,
+                                jobType: jobType,
+                                area: area,
+                                priority: priority,
+                                description: description
+                            )
+                            await viewModel.fetchLatestDailyPlan()
+                        }
+                    }
+                }
+            }
+
+            .sheet(item: $selectedTask) { task in
+                UpdateTaskView(
+                    task: task,
+                    foremanId: SessionManager.shared.foremanId!,
+                    locationId: selectedTaskLocationId
+                ) {
+                    jobType,
+                    locationId,
+                    area,
+                    priority,
+                    notes,
+                    neededWorkers,
+                    availableWorker,
+                    workerNames,
+                    image in
+                    Task {
+                        await viewModel.updateTask(
+                            foremanId: SessionManager.shared.foremanId!,
+                            reportId: viewModel.dailyPlan?.id ?? 0,
+                            taskId: task.id,
+                            jobType: jobType,
+                            locationId: locationId,
+                            areas: area,
+                            workerNeeded: neededWorkers,
+                            availableWorker: availableWorker,
+                            workerNameList: workerNames,
+                            image: image
+                        )
+                    }
+                }
+            }
         }
     }
-    
+
     @ViewBuilder
     private func dashboardContent(plan: DailyPlanData) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            
+
             Text("Program Hari Ini")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .padding(.horizontal)
                 .accessibilityAddTraits(.isHeader)
-            
+
             VStack(spacing: 0) {
                 infoRow(
                     icon: "calendar",
                     title: "Tanggal",
                     subtitle: viewModel.formattedDate
                 )
-                
+
                 Divider().padding(.leading, 60).accessibilityHidden(true)
-                
+
                 infoRow(
                     icon: "person.3.fill",
                     title: "Penyedia Tenaga Kerja",
                     subtitle: plan.outsourceCompany
                 )
-                
+
                 Divider().padding(.leading, 60).accessibilityHidden(true)
-                
+
                 infoRow(
                     icon: "map.fill",
                     title: "Area",
@@ -98,22 +205,22 @@ struct MandorDashboardView: View {
             .background(Color(.white))
             .cornerRadius(12)
             .padding(.horizontal)
-            
+
             Divider().accessibilityHidden(true)
-            
+
             HStack {
                 Text("Daftar Pekerjaan")
                     .font(.title2).bold()
                     .accessibilityAddTraits(.isHeader)
                 Spacer()
-                Button(action: { /* Static for now */  }) {
+                Button(action: { showAddTaskSheet = true }) {
                     Label("Tambah", systemImage: "plus")
                 }
                 .buttonStyle(.borderedProminent)
                 .accessibilityHint("Tambah pekerjaan baru ke daftar")
             }
             .padding(.horizontal)
-            
+
             // Segmented control for divisions
             Picker("Division", selection: $viewModel.selectedDivisionName) {
                 ForEach(viewModel.allDivisions, id: \.self) { division in
@@ -123,7 +230,7 @@ struct MandorDashboardView: View {
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
-            
+
             // The list of tasks, grouped by location
             List {
                 if viewModel.filteredLocations.isEmpty {
@@ -131,51 +238,67 @@ struct MandorDashboardView: View {
                         "Tidak ada pekerjaan di divisi \(viewModel.selectedDivisionName) untuk hari ini."
                     )
                     .foregroundColor(.secondary)
-                    .accessibilityLabel("Tidak ada pekerjaan di divisi \(viewModel.selectedDivisionName) untuk hari ini")
+                    .accessibilityLabel(
+                        "Tidak ada pekerjaan di divisi \(viewModel.selectedDivisionName) untuk hari ini"
+                    )
                 } else {
                     ForEach(viewModel.filteredLocations) { location in
                         Section(
-                            header: Text(location.locationName.uppercased())
+                            header: Text("\(location.locationName.uppercased()) \(location.locationId)")
                                 .accessibilityAddTraits(.isHeader)
-                                .accessibilityHint("Daftar pekerjaan di lokasi \(location.locationName)")) {
-                                    ForEach(location.tasks) { task in
-                                        taskRow(task: task)
-                                    }
-                                }
+                                .accessibilityHint(
+                                    "Daftar pekerjaan di lokasi \(location.locationName)"
+                                )
+                            
+                        ) {
+                            ForEach(location.tasks) { task in
+                                taskRow(task: task, locationId: location.locationId)
+                            }
+                        }
                     }
                 }
             }
             .listStyle(.insetGrouped)
         }
     }
-    
+
     // A view for a single task row
-    private func taskRow(task: TaskDetail) -> some View {
-        HStack(spacing: 15) {
-            Text(task.priority)
-                .font(.headline.monospaced())
-                .frame(width: 44, height: 44)
-                .background(Color.gray.opacity(0.1))
-                .clipShape(Circle())
-                .accessibilityHidden(true)
-            
-            VStack(alignment: .leading) {
-                Text(task.taskType)
-                    .fontWeight(.bold)
-                Text(task.area.joined(separator: ", "))
-                    .font(.caption)
+    private func taskRow(task: TaskDetail, locationId: Int) -> some View {
+        Button {
+            selectedTask = task
+            selectedTaskLocationId = locationId
+        } label: {
+            HStack(spacing: 15) {
+                Text(task.priority)
+                    .font(.headline.monospaced())
+                    .frame(width: 44, height: 44)
+                    .background(Color.gray.opacity(0.1))
+                    .clipShape(Circle())
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading) {
+                    Text(task.taskType)
+                        .fontWeight(.bold)
+                    Text(task.area.joined(separator: ", "))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
                     .foregroundColor(.secondary)
+                    .accessibilityHidden(true)
             }
-            
-            Spacer()
-            
-            Image(systemName: "chevron.right")
-                .foregroundColor(.secondary)
-                .accessibilityHidden(true)
+            .padding(.vertical, 4)
+            .accessibilityLabel(
+                "\(task.taskType), prioritas \(task.priority), area: \(task.area.joined(separator: ", "))"
+            )
+            .accessibilityHint(
+                "Ketuk untuk membuka detail pekerjaan \(task.taskType)"
+            )
         }
-        .padding(.vertical, 4)
-        .accessibilityLabel("\(task.taskType), prioritas \(task.priority), area: \(task.area.joined(separator: ", "))")
-        .accessibilityHint("Ketuk untuk membuka detail pekerjaan \(task.taskType)")
+        .buttonStyle(.plain)
     }
 }
 
@@ -187,7 +310,7 @@ private func infoRow(icon: String, title: String, subtitle: String) -> some View
             .foregroundColor(.green)
             .frame(width: 24)
             .accessibilityHidden(true)
-        
+
         VStack(alignment: .leading) {
             Text(title)
                 .fontWeight(.bold)
@@ -207,7 +330,7 @@ private func infoRow(icon: String, title: String, subtitle: String) -> some View
 extension MandorDashboardView {
     // This is a static, pre-configured ViewModel instance that will be used ONLY for the preview.
     static var previewVM: MandorDashboardViewModel = {
-        
+
         // We create our mock data using the exact structure from your API response.
         let mockData = DailyPlanData(
             id: 39,
@@ -299,15 +422,15 @@ extension MandorDashboardView {
                 ),
             ]
         )
-        
+
         // We return a new ViewModel, initializing it with our mock data.
         return MandorDashboardViewModel(mockPlan: mockData)
     }()
 }
 
-#Preview {
-    // This calls the special initializer for previews, injecting the mock ViewModel.
-    MandorDashboardView(viewModel: MandorDashboardView.previewVM)
-    // We still need a dummy SessionManager for the Logout button to work in the preview.
-        .environmentObject(SessionManager())
-}
+//#Preview {
+//    // This calls the special initializer for previews, injecting the mock ViewModel.
+//    MandorDashboardView(viewModel: MandorDashboardView.previewVM)
+//    // We still need a dummy SessionManager for the Logout button to work in the preview.
+//        .environmentObject(SessionManager())
+//}

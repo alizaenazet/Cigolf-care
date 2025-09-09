@@ -7,170 +7,205 @@
 
 import SwiftUI
 
+//struct UpdateTaskView: View {
+//    @Environment(\.dismiss) var dismiss
+//
+//    let task: TaskDetail
+//    let foremanId: Int
+//    let locationId: Int
+//    let onSubmit:
+//        (
+//            _ jobType: String,
+//            _ locationId: Int,
+//            _ area: [String],
+//            _ priority: Int,
+//            _ notes: String,
+//            _ neededWorkers: Int,
+//            _ availableWorker: Int,
+//            _ workerNames: String,
+//            _ image: UIImage?
+//        ) -> Void
+//
+//    // Inputs
+//    @State private var notes: String = ""
+//    @State private var workerNames: String = ""
+//    @State private var neededWorkers: String = ""
+//    @State private var availableWorkers: String = ""
+//    @State private var image: UIImage? = nil
+//    @State private var showImagePicker = false
+//
+//    var body: some View {
+//        NavigationStack {
+//            VStack(spacing: 0) {
+//                Form {
+//                    // Prefilled date
+//                    Section {
+//                        HStack {
+//                            Text("Jenis Pekerjaan")
+//                            Spacer()
+//                            Text(task.taskType)
+//                                .foregroundColor(.secondary)
+//                        }
+//                        HStack {
+//                            Text("Prioritas")
+//                            Spacer()
+//                            Text("\(task.priority)")  // ensure String
+//                                .foregroundColor(.secondary)
+//                        }
+//                        HStack {
+//                            Text("Lokasi/Hole")
+//                            Spacer()
+//                            Text(task.area.joined(separator: ", "))
+//                                .foregroundColor(.secondary)
+//                        }
+//                    }
+//
+//                    Section(header: Text("Tenaga Kerja")) {
+//                        TextField("Nama Tenaga Kerja", text: $workerNames)
+//                    }
+//
+//                    Section {
+//                        TextField("Jumlah TK Diminta", text: $neededWorkers)
+//                            .keyboardType(.numberPad)
+//                        TextField("Jumlah TK Tersedia", text: $availableWorkers)
+//                            .keyboardType(.numberPad)
+//                    }
+//
+//                    Section(header: Text("Dokumentasi Pekerjaan")) {
+//                        Button {
+//                            showImagePicker = true
+//                        } label: {
+//                            HStack {
+//                                Image(
+//                                    systemName: image == nil
+//                                        ? "plus"
+//                                        : "arrow.trianglehead.2.clockwise.rotate.90"
+//                                )
+//                                Text(
+//                                    image == nil ? "Tambah Foto" : "Ganti Foto"
+//                                )
+//                            }
+//                            .frame(maxWidth: .infinity)
+//                            .padding()
+//                            .background(Color.gray.opacity(0.2))
+//                            .cornerRadius(12)
+//                        }
+//
+//                        if let img = image {
+//                            Image(uiImage: img)
+//                                .resizable()
+//                                .scaledToFit()
+//                                .frame(height: 120)
+//                                .clipShape(RoundedRectangle(cornerRadius: 8))
+//                                .padding(.top, 4)
+//                        }
+//                    }
+//
+//                    Section(header: Text("Catatan")) {
+//                        TextEditor(text: $notes)
+//                            .frame(minHeight: 100)
+//                            .overlay(
+//                                Group {
+//                                    if notes.isEmpty {
+//                                        Text("Belum diisi")
+//                                            .foregroundColor(.gray)
+//                                            .padding(.horizontal, 5)
+//                                            .padding(.vertical, 8)
+//                                            .frame(
+//                                                maxWidth: .infinity,
+//                                                alignment: .leading
+//                                            )
+//                                    }
+//                                }
+//                            )
+//                    }
+//                }
+//
+//                // ✅ Submit button at the bottom
+//                Button(action: {
+//                    guard let needed = Int(neededWorkers),
+//                        let available = Int(availableWorkers)
+//                    else { return }
+//
+//                    onSubmit(
+//                        task.taskType,
+//                        task.locationId,
+//                        task.area,
+//                        task.priority,
+//                        notes,
+//                        needed,
+//                        available,
+//                        workerNames,
+//                        image
+//                    )
+//                    dismiss()
+//                }) {
+//                    HStack {
+//                        Image(systemName: "checkmark.circle")
+//                        Text("Simpan Pekerjaan")
+//                            .fontWeight(.semibold)
+//                    }
+//                    .frame(maxWidth: .infinity)
+//                    .padding()
+//                    .background(
+//                        Color(red: 121 / 255, green: 162 / 255, blue: 34 / 255)
+//                    )
+//                    .foregroundColor(.white)
+//                    .cornerRadius(12)
+//                }
+//                .padding()
+//            }
+//            .navigationTitle("Simpan Pekerjaan")
+//            .navigationBarTitleDisplayMode(.inline)
+//            .toolbar {
+//                ToolbarItem(placement: .navigationBarLeading) {
+//                    Button("Cancel") { dismiss() }
+//                        .foregroundColor(.green)
+//                }
+//            }
+//            .sheet(isPresented: $showImagePicker) {
+//                PhotoPicker(image: $image)
+//            }
+//        }
+//    }
+//
+//}
+
+
 struct UpdateTaskView: View {
     @Environment(\.dismiss) var dismiss
 
+    let task: TaskDetail
     let foremanId: Int
-    let onSubmit:
-        (
-            _ divisionId: Int, _ locationId: Int, _ jobType: String,
-            _ area: [String], _ priority: Int, _ description: String
-        ) -> Void
+    let locationId: Int
+    let onSubmit: (
+        _ jobType: String,
+        _ locationId: Int,
+        _ area: String,
+        _ priority: String,
+        _ notes: String,
+        _ neededWorkers: Int,
+        _ availableWorker: Int,
+        _ workerNames: String,
+        _ image: UIImage?
+    ) -> Void
 
     // Inputs
-    @State private var selectedDivision: Int = -1
-    @State private var selectedLocation: Int = -1
-    @State private var jobType: String = ""
-    @State private var priority: Int = 1
-    @State private var selectedHoles: Set<String> = []
     @State private var notes: String = ""
-    @State private var isNewDay: Bool = false
-
-    // MARK: - Derived Data
-
-    private var today: String {
-        DateHelper.formattedIndonesianDate(Date())
-    }
-    
-    let availableDivisions: [String] = [
-        "Operasional",
-        "Landscape",
-        "Projek",
-        "Irigasi",
-        "Mekanik"
-    ]
-
-    let availableLocations: [String] = [
-        "All", "Green", "Tee Box", "Fairway", "Apron", "Rough", "Bunker", "Nursery",
-        "Driving Range", "Maingate", "Putting 10", "Paving Room", "Resto",
-        "Mekanik", "Irigasi",
-    ]
-
-    private var availablePriorities: [Int] {
-        Array(1...5)
-    }
-
-    func holeOptions(for foremanId: Int) -> [String] {
-        let mandatory = [
-            "CH", "FC", "VILLA", "Main Gate", "Driving Range", "Parkiran",
-        ]
-
-        switch foremanId {
-        case 1: return mandatory + (1...9).map { "\($0)" }  // Lembah
-        case 2: return mandatory + (10...18).map { "\($0)" }  // Bukit
-        case 3: return mandatory + (19...27).map { "\($0)" }  // Danau
-        default: return mandatory
-        }
-    }
+    @State private var workerNames: String = ""
+    @State private var neededWorkers: String = ""
+    @State private var availableWorkers: String = ""
+    @State private var image: UIImage? = nil
+    @State private var showImagePicker = false
 
     var body: some View {
         NavigationStack {
-            Form {
-                // Prefilled date
-                Section {
-                    HStack {
-                        Text("Tanggal")
-                        Spacer()
-                        Text(today)
-                            .foregroundColor(.secondary)
-                    }
-                    Picker("Divisi", selection: $selectedDivision) {
-                        Text("Pilih Divisi").tag(-1)
-                        ForEach(availableDivisions.indices, id: \.self) { index in
-                            Text(availableDivisions[index])
-                                .tag(index + 1) // db id starts at 1
-                        }
-                    }
+            VStack(spacing: 0) {
+                formContent
 
-                    Picker("Area", selection: $selectedLocation) {
-                        Text("Pilih Area").tag(-1)
-                        ForEach(availableLocations.indices, id: \.self) { index in
-                            Text(availableLocations[index])
-                                .tag(index + 1) // db id starts at 1
-                        }
-                    }
-
-                }
-
-                Section {
-                    TextField("Jenis Pekerjaan", text: $jobType)
-//                        .placeholder(when: jobType.isEmpty) {
-//                            Text("Belum diisi").foregroundColor(.gray)
-//                        }
-
-                    Picker("Prioritas", selection: $priority) {
-                        ForEach(availablePriorities, id: \.self) { prio in
-                            Text("\(prio)").tag(prio)
-                        }
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Hole/Area")
-
-                        Menu {
-                            ForEach(holeOptions(for: foremanId), id: \.self) {
-                                option in
-                                Button {
-                                    if selectedHoles.contains(option) {
-                                        selectedHoles.remove(option)
-                                    } else {
-                                        selectedHoles.insert(option)
-                                    }
-                                } label: {
-                                    HStack {
-                                        Text(option)
-                                        if selectedHoles.contains(option) {
-                                            Image(systemName: "checkmark")
-                                        }
-                                    }
-                                }
-                            }
-                        } label: {
-                            HStack {
-                                Text(
-                                    selectedHoles.isEmpty
-                                        ? "Pilih lokasi/hole"
-                                        : selectedHoles.sorted().joined(
-                                            separator: ", "
-                                        )
-                                )
-                                .foregroundColor(
-                                    selectedHoles.isEmpty ? .gray : .primary
-                                )
-                                .lineLimit(1)
-                                Spacer()
-                                Image(systemName: "chevron.down")
-                            }
-                            .padding(8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color.gray.opacity(0.5))
-                            )
-                        }
-                    }
-
-                }
-
-                Section(header: Text("Catatan")) {
-                    TextEditor(text: $notes)
-                        .frame(minHeight: 100)
-                        .overlay(
-                            Group {
-                                if notes.isEmpty {
-                                    Text("Belum diisi")
-                                        .foregroundColor(.gray)
-                                        .padding(.horizontal, 5)
-                                        .padding(.vertical, 8)
-                                        .frame(
-                                            maxWidth: .infinity,
-                                            alignment: .leading
-                                        )
-                                }
-                            }
-                        )
-                }
+                saveButton
             }
-            .navigationTitle("Tambah Pekerjaan")
+            .navigationTitle("Simpan Pekerjaan")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -178,44 +213,119 @@ struct UpdateTaskView: View {
                         .foregroundColor(.green)
                 }
             }
-
-            // Bottom submit button
-            VStack {
-                Button(action: {
-                    guard selectedDivision != -1,
-                        selectedLocation != -1, !jobType.isEmpty,
-                        !selectedHoles.isEmpty
-                    else { return }
-
-                    onSubmit(
-                        selectedDivision,
-                        selectedLocation,
-                        jobType,
-                        Array(selectedHoles),
-                        priority,
-                        notes
-                    )
-                    dismiss()
-                }) {
-                    HStack {
-                        Image(systemName: "checkmark.circle")
-                        Text("Tambah Pekerjaan")
-                            .fontWeight(.semibold)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                            (selectedDivision == -1 || selectedLocation == -1 || jobType.isEmpty || selectedHoles.isEmpty)
-                            ? Color.gray
-                            : Color(red: 121/255, green: 162/255, blue: 34/255)
-                        )
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-                }
-                .disabled(selectedDivision == -1 || selectedLocation == -1 || jobType.isEmpty || selectedHoles.isEmpty)
-                .padding()
+            .sheet(isPresented: $showImagePicker) {
+                PhotoPicker(image: $image)
             }
         }
     }
-}
 
+    // MARK: - Subviews
+
+    private var formContent: some View {
+        Form {
+            Section {
+                labeledRow("Jenis Pekerjaan", value: task.taskType)
+                labeledRow("Prioritas", value: "\(task.priority)")
+                labeledRow("Lokasi/Hole", value: task.area.joined(separator: ", "))
+            }
+
+            Section(header: Text("Tenaga Kerja")) {
+                TextField("Nama Tenaga Kerja", text: $workerNames)
+            }
+
+            Section {
+                TextField("Jumlah TK Diminta", text: $neededWorkers)
+                    .keyboardType(.numberPad)
+                TextField("Jumlah TK Tersedia", text: $availableWorkers)
+                    .keyboardType(.numberPad)
+            }
+
+            Section(header: Text("Dokumentasi Pekerjaan")) {
+                photoPickerButton
+
+                if let img = image {
+                    Image(uiImage: img)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 120)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .padding(.top, 4)
+                }
+            }
+
+            Section(header: Text("Catatan")) {
+                TextEditor(text: $notes)
+                    .frame(minHeight: 100)
+                    .overlay(
+                        Group {
+                            if notes.isEmpty {
+                                Text("Belum diisi")
+                                    .foregroundColor(.gray)
+                                    .padding(.horizontal, 5)
+                                    .padding(.vertical, 8)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                        }
+                    )
+            }
+        }
+    }
+
+    private var photoPickerButton: some View {
+        Button {
+            showImagePicker = true
+        } label: {
+            HStack {
+                Image(systemName: image == nil ? "plus" : "arrow.trianglehead.2.clockwise.rotate.90")
+                Text(image == nil ? "Tambah Foto" : "Ganti Foto")
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.gray.opacity(0.2))
+            .cornerRadius(12)
+        }
+    }
+
+    private var saveButton: some View {
+        Button(action: {
+            guard let needed = Int(neededWorkers),
+                  let available = Int(availableWorkers)
+            else { return }
+
+            onSubmit(
+                task.taskType,
+                locationId,
+                "\(task.area)",
+                task.priority,
+                notes,
+                needed,
+                available,
+                "\([workerNames])",
+                image
+            )
+            dismiss()
+            print(task.area.joined(separator: ", "))
+        }) {
+            HStack {
+                Image(systemName: "checkmark.circle")
+                Text("Simpan Pekerjaan")
+                    .fontWeight(.semibold)
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color(red: 121/255, green: 162/255, blue: 34/255))
+            .foregroundColor(.white)
+            .cornerRadius(12)
+        }
+        .padding()
+    }
+
+    // Helper for rows
+    private func labeledRow(_ label: String, value: String) -> some View {
+        HStack {
+            Text(label)
+            Spacer()
+            Text(value).foregroundColor(.secondary)
+        }
+    }
+}
