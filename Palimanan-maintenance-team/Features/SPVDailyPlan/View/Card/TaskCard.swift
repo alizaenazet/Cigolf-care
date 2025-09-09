@@ -54,8 +54,11 @@ struct TaskCard: View {
             }
             Text(task.description)
                 .lineLimit(1)
-            Image(systemName: task.isFinished ? "checkmark.circle" : "xmark.circle")
+            
+            Text(task.isFinished ? "Selesai" : "Belum")
+                .lineLimit(1)
                 .foregroundColor(task.isFinished ? .green : .red)
+            
         }
         .font(.subheadline)
         .padding(.horizontal)
