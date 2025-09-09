@@ -8,6 +8,20 @@
 import Foundation
 
 struct DateHelper {
+    static func isToday(_ dateString: String) -> Bool {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "id_ID")
+        formatter.timeZone = TimeZone.current
+
+        guard let date = formatter.date(from: dateString) else {
+            print("❌ Failed to parse date: \(dateString)")
+            return false
+        }
+
+        return Calendar.current.isDateInToday(date)
+    }
+
     static func formattedDate(_ dateString: String) -> String {
         let df = DateFormatter()
         df.dateFormat = "yyyy-MM-dd"
@@ -18,7 +32,7 @@ struct DateHelper {
         }
         return dateString
     }
-    
+
     static func dayConverter(day: String) -> String {
         let mapping: [String: String] = [
             "monday": "Senin",
@@ -27,19 +41,19 @@ struct DateHelper {
             "thursday": "Kamis",
             "friday": "Jumat",
             "saturday": "Sabtu",
-            "sunday": "Minggu"
+            "sunday": "Minggu",
         ]
-        
+
         return mapping[day.lowercased()] ?? day
     }
-    
+
     static func formatDateToDDMMYYYY(_ date: Date) -> String {
         let df = DateFormatter()
         df.dateFormat = "dd-MM-yyyy"
         df.locale = Locale(identifier: "id_ID")
         return df.string(from: date)
     }
-    
+
     static func formattedDateWithoutDay(dateStr: String) -> String {
         let df = DateFormatter()
         df.dateFormat = "yyyy-MM-dd"
@@ -50,16 +64,15 @@ struct DateHelper {
         }
         return dateStr
     }
-    
+
     static func formattedIndonesianDate(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "d MMMM yyyy" // misal 10 Juni 2024
-        formatter.locale = Locale(identifier: "id_ID") // pakai locale Indonesia
+        formatter.dateFormat = "d MMMM yyyy"  // misal 10 Juni 2024
+        formatter.locale = Locale(identifier: "id_ID")  // pakai locale Indonesia
         return formatter.string(from: date)
     }
-    
-}
 
+}
 
 extension String {
     func toDate() -> Date? {
@@ -69,9 +82,8 @@ extension String {
         formatter.timeZone = TimeZone(secondsFromGMT: 0)
         return formatter.date(from: self)
     }
-    
-}
 
+}
 
 extension Date {
     func toString() -> String {
@@ -81,28 +93,28 @@ extension Date {
         formatter.timeZone = TimeZone(secondsFromGMT: 0)
         return formatter.string(from: self)
     }
-    
+
     func toIndonesianFormat() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd MMMM yyyy"
         formatter.locale = Locale(identifier: "id_ID")
         return formatter.string(from: self)
     }
-    
+
     func toFormattedString() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd MMMM yyyy"
         formatter.locale = Locale(identifier: "en_US")
         return formatter.string(from: self)
     }
-    
+
     func getDayOfWeekEN() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEEE"
         formatter.locale = Locale(identifier: "en_US")
         return formatter.string(from: self)
     }
-    
+
     func getDayOfWeekID() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEEE"
@@ -110,4 +122,3 @@ extension Date {
         return formatter.string(from: self)
     }
 }
-
