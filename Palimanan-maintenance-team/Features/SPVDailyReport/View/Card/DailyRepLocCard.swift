@@ -11,16 +11,19 @@ struct DailyRepLocCard: View {
     let location: Location
     let division: Division
     let isReportApproved: Bool
-    @State private var isExpanded = false
+    @State private var isExpanded = true
     var onAddTask: (Division, Location) -> Void
     
     // Shared grid definition
     private let taskColumns: [GridItem] = [
         GridItem(.fixed(50), alignment: .leading),   // Nomor
+        GridItem(.fixed(70), alignment: .center),    // Prioritas
         GridItem(.flexible(minimum: 120), alignment: .leading), // Jenis Pengerjaan
         GridItem(.fixed(100), alignment: .leading),  // Hole/Area
-        GridItem(.fixed(70), alignment: .center),    // Prioritas
-        GridItem(.fixed(120), alignment: .center),   // Gambar
+        GridItem(.fixed(70), alignment: .center),    // Tk Diminta
+        GridItem(.fixed(70), alignment: .center),    // Tk Tersedia
+        GridItem(.fixed(150), alignment: .center),   // Nama Tk
+        GridItem(.fixed(225), alignment: .center),   // Gambar
         GridItem(.flexible(), alignment: .leading),  // Keterangan
         GridItem(.fixed(50), alignment: .center)     // Status
     ]
@@ -64,9 +67,12 @@ struct DailyRepLocCard: View {
                     // Table header
                     LazyVGrid(columns: taskColumns, spacing: 12) {
                         Text("Nomor")
+                        Text("Prioritas")
                         Text("Jenis Pengerjaan")
                         Text("Hole/Area")
-                        Text("Prioritas")
+                        Text("TK Diminta")
+                        Text("TK Tersedia")
+                        Text("Nama TK")
                         Text("Gambar")
                         Text("Keterangan")
                         Text("Status")
