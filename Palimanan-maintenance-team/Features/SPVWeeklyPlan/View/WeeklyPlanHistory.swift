@@ -84,7 +84,9 @@ struct WeeklyPlanHistory: View {
                                             try await APIService.shared
                                             .downloadFile(endpoint)
 
-                                        presentShareSheet(url: fileURL)
+                                        DispatchQueue.main.async {
+                                            FilePresenter.shared.present(url: fileURL, action: .share)
+                                        }
                                     } catch {
                                         print("❌ Export failed:", error)
                                     }

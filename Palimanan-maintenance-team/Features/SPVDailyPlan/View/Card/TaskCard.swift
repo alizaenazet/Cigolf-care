@@ -26,7 +26,7 @@ struct TaskCard: View {
                     FileDownloader.downloadTempFile(from: url) { fileURL in
                         if let fileURL = fileURL {
                             DispatchQueue.main.async {
-                                QuickLookPresenter.present(fileURL: fileURL)  // 👈 show immediately
+                                FilePresenter.shared.present(url: fileURL, action: .preview)
                             }
                         }
                     }
