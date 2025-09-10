@@ -30,6 +30,19 @@ struct AddTaskPopup: View {
     
     let priorities = ["P1", "P2", "P3", "P4", "P5"]
     
+    func holeOptions(for foremanId: Int) -> [String] {
+        let mandatory = [
+            "CH", "FC", "Villa", "Main Gate", "Driving Range", "Parkiran",
+        ]
+
+        switch foremanId {
+        case 1: return mandatory + (1...9).map { "Hole \($0)" }  // Lembah
+        case 2: return mandatory + (10...18).map { "Hole \($0)" }  // Bukit
+        case 3: return mandatory + (19...27).map { "Hole \($0)" }  // Danau
+        default: return mandatory
+        }
+    }
+    
     var body: some View {
         
         VStack(spacing: 16) {
