@@ -20,7 +20,7 @@ struct MandorDashboardView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 if viewModel.isLoading {
                     ProgressView("Loading Data...")
@@ -44,11 +44,10 @@ struct MandorDashboardView: View {
             
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Label(viewModel.mandorArea, systemImage: "leaf.fill")
-                        .foregroundColor(.green)
-                        .accessibilityLabel(
-                            "Area Kerja: \(viewModel.mandorArea)"
-                        )
+                    Button("Keluar", role: .destructive) {
+                        session.logout()
+                    }
+                    .fontWeight(.semibold)
                 }
             }
             
@@ -64,40 +63,45 @@ struct MandorDashboardView: View {
     
     @ViewBuilder
     private func dashboardContent(plan: DailyPlanData) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading) {
             
             Text("Program Hari Ini")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .padding(.horizontal)
+                .padding(.bottom, 4)
                 .accessibilityAddTraits(.isHeader)
             
-            VStack(spacing: 0) {
-                infoRow(
-                    icon: "calendar",
-                    title: "Tanggal",
-                    subtitle: viewModel.formattedDate
-                )
-                
-                Divider().padding(.leading, 60).accessibilityHidden(true)
-                
-                infoRow(
-                    icon: "person.3.fill",
-                    title: "Penyedia Tenaga Kerja",
-                    subtitle: plan.outsourceCompany
-                )
-                
-                Divider().padding(.leading, 60).accessibilityHidden(true)
-                
-                infoRow(
-                    icon: "map.fill",
-                    title: "Area",
-                    subtitle: viewModel.allTaskAreas
-                )
+            HStack {
+                Image(systemName: "leaf.fill")
+                    .foregroundColor(Color(hex: "#79A222"))
+                Text("\(viewModel.mandorArea)")
+                    .font(.body)
+                    .foregroundColor(Color(hex: "#79A222"))
+                    .fontWeight(.bold)
             }
-            .background(Color(.white))
-            .cornerRadius(12)
             .padding(.horizontal)
+            .padding(.bottom, 4)
+            
+            Text("Hari: \(viewModel.formattedDate)")
+                .font(.footnote)
+                .fontWeight(.medium)
+                .foregroundStyle(Color(hex: "#A9A9A9"))
+                .padding(.horizontal)
+            
+            if plan.approved.isApproved {
+                Text("Status: Sudah Disetujui")
+                    .font(.footnote)
+                    .fontWeight(.medium)
+                    .foregroundStyle(Color(hex: "#A9A9A9"))
+                    .padding(.horizontal)
+            } else {
+                Text("Status: Dalam Pengerjaan")
+                    .font(.footnote)
+                    .fontWeight(.medium)
+                    .foregroundStyle(Color(hex: "#A9A9A9"))
+                    .padding(.horizontal)
+            }
             
             Divider().accessibilityHidden(true)
             
@@ -114,7 +118,6 @@ struct MandorDashboardView: View {
             }
             .padding(.horizontal)
             
-            // Segmented control for divisions
             Picker("Division", selection: $viewModel.selectedDivisionName) {
                 ForEach(viewModel.allDivisions, id: \.self) { division in
                     Text(division)
@@ -124,7 +127,6 @@ struct MandorDashboardView: View {
             .pickerStyle(.segmented)
             .padding(.horizontal)
             
-            // The list of tasks, grouped by location
             List {
                 if viewModel.filteredLocations.isEmpty {
                     Text(
@@ -149,7 +151,6 @@ struct MandorDashboardView: View {
         }
     }
     
-    // A view for a single task row
     private func taskRow(task: TaskDetail) -> some View {
         HStack(spacing: 15) {
             Text(task.priority)
@@ -179,8 +180,7 @@ struct MandorDashboardView: View {
     }
 }
 
-private func infoRow(icon: String, title: String, subtitle: String) -> some View
-{
+private func infoRow(icon: String, title: String, subtitle: String) -> some View {
     HStack(spacing: 16) {
         Image(systemName: icon)
             .font(.title2)
@@ -201,14 +201,8 @@ private func infoRow(icon: String, title: String, subtitle: String) -> some View
     .accessibilityLabel("\(title): \(subtitle)")
 }
 
-// --- PREVIEW PROVIDER ---
-
-// We create an extension to hold our preview-specific code, keeping it clean.
 extension MandorDashboardView {
-    // This is a static, pre-configured ViewModel instance that will be used ONLY for the preview.
     static var previewVM: MandorDashboardViewModel = {
-        
-        // We create our mock data using the exact structure from your API response.
         let mockData = DailyPlanData(
             id: 39,
             createdAt: "2025-09-03",
@@ -300,14 +294,11 @@ extension MandorDashboardView {
             ]
         )
         
-        // We return a new ViewModel, initializing it with our mock data.
         return MandorDashboardViewModel(mockPlan: mockData)
     }()
 }
 
 #Preview {
-    // This calls the special initializer for previews, injecting the mock ViewModel.
     MandorDashboardView(viewModel: MandorDashboardView.previewVM)
-    // We still need a dummy SessionManager for the Logout button to work in the preview.
         .environmentObject(SessionManager())
 }
