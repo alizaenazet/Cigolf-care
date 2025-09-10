@@ -49,28 +49,6 @@ struct DailyReportDetailView: View {
         }
         
         .background(Color(.systemGray6))
-//        .sheet(isPresented: $showApprovalPopup) {
-//            if let report = viewModel.reportDetail {
-//                ApprovalPopup(
-//                    date: DateHelper.formattedDate(report.createdAt),
-//                    provider: report.outsourceCompany ?? "-",
-//                    finishedCount: report.finishedTasks ?? 0,
-//                    totalCount: report.totalTasks ?? 0,
-//                    inProgressCount: report.pendingTasks ?? 0,
-//                    onApprove: {
-//                        viewModel.reportDetail?.approved.isApproved = true
-//                        withAnimation { showApprovalPopup = false }
-//                    },
-//                    onClose: {
-//                        withAnimation { showApprovalPopup = false }
-//                    }
-//                )
-//                .transition(.opacity.combined(with: .scale))
-//                .presentationDetents([.medium, .large])
-//                .interactiveDismissDisabled(true)
-//                .presentationCornerRadius(24)
-//            }
-//        }
         .sheet(isPresented: $showApprovalPopup) {
             if let report = viewModel.reportDetail {
                 if SessionManager.shared.isLoggedIn {
