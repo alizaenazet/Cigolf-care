@@ -109,9 +109,9 @@ struct ReportTableView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                 Text("Detail").bold()
                     .frame(maxWidth: .infinity, alignment: .center)
-                Image(systemName: "square")
-                    .foregroundColor(Color(red: 121/255, green: 162/255, blue: 34/255))
+                Text("Pilih").bold()
                     .frame(maxWidth: .infinity, alignment: .center)
+
             }
             .padding(.vertical, reports.isEmpty ? 8 : 0)
             
