@@ -25,7 +25,6 @@ struct UpdateTaskView: View {
         _ image: UIImage?
     ) -> Void
 
-    // Inputs
     @State private var notes: String = ""
     @State private var workerNames: String = ""
     @State private var neededWorkers: String = ""
@@ -35,7 +34,7 @@ struct UpdateTaskView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            VStack {
                 formContent
 
                 saveButton
@@ -45,7 +44,8 @@ struct UpdateTaskView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { dismiss() }
-                        .foregroundColor(.green)
+                        .foregroundColor(Color(hex: "#79A222"))
+                        .font(.headline)
                 }
             }
             .sheet(isPresented: $showImagePicker) {
@@ -53,8 +53,6 @@ struct UpdateTaskView: View {
             }
         }
     }
-
-    // MARK: - Subviews
 
     private var formContent: some View {
         Form {
@@ -155,7 +153,6 @@ struct UpdateTaskView: View {
         .padding()
     }
 
-    // Helper for rows
     private func labeledRow(_ label: String, value: String) -> some View {
         HStack {
             Text(label)
@@ -165,12 +162,10 @@ struct UpdateTaskView: View {
     }
 }
 
-// --- PREVIEW CODE ADDED HERE ---
 #Preview {
-    // 1. Create a mock 'TaskDetail' object to pass into the view.
     let mockTask = TaskDetail(
         id: 1284,
-        taskType: "Perbaiki Roda Golf Cart 241",
+        taskType: "Perbaiki Roda Golf Cart 24",
         description: "Roda depan kiri macet dan tidak bisa berputar.",
         priority: "P1",
         area: ["Garasi", "Hole 6"],
@@ -180,13 +175,11 @@ struct UpdateTaskView: View {
         isFinished: false
     )
     
-    // 2. Initialize the UpdateTaskView with the mock data.
     return UpdateTaskView(
         task: mockTask,
-        foremanId: 1, // Dummy foremanId
-        locationId: 14 // Dummy locationId
+        foremanId: 1,
+        locationId: 14
     ) { jobType, locationId, area, priority, notes, neededWorkers, availableWorker, workerNames, image in
-        // The onSubmit closure can be empty or print for preview purposes.
         print("--- Preview Save Button Tapped ---")
         print("Job: \(jobType), Location ID: \(locationId), Area: \(area)")
         print("Priority: \(priority), Notes: \(notes)")

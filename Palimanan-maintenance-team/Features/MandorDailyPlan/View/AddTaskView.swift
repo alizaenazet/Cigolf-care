@@ -17,7 +17,6 @@ struct AddTaskView: View {
             _ area: [String], _ priority: Int, _ description: String
         ) -> Void
 
-    // Inputs
     @State private var selectedDivision: Int = -1
     @State private var selectedLocation: Int = -1
     @State private var jobType: String = ""
@@ -25,8 +24,6 @@ struct AddTaskView: View {
     @State private var selectedHoles: Set<String> = []
     @State private var notes: String = ""
     @State private var isNewDay: Bool = false
-
-    // MARK: - Derived Data
 
     private var today: String {
         DateHelper.formattedIndonesianDate(Date())
@@ -56,9 +53,9 @@ struct AddTaskView: View {
         ]
 
         switch foremanId {
-        case 1: return mandatory + (1...9).map { "Hole \($0)" }  // Lembah
-        case 2: return mandatory + (10...18).map { "Hole \($0)" }  // Bukit
-        case 3: return mandatory + (19...27).map { "Hole \($0)" }  // Danau
+        case 1: return mandatory + (1...9).map { "Hole \($0)" }
+        case 2: return mandatory + (10...18).map { "Hole \($0)" }
+        case 3: return mandatory + (19...27).map { "Hole \($0)" }
         default: return mandatory
         }
     }
@@ -66,7 +63,6 @@ struct AddTaskView: View {
     var body: some View {
         NavigationStack {
             Form {
-                // Prefilled date
                 Section {
                     HStack {
                         Text("Tanggal")
@@ -78,7 +74,7 @@ struct AddTaskView: View {
                         Text("Pilih Divisi").tag(-1)
                         ForEach(availableDivisions.indices, id: \.self) { index in
                             Text(availableDivisions[index])
-                                .tag(index + 1) // db id starts at 1
+                                .tag(index + 1)
                         }
                     }
 
@@ -86,7 +82,7 @@ struct AddTaskView: View {
                         Text("Pilih Area").tag(-1)
                         ForEach(availableLocations.indices, id: \.self) { index in
                             Text(availableLocations[index])
-                                .tag(index + 1) // db id starts at 1
+                                .tag(index + 1)
                         }
                     }
 
@@ -94,9 +90,6 @@ struct AddTaskView: View {
 
                 Section {
                     TextField("Jenis Pekerjaan", text: $jobType)
-//                        .placeholder(when: jobType.isEmpty) {
-//                            Text("Belum diisi").foregroundColor(.gray)
-//                        }
 
                     Picker("Prioritas", selection: $priority) {
                         ForEach(availablePriorities, id: \.self) { prio in
@@ -180,7 +173,6 @@ struct AddTaskView: View {
                 }
             }
 
-            // Bottom submit button
             VStack {
                 Button(action: {
                     guard selectedDivision != -1,
@@ -233,15 +225,9 @@ extension View {
     }
 }
 
-// --- PREVIEW CODE ADDED HERE ---
 #Preview {
-    // We provide dummy data so the preview can be generated.
     AddTaskView(
-        // Use a sample foremanId (e.g., 1 for "Lembah")
         foremanId: 1,
-        
-        // The onSubmit action can be empty for the preview,
-        // since we only care about the UI.
         onSubmit: { divisionId, locationId, jobType, area, priority, notes in
             print("--- Preview Submit Button Tapped ---")
             print("Division: \(divisionId), Location: \(locationId), Job: \(jobType)")

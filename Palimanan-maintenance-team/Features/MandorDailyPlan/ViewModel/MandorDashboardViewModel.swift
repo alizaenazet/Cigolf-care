@@ -62,8 +62,8 @@ class MandorDashboardViewModel: ObservableObject {
         guard let name = dailyPlan?.foremanName else { return "Unknown Area" }
         switch name {
         case "Darlene McLaughlin": return "Lembah"
-        case "Kelly Stanton-Rowe IV": return "Bukit"
-        case "Joyce Rutherford": return "Danau"
+        case "Kelly Stanton-Rowe IV": return "Danau"
+        case "Joyce Rutherford": return "Bukit"
         default: return "Area Lain"
         }
     }
