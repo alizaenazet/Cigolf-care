@@ -13,15 +13,15 @@ struct MandorDashboardView: View {
     @State private var showAddTaskSheet: Bool = false
     @State private var selectedTask: TaskDetail? = nil
     @State private var selectedTaskLocationId: Int = -1
-
+    
     init() {
         _viewModel = StateObject(wrappedValue: MandorDashboardViewModel())
     }
-
+    
     init(viewModel: MandorDashboardViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
-
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -49,7 +49,7 @@ struct MandorDashboardView: View {
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                             .padding()
-
+                            
                             Button(action: { showAddTaskSheet = true }) {
                                 Label("Tambah Pekerjaan", systemImage: "plus")
                                     .frame(maxWidth: .infinity)
@@ -65,7 +65,7 @@ struct MandorDashboardView: View {
                         .accessibilityLabel("Tidak ada data yang tersedia")
                 }
             }
-
+            
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Keluar", role: .destructive) {
@@ -74,7 +74,7 @@ struct MandorDashboardView: View {
                     .fontWeight(.semibold)
                 }
             }
-
+            
             .onAppear {
                 if viewModel.dailyPlan == nil {
                     Task {
@@ -82,7 +82,7 @@ struct MandorDashboardView: View {
                     }
                 }
             }
-
+            
             .sheet(isPresented: $showAddTaskSheet) {
                 AddTaskView(foremanId: SessionManager.shared.foremanId!) {
                     divisionId,
@@ -105,7 +105,6 @@ struct MandorDashboardView: View {
                                     description: description
                                 )
                             } else {
-                                // ❌ Not today → create new plan + task
                                 await viewModel.createNewDailyPlanAndTask(
                                     for: SessionManager().foremanId!,
                                     divisionId: divisionId,
@@ -118,7 +117,6 @@ struct MandorDashboardView: View {
                             }
                             await viewModel.fetchLatestDailyPlan()
                         } else {
-                            // no plan at all → create new one
                             await viewModel.createNewDailyPlanAndTask(
                                 for: SessionManager().foremanId!,
                                 divisionId: divisionId,
@@ -133,7 +131,7 @@ struct MandorDashboardView: View {
                     }
                 }
             }
-
+            
             .sheet(item: $selectedTask) { task in
                 UpdateTaskView(
                     task: task,
@@ -167,7 +165,7 @@ struct MandorDashboardView: View {
             }
         }
     }
-
+    
     @ViewBuilder
     private func dashboardContent(plan: DailyPlanData) -> some View {
         VStack(alignment: .leading) {
@@ -208,91 +206,139 @@ struct MandorDashboardView: View {
                     .fontWeight(.medium)
                     .foregroundStyle(Color(hex: "#A9A9A9"))
                     .padding(.horizontal)
+                    .padding(.bottom, 8)
             }
             
-            Divider().accessibilityHidden(true)
-
-            HStack {
-                Text("Daftar Pekerjaan")
-                    .font(.title2).bold()
-                    .accessibilityAddTraits(.isHeader)
-                Spacer()
-                Button(action: { showAddTaskSheet = true }) {
-                    Label("Tambah", systemImage: "plus")
-                }
-                .buttonStyle(.borderedProminent)
-                .accessibilityHint("Tambah pekerjaan baru ke daftar")
-            }
-            .padding(.horizontal)
-            
-            Picker("Division", selection: $viewModel.selectedDivisionName) {
-                ForEach(viewModel.allDivisions, id: \.self) { division in
-                    Text(division)
-                        .accessibilityLabel("Divisi \(division)")
-                }
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal)
-            
-            List {
-                if viewModel.filteredLocations.isEmpty {
-                    Text(
-                        "Tidak ada pekerjaan di divisi \(viewModel.selectedDivisionName) untuk hari ini."
-                    )
-                    .foregroundColor(.secondary)
-                    .accessibilityLabel(
-                        "Tidak ada pekerjaan di divisi \(viewModel.selectedDivisionName) untuk hari ini"
-                    )
-                } else {
-                    ForEach(viewModel.filteredLocations) { location in
-                        Section(
-                            header: Text("\(location.locationName.uppercased()) \(location.locationId)")
-                                .accessibilityAddTraits(.isHeader)
-                                .accessibilityHint(
-                                    "Daftar pekerjaan di lokasi \(location.locationName)"
-                                )
+            ZStack {
+                LinearGradient(
+                    colors: [Color(hex: "#F8F8F8"), Color(hex: "#79A222").opacity(0.6)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+                
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text("Daftar Pekerjaan")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .accessibilityAddTraits(.isHeader)
+                        
+                        Spacer()
+                        
+                        Button(action: { showAddTaskSheet = true }) {
+                            HStack {
+                                Image(systemName: "plus")
+                                    .font(.subheadline)
+                                    .foregroundStyle(Color.white)
+                                
+                                Text("Tambah")
+                                    .foregroundStyle(Color.white)
+                                    .font(.subheadline)
+                            }
+                            .padding(.vertical, 4)
+                            .padding(.horizontal, 12)
+                        }
+                        .background(Color(hex: "#79A222"))
+                        .cornerRadius(16)
+                        .accessibilityHint("Tambah pekerjaan baru ke daftar")
+                    }
+                    .padding(.horizontal)
+                    .padding(.top)
+                    
+                    Menu {
+                        ForEach(viewModel.allDivisions, id: \.self) { division in
+                            Button(division) {
+                                viewModel.selectedDivisionName = division
+                            }
+                        }
+                    } label: {
+                        HStack {
+                            Text(viewModel.selectedDivisionName)
+                                .font(.title3)
+                                .fontWeight(.semibold)
                             
-                        ) {
-                            ForEach(location.tasks) { task in
-                                taskRow(task: task, locationId: location.locationId)
+                            Image(systemName: "chevron.down")
+                                .font(.footnote)
+                                .fontWeight(.bold)
+                        }
+                        .foregroundColor(Color(hex: "#79A222"))
+                        .padding(.horizontal)
+                    }
+                    .accessibilityLabel("Pilih Divisi, saat ini \(viewModel.selectedDivisionName)")
+                    
+                    List {
+                        if viewModel.filteredLocations.isEmpty {
+                            Text("Tidak ada pekerjaan hari ini.")
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .foregroundColor(Color(hex: "#A9A9A9"))
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                                .accessibilityLabel(
+                                    "Tidak ada pekerjaan di divisi \(viewModel.selectedDivisionName) untuk hari ini"
+                                )
+                        } else {
+                            ForEach(viewModel.filteredLocations) { location in
+                                Section(
+                                    header: Text("\(location.locationName.uppercased())")
+                                        .padding(.vertical, 4)
+                                        .accessibilityAddTraits(.isHeader)
+                                        .accessibilityHint(
+                                            "Daftar pekerjaan di lokasi \(location.locationName)"
+                                        )
+                                ) {
+                                    ForEach(location.tasks.sorted(by: { $0.priority < $1.priority })) { task in
+                                        taskRow(task: task, locationId: location.locationId)
+                                            .listRowSeparator(.hidden)
+                                            .listRowBackground(Color.clear)
+                                    }
+                                }
                             }
                         }
                     }
+                    .listStyle(.plain)
                 }
             }
-            .listStyle(.insetGrouped)
         }
     }
-
-    // A view for a single task row
+    
+    
     private func taskRow(task: TaskDetail, locationId: Int) -> some View {
         Button {
             selectedTask = task
             selectedTaskLocationId = locationId
         } label: {
-            HStack(spacing: 15) {
+            HStack(spacing: 16) {
                 Text(task.priority)
-                    .font(.headline.monospaced())
-                    .frame(width: 44, height: 44)
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .frame(width: 32, height: 32)
                     .background(Color.gray.opacity(0.1))
                     .clipShape(Circle())
                     .accessibilityHidden(true)
-
-                VStack(alignment: .leading) {
-                    Text(task.taskType)
-                        .fontWeight(.bold)
-                    Text(task.area.joined(separator: ", "))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-
+                
+                
+                Text(task.taskType)
+                    .font(.body)
+                    .fontWeight(.light)
+                    .lineLimit(1)
+                
                 Spacer()
-
-                Image(systemName: "chevron.right")
+                
+                Text(task.area.joined(separator: ", "))
+                    .font(.caption)
                     .foregroundColor(.secondary)
+                    .lineLimit(1)
+                
+                Image(systemName: "chevron.right")
+                    .font(.headline)
+                    .foregroundColor(Color(hex: "#79A222"))
                     .accessibilityHidden(true)
             }
-            .padding(.vertical, 4)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 12)
+            .background(Color.white)
+            .cornerRadius(12)
             .accessibilityLabel(
                 "\(task.taskType), prioritas \(task.priority), area: \(task.area.joined(separator: ", "))"
             )
@@ -300,38 +346,17 @@ struct MandorDashboardView: View {
                 "Ketuk untuk membuka detail pekerjaan \(task.taskType)"
             )
         }
-        .buttonStyle(.plain)
     }
-}
-
-private func infoRow(icon: String, title: String, subtitle: String) -> some View {
-    HStack(spacing: 16) {
-        Image(systemName: icon)
-            .font(.title2)
-            .foregroundColor(.green)
-            .frame(width: 24)
-            .accessibilityHidden(true)
-
-        VStack(alignment: .leading) {
-            Text(title)
-                .fontWeight(.bold)
-            Text(subtitle)
-                .foregroundColor(.secondary)
-        }
-        Spacer()
-    }
-    .padding()
-    .accessibilityElement(children: .combine)
-    .accessibilityLabel("\(title): \(subtitle)")
 }
 
 extension MandorDashboardView {
     static var previewVM: MandorDashboardViewModel = {
-
-        // We create our mock data using the exact structure from your API response.
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let todayDateString = formatter.string(from: Date())
         let mockData = DailyPlanData(
             id: 39,
-            createdAt: "2025-09-03",
+            createdAt: todayDateString,
             approved: ApprovedStatus(
                 isApproved: false,
                 approvedAt: "",
@@ -353,10 +378,87 @@ extension MandorDashboardView {
                             tasks: [
                                 .init(
                                     id: 1281,
-                                    taskType: "y",
+                                    taskType: "Perapian TANAKA",
                                     description: "yy",
                                     priority: "P2",
-                                    area: ["Parkiran", "Hole 25"],
+                                    area: ["CH", "FC", "H1", "H2", "H3", "H4", "H5"],
+                                    needWorker: nil,
+                                    availableWorker: nil,
+                                    workerList: [],
+                                    isFinished: false
+                                ),
+                                .init(
+                                    id: 1281,
+                                    taskType: "Perapian TANAKA",
+                                    description: "yy",
+                                    priority: "P2",
+                                    area: ["CH", "FC", "H1", "H2", "H3", "H4", "H5"],
+                                    needWorker: nil,
+                                    availableWorker: nil,
+                                    workerList: [],
+                                    isFinished: false
+                                ),
+                                .init(
+                                    id: 1281,
+                                    taskType: "Perapian TANAKA",
+                                    description: "yy",
+                                    priority: "P2",
+                                    area: ["CH", "FC", "H1", "H2", "H3", "H4", "H5"],
+                                    needWorker: nil,
+                                    availableWorker: nil,
+                                    workerList: [],
+                                    isFinished: false
+                                ),
+                                .init(
+                                    id: 1281,
+                                    taskType: "Perapian TANAKA",
+                                    description: "yy",
+                                    priority: "P2",
+                                    area: ["CH", "FC", "H1", "H2", "H3", "H4", "H5"],
+                                    needWorker: nil,
+                                    availableWorker: nil,
+                                    workerList: [],
+                                    isFinished: false
+                                ),
+                                .init(
+                                    id: 1281,
+                                    taskType: "Perapian TANAKA",
+                                    description: "yy",
+                                    priority: "P2",
+                                    area: ["CH", "FC", "H1", "H2", "H3", "H4", "H5"],
+                                    needWorker: nil,
+                                    availableWorker: nil,
+                                    workerList: [],
+                                    isFinished: false
+                                ),
+                                .init(
+                                    id: 1281,
+                                    taskType: "Perapian TANAKA",
+                                    description: "yy",
+                                    priority: "P2",
+                                    area: ["CH", "FC", "H1", "H2", "H3", "H4", "H5"],
+                                    needWorker: nil,
+                                    availableWorker: nil,
+                                    workerList: [],
+                                    isFinished: false
+                                ),
+                                .init(
+                                    id: 1281,
+                                    taskType: "Perapian TANAKA",
+                                    description: "yy",
+                                    priority: "P2",
+                                    area: ["CH", "FC", "H1", "H2", "H3", "H4", "H5"],
+                                    needWorker: nil,
+                                    availableWorker: nil,
+                                    workerList: [],
+                                    isFinished: false
+                                ),
+                                .init(
+                                    id: 1281,
+                                    taskType: "Perapian TANAKA",
+                                    description: "yy",
+                                    priority: "P2",
+                                    area: ["CH", "FC", "H1", "H2", "H3", "H4", "H5"],
                                     needWorker: nil,
                                     availableWorker: nil,
                                     workerList: [],
@@ -376,10 +478,10 @@ extension MandorDashboardView {
                             tasks: [
                                 .init(
                                     id: 1282,
-                                    taskType: "l",
+                                    taskType: "Potong Green",
                                     description: "ll",
                                     priority: "P1",
-                                    area: ["Hole 8", "Main Gate"],
+                                    area: ["H8", "H7", "H6"],
                                     needWorker: nil,
                                     availableWorker: nil,
                                     workerList: [],
@@ -393,9 +495,9 @@ extension MandorDashboardView {
                             tasks: [
                                 .init(
                                     id: 1283,
-                                    taskType: "u",
+                                    taskType: "Service Golf Cart",
                                     description: "uu",
-                                    priority: "P1",
+                                    priority: "P4",
                                     area: ["Hole 2"],
                                     needWorker: nil,
                                     availableWorker: nil,
@@ -404,9 +506,9 @@ extension MandorDashboardView {
                                 ),
                                 .init(
                                     id: 1284,
-                                    taskType: "9",
+                                    taskType: "Perbaiki Roda Golf Cart 241",
                                     description: "99",
-                                    priority: "P4",
+                                    priority: "P1",
                                     area: ["Hole 6"],
                                     needWorker: nil,
                                     availableWorker: nil,
@@ -419,15 +521,12 @@ extension MandorDashboardView {
                 ),
             ]
         )
-
-        // We return a new ViewModel, initializing it with our mock data.
+        
         return MandorDashboardViewModel(mockPlan: mockData)
     }()
 }
 
-//#Preview {
-//    // This calls the special initializer for previews, injecting the mock ViewModel.
-//    MandorDashboardView(viewModel: MandorDashboardView.previewVM)
-//    // We still need a dummy SessionManager for the Logout button to work in the preview.
-//        .environmentObject(SessionManager())
-//}
+#Preview {
+    MandorDashboardView(viewModel: MandorDashboardView.previewVM)
+        .environmentObject(SessionManager())
+}
