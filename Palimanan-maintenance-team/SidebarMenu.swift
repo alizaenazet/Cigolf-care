@@ -31,14 +31,6 @@ enum ForemanMenu: Hashable {
         }
     }
     
-    var holeRange: [Int] {
-        switch self {
-        case .lembah: return Array(1...9)
-        case .danau: return Array(10...18)
-        case .bukit: return Array(19...27)
-        }
-    }
-    
     static func fromId(_ id: Int) -> ForemanMenu? {
         switch id {
         case 1: return .lembah

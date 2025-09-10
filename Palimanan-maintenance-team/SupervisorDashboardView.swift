@@ -30,11 +30,11 @@ struct SupervisorDashboardView: View {
                         NavigationLink(value: SidebarMenu.dashboard(.lembah)) {
                             Label("Lembah", systemImage: "leaf")
                         }
-                        NavigationLink(value: SidebarMenu.dashboard(.bukit)) {
-                            Label("Bukit", systemImage: "mountain.2")
-                        }
                         NavigationLink(value: SidebarMenu.dashboard(.danau)) {
                             Label("Danau", systemImage: "water.waves")
+                        }
+                        NavigationLink(value: SidebarMenu.dashboard(.bukit)) {
+                            Label("Bukit", systemImage: "mountain.2")
                         }
                     } label: {
                         Label("Dashboard", systemImage: "rectangle.grid.2x2")

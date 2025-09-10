@@ -19,17 +19,21 @@ struct AddTaskPopup: View {
     let division: Division
     let location: Location
     let foreman: ForemanMenu
-    let onSubmit: (_ jobType: String, _ area: [String], _ priority: Int, _ description: String) -> Void
+    let onSubmit:
+        (
+            _ jobType: String, _ area: [String], _ priority: Int,
+            _ description: String
+        ) -> Void
     let onClose: () -> Void
-    
+
     // Form states
     @State private var jobType: String = ""
-    @State private var selectedHoles: Set<Int> = []
+    @State private var selectedHoles: Set<String> = []
     @State private var priority: String = "P1"
     @State private var notes: String = ""
-    
+
     let priorities = ["P1", "P2", "P3", "P4", "P5"]
-    
+
     func holeOptions(for foremanId: Int) -> [String] {
         let mandatory = [
             "CH", "FC", "Villa", "Main Gate", "Driving Range", "Parkiran",
@@ -42,17 +46,19 @@ struct AddTaskPopup: View {
         default: return mandatory
         }
     }
-    
+
     var body: some View {
-        
+
         VStack(spacing: 16) {
             // Header
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Tambah Pekerjaan")
                         .font(.title2).bold()
-                    Text("\(foreman.title) | \(foreman.holeRange.first!)-\(foreman.holeRange.last!)")
-                        .font(.subheadline)
+                    Text(
+                        "\(foreman.title) | \(holeOptions(for: foreman.foremanId).joined(separator: ", "))"
+                    )
+                    .font(.subheadline)
                     Text("Divisi : \(division.name)")
                         .font(.subheadline).foregroundColor(.gray)
                 }
@@ -63,32 +69,34 @@ struct AddTaskPopup: View {
                         .foregroundColor(.gray)
                 }
             }
-            
+
             Divider()
-            
+
             // Jenis Pekerjaan
             VStack(alignment: .leading, spacing: 4) {
                 Text("Jenis Pekerjaan")
                 TextField("Isi jenis pekerjaan", text: $jobType)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
             }
-            
+
             // Hole/Area (Multi-select dropdown)
             VStack(alignment: .leading, spacing: 4) {
                 Text("Hole/Area")
-                
+
                 Menu {
-                    ForEach(foreman.holeRange, id: \.self) { hole in
+                    ForEach(holeOptions(for: foreman.foremanId), id: \.self) {
+                        option in
                         Button {
-                            if selectedHoles.contains(hole) {
-                                selectedHoles.remove(hole)
+                            if selectedHoles.contains(option) {
+                                selectedHoles.remove(option)
                             } else {
-                                selectedHoles.insert(hole)
+                                selectedHoles.insert(option)
                             }
+
                         } label: {
                             HStack {
-                                Text("Hole \(hole)")
-                                if selectedHoles.contains(hole) {
+                                Text(option)
+                                if selectedHoles.contains(option) {
                                     Image(systemName: "checkmark")
                                 }
                             }
@@ -96,17 +104,28 @@ struct AddTaskPopup: View {
                     }
                 } label: {
                     HStack {
-                        Text(selectedHoles.isEmpty ? "Pilih hole" :
-                                selectedHoles.map { String($0) }.joined(separator: ", "))
-                        .foregroundColor(selectedHoles.isEmpty ? .gray : .primary)
+                        Text(
+                            selectedHoles.isEmpty
+                                ? "Pilih hole"
+                                : selectedHoles.map { String($0) }.joined(
+                                    separator: ", "
+                                )
+                        )
+                        .foregroundColor(
+                            selectedHoles.isEmpty ? .gray : .primary
+                        )
                         Spacer()
                         Image(systemName: "chevron.down")
                     }
                     .padding(8)
-                    .background(RoundedRectangle(cornerRadius: 6).stroke(Color.gray.opacity(0.5)))
+                    .background(
+                        RoundedRectangle(cornerRadius: 6).stroke(
+                            Color.gray.opacity(0.5)
+                        )
+                    )
                 }
             }
-            
+
             // Prioritas
             VStack(alignment: .leading, spacing: 4) {
                 Text("Prioritas")
@@ -118,14 +137,18 @@ struct AddTaskPopup: View {
                 .pickerStyle(SegmentedPickerStyle())
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(8)
-                .background(RoundedRectangle(cornerRadius: 6).stroke(Color.gray.opacity(0.5)))
+                .background(
+                    RoundedRectangle(cornerRadius: 6).stroke(
+                        Color.gray.opacity(0.5)
+                    )
+                )
             }
-            
+
             // Keterangan
             VStack(alignment: .leading, spacing: 4) {
                 Text("Keterangan Tambahan")
                 TextEditor(text: $notes)
-                    .frame(minHeight: 100) // 👈 make it taller
+                    .frame(minHeight: 100)  // 👈 make it taller
                     .padding(8)
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
@@ -133,11 +156,16 @@ struct AddTaskPopup: View {
                     )
                     .background(Color.white)
             }
-            
+
             // Submit Button
             Button(action: {
-                let priorityValue = Int(priority.dropFirst()) ?? 1 // "P1" → 1
-                onSubmit(jobType, selectedHoles.map { String($0) }, priorityValue, notes)
+                let priorityValue = Int(priority.dropFirst()) ?? 1  // "P1" → 1
+                onSubmit(
+                    jobType,
+                    Array(selectedHoles),
+                    priorityValue,
+                    notes
+                )
             }) {
                 Text("Submit")
                     .font(.headline)
@@ -148,7 +176,7 @@ struct AddTaskPopup: View {
                     .cornerRadius(8)
             }
             .padding(.top, 8)
-            
+
         }
         .padding(.all, 25)
     }
