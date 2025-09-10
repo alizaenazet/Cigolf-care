@@ -50,11 +50,11 @@ struct SupervisorDashboardView: View {
                         NavigationLink(value: SidebarMenu.programHarian(.lembah)) {
                             Label("Lembah", systemImage: "leaf")
                         }
-                        NavigationLink(value: SidebarMenu.programHarian(.bukit)) {
-                            Label("Bukit", systemImage: "mountain.2")
-                        }
                         NavigationLink(value: SidebarMenu.programHarian(.danau)) {
                             Label("Danau", systemImage: "water.waves")
+                        }
+                        NavigationLink(value: SidebarMenu.programHarian(.bukit)) {
+                            Label("Bukit", systemImage: "mountain.2")
                         }
                     } label: {
                         Label("Program Harian", systemImage: "list.bullet.clipboard")
