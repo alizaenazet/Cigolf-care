@@ -142,7 +142,7 @@ struct MandorDashboardView: View {
                     locationId,
                     area,
                     priority,
-                    notes,
+                    description,
                     neededWorkers,
                     availableWorker,
                     workerNames,
@@ -159,7 +159,10 @@ struct MandorDashboardView: View {
                             availableWorker: availableWorker,
                             workerNameList: workerNames,
                             image: image
+                            description: description
                         )
+    
+                        await viewModel.fetchLatestDailyPlan()
                     }
                 }
             }
@@ -376,61 +379,6 @@ extension MandorDashboardView {
                             locationId: 4,
                             locationName: "Fairway",
                             tasks: [
-                                .init(
-                                    id: 1281,
-                                    taskType: "Perapian TANAKA",
-                                    description: "yy",
-                                    priority: "P2",
-                                    area: ["CH", "FC", "H1", "H2", "H3", "H4", "H5"],
-                                    needWorker: nil,
-                                    availableWorker: nil,
-                                    workerList: [],
-                                    isFinished: false
-                                ),
-                                .init(
-                                    id: 1281,
-                                    taskType: "Perapian TANAKA",
-                                    description: "yy",
-                                    priority: "P2",
-                                    area: ["CH", "FC", "H1", "H2", "H3", "H4", "H5"],
-                                    needWorker: nil,
-                                    availableWorker: nil,
-                                    workerList: [],
-                                    isFinished: false
-                                ),
-                                .init(
-                                    id: 1281,
-                                    taskType: "Perapian TANAKA",
-                                    description: "yy",
-                                    priority: "P2",
-                                    area: ["CH", "FC", "H1", "H2", "H3", "H4", "H5"],
-                                    needWorker: nil,
-                                    availableWorker: nil,
-                                    workerList: [],
-                                    isFinished: false
-                                ),
-                                .init(
-                                    id: 1281,
-                                    taskType: "Perapian TANAKA",
-                                    description: "yy",
-                                    priority: "P2",
-                                    area: ["CH", "FC", "H1", "H2", "H3", "H4", "H5"],
-                                    needWorker: nil,
-                                    availableWorker: nil,
-                                    workerList: [],
-                                    isFinished: false
-                                ),
-                                .init(
-                                    id: 1281,
-                                    taskType: "Perapian TANAKA",
-                                    description: "yy",
-                                    priority: "P2",
-                                    area: ["CH", "FC", "H1", "H2", "H3", "H4", "H5"],
-                                    needWorker: nil,
-                                    availableWorker: nil,
-                                    workerList: [],
-                                    isFinished: false
-                                ),
                                 .init(
                                     id: 1281,
                                     taskType: "Perapian TANAKA",

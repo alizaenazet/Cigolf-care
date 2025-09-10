@@ -9,7 +9,7 @@ import SwiftUI
 
 struct UpdateTaskView: View {
     @Environment(\.dismiss) var dismiss
-
+    
     let task: TaskDetail
     let foremanId: Int
     let locationId: Int
@@ -18,25 +18,43 @@ struct UpdateTaskView: View {
         _ locationId: Int,
         _ area: String,
         _ priority: String,
-        _ notes: String,
+        _ description: String,
         _ neededWorkers: Int,
         _ availableWorker: Int,
         _ workerNames: String,
         _ image: UIImage?
     ) -> Void
-
-    @State private var notes: String = ""
-    @State private var workerNames: String = ""
-    @State private var neededWorkers: String = ""
-    @State private var availableWorkers: String = ""
-    @State private var image: UIImage? = nil
+    
+    @State private var description: String
+    @State private var workerNames: String
+    @State private var neededWorkers: String
+    @State private var availableWorkers: String
+    @State private var image: UIImage?
     @State private var showImagePicker = false
-
+    
+    init(
+        task: TaskDetail,
+        foremanId: Int,
+        locationId: Int,
+        onSubmit: @escaping (String, Int, String, String, String, Int, Int, String, UIImage?) -> Void
+    ) {
+        self.task = task
+        self.foremanId = foremanId
+        self.locationId = locationId
+        self.onSubmit = onSubmit
+                
+        _description = State(initialValue: task.description ?? "")
+        _workerNames = State(initialValue: task.workerList.joined(separator: ", "))
+        _neededWorkers = State(initialValue: "\(task.needWorker ?? 0)")
+        _availableWorkers = State(initialValue: "\(task.availableWorker ?? 0)")
+        _image = State(initialValue: task.image)
+    }
+    
     var body: some View {
         NavigationStack {
             VStack {
                 formContent
-
+                
                 saveButton
             }
             .navigationTitle("Simpan Pekerjaan")
@@ -53,7 +71,7 @@ struct UpdateTaskView: View {
             }
         }
     }
-
+    
     private var formContent: some View {
         Form {
             Section {
@@ -61,21 +79,21 @@ struct UpdateTaskView: View {
                 labeledRow("Prioritas", value: "\(task.priority)")
                 labeledRow("Lokasi/Hole", value: task.area.joined(separator: ", "))
             }
-
+            
             Section(header: Text("Tenaga Kerja")) {
                 TextField("Nama Tenaga Kerja", text: $workerNames)
             }
-
+            
             Section {
                 TextField("Jumlah TK Diminta", text: $neededWorkers)
                     .keyboardType(.numberPad)
                 TextField("Jumlah TK Tersedia", text: $availableWorkers)
                     .keyboardType(.numberPad)
             }
-
+            
             Section(header: Text("Dokumentasi Pekerjaan")) {
                 photoPickerButton
-
+                
                 if let img = image {
                     Image(uiImage: img)
                         .resizable()
@@ -85,13 +103,13 @@ struct UpdateTaskView: View {
                         .padding(.top, 4)
                 }
             }
-
+            
             Section(header: Text("Catatan")) {
-                TextEditor(text: $notes)
+                TextEditor(text: $description)
                     .frame(minHeight: 100)
                     .overlay(
                         Group {
-                            if notes.isEmpty {
+                            if description.isEmpty {
                                 Text("Belum diisi")
                                     .foregroundColor(.gray)
                                     .padding(.horizontal, 5)
@@ -103,7 +121,7 @@ struct UpdateTaskView: View {
             }
         }
     }
-
+    
     private var photoPickerButton: some View {
         Button {
             showImagePicker = true
@@ -118,19 +136,19 @@ struct UpdateTaskView: View {
             .cornerRadius(12)
         }
     }
-
+    
     private var saveButton: some View {
         Button(action: {
             guard let needed = Int(neededWorkers),
                   let available = Int(availableWorkers)
             else { return }
-
+            
             onSubmit(
                 task.taskType,
                 locationId,
                 "\(task.area)",
                 task.priority,
-                notes,
+                description,
                 needed,
                 available,
                 "\([workerNames])",
@@ -152,7 +170,7 @@ struct UpdateTaskView: View {
         }
         .padding()
     }
-
+    
     private func labeledRow(_ label: String, value: String) -> some View {
         HStack {
             Text(label)
@@ -171,11 +189,12 @@ struct UpdateTaskView: View {
         area: ["Garasi", "Hole 6"],
         needWorker: 2,
         availableWorker: 1,
-        workerList: ["Budi"],
-        isFinished: false
+        workerList: ["Budi", "Andi"],
+        isFinished: false,
+        image: nil
     )
     
-    return UpdateTaskView(
+    UpdateTaskView(
         task: mockTask,
         foremanId: 1,
         locationId: 14
