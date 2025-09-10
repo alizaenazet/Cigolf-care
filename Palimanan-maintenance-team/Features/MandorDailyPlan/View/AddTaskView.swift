@@ -175,7 +175,8 @@ struct AddTaskView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { dismiss() }
-                        .foregroundColor(.green)
+                        .foregroundColor(Color(hex: "#79A222"))
+                        .fontWeight(.bold)
                 }
             }
 
@@ -230,4 +231,21 @@ extension View {
             self
         }
     }
+}
+
+// --- PREVIEW CODE ADDED HERE ---
+#Preview {
+    // We provide dummy data so the preview can be generated.
+    AddTaskView(
+        // Use a sample foremanId (e.g., 1 for "Lembah")
+        foremanId: 1,
+        
+        // The onSubmit action can be empty for the preview,
+        // since we only care about the UI.
+        onSubmit: { divisionId, locationId, jobType, area, priority, notes in
+            print("--- Preview Submit Button Tapped ---")
+            print("Division: \(divisionId), Location: \(locationId), Job: \(jobType)")
+            print("Area: \(area), Priority: \(priority), Notes: \(notes)")
+        }
+    )
 }

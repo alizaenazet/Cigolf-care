@@ -18,9 +18,12 @@ struct DailyRepTaskCard: View {
         LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
             Text(String(format: "%02d", index + 1))
                 .padding(.leading)
+            Text(task.priority)
             Text(task.taskType)
             Text(task.area.joined(separator: ", "))
-            Text(task.priority)
+            Text(String(task.needWorker ?? 0))
+            Text(String(task.availableWorker ?? 0))
+            Text(task.workerList?.joined(separator: ", ") ?? "")
             if let url = task.urlPhoto, !url.isEmpty {
                 Button {
                     FileDownloader.downloadTempFile(from: url) { fileURL in
@@ -54,7 +57,7 @@ struct DailyRepTaskCard: View {
             }
             Text(task.description)
                 .lineLimit(1)
-            Image(systemName: task.isFinished ? "checkmark.circle" : "xmark.circle")
+            Text(task.isFinished ? "Selesai" : "Belum")
                 .foregroundColor(task.isFinished ? .green : .red)
         }
         .font(.subheadline)

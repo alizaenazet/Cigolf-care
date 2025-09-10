@@ -152,7 +152,7 @@ struct TablePreviews: View {
                     .font(.title3)
                     .foregroundColor(.gray)
                 Text("Tanggal Program")
-                    .frame(width: 262, alignment: .leading)
+                    .frame(width: 325, alignment: .leading)
                     .font(.title3)
                     .foregroundColor(.gray)
 
@@ -196,10 +196,8 @@ struct TablePreviewRow: View {
 
             Text("\(index + 1)")
                 .frame(width: 53, alignment: .leading)
-            Text(
-                "\(weeklyPlan.startDate?.toFormattedString() ?? "-") - \(weeklyPlan.endDate?.toFormattedString() ?? "-")"
-            )
-            .frame(width: 292, alignment: .leading)
+            Text("\(weeklyPlan.startDate?.toFormattedString() ?? "-") - \(weeklyPlan.endDate?.toFormattedString() ?? "-")")
+                .frame(width: 325, alignment: .leading)
             Spacer()
             NavigationLink {
                 WeeklyPlanDetailViewWrapper(weeklyId: weeklyPlan.id)
