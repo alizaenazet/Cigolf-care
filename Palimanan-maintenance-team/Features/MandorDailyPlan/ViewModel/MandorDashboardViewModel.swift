@@ -21,6 +21,11 @@ class MandorDashboardViewModel: ObservableObject {
     ]
     @Published var selectedDivisionName: String = "Operasional"
     
+    // Add timer properties for refetch mechanism
+    private var foremanId: Int? = nil
+    private var timer: Timer?
+    private let refetchInterval: TimeInterval = 3.0 // 5 seconds interval
+    
     init() {}
     
     init(mockPlan: DailyPlanData) {
@@ -36,6 +41,7 @@ class MandorDashboardViewModel: ObservableObject {
         
         isLoading = true
         self.errorMessage = nil
+        self.foremanId = foremanId // Store foremanId for refetching
         
         do {
             let response: APIResponse<DailyPlanData> =
@@ -56,6 +62,29 @@ class MandorDashboardViewModel: ObservableObject {
         }
         
         isLoading = false
+    }
+    
+    // MARK: - Refetch Mechanism
+    func stopRefetching() {
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    func startRefetching() {
+        // Pastikan tidak ada timer yang sudah berjalan
+        stopRefetching()
+        
+        // Jadwalkan timer untuk memanggil fetchLatestDailyPlan setiap 'refetchInterval' detik
+        self.timer = Timer.scheduledTimer(withTimeInterval: refetchInterval, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            Task {
+                // Panggil fungsi fetchLatestDailyPlan
+                if await (self.foremanId != nil) {
+                    await self.fetchLatestDailyPlan()
+                    print("success refetch mandor daily plan data")
+                }
+            }
+        }
     }
     
     var mandorArea: String {

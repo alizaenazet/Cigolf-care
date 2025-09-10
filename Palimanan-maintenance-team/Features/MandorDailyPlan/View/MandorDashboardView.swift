@@ -79,8 +79,15 @@ struct MandorDashboardView: View {
                 if viewModel.dailyPlan == nil {
                     Task {
                         await viewModel.fetchLatestDailyPlan()
+                        // Start refetching when view appears
+                        viewModel.startRefetching()
                     }
                 }
+            }
+            
+            .onDisappear {
+                // Stop refetching when view disappears to prevent memory leaks
+                viewModel.stopRefetching()
             }
             
             .sheet(isPresented: $showAddTaskSheet) {

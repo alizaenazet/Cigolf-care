@@ -48,6 +48,10 @@ struct DashboardView: View {
         }
         .task(id: foremanId) {
             await viewModel.fetchReport(for: foremanId)
+            viewModel.startRefetching()
+        }
+        .onDisappear{
+            viewModel.stopRefetching()
         }
         
         .background(Color(.systemGray6))
