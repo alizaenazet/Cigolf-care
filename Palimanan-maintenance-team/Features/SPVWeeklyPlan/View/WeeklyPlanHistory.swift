@@ -121,12 +121,6 @@ struct WeeklyPlanHistory: View {
                 }
             }
             
-            .sheet(isPresented: $showShareSheet) {
-                if let fileURL = exportedFileURL {
-                    ShareSheet(activityItems: [fileURL])
-                }
-            }
-            
             .task {
                 await viewModel.fetchLastWeeklyPlanHistory()
                 print(
