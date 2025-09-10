@@ -36,8 +36,10 @@ struct HeaderView: View {
 struct FilterView: View {
     @Binding var startDate: Date
     @Binding var endDate: Date
-    var onSearch: (() -> Void)?   // ✅ callback
+    @Binding var selectedIds: [Int]   // ⬅️ pindahkan ke atas
     
+    var onSearch: (() -> Void)?       // ⬅️ setelah binding
+    var onExport: () -> Void
     
     var body: some View {
         HStack {
@@ -71,7 +73,10 @@ struct FilterView: View {
                 .background(Color(red: 121/255, green: 162/255, blue: 34/255))
                 .cornerRadius(12)
                 
-                Button(action: {}) {
+                Button(action: {
+                    print("Export with IDs: \(selectedIds)") // debug
+                    onExport()
+                }) {
                     HStack {
                         Image(systemName: "square.and.arrow.up")
                             .foregroundStyle(.white)
@@ -95,6 +100,11 @@ struct FilterView: View {
 struct ReportTableView: View {
     @Binding var reports: [DailyReport]  // ✅ binding
     let foremanId: Int
+    @Binding var selectedIds: [Int] // ✅ binding array id
+    
+    var allSelected: Bool {
+        !reports.isEmpty && reports.allSatisfy { $0.isChecked }
+    }
     
     var body: some View {
         
@@ -109,9 +119,25 @@ struct ReportTableView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                 Text("Detail").bold()
                     .frame(maxWidth: .infinity, alignment: .center)
-                Image(systemName: "square")
-                    .foregroundColor(Color(red: 121/255, green: 162/255, blue: 34/255))
-                    .frame(maxWidth: .infinity, alignment: .center)
+                Button(action: {
+                    if allSelected {
+                        // Unselect all
+                        for i in reports.indices {
+                            reports[i].isChecked = false
+                        }
+                        selectedIds.removeAll()
+                    } else {
+                        // Select all
+                        for i in reports.indices {
+                            reports[i].isChecked = true
+                        }
+                        selectedIds = reports.map { $0.id }
+                    }
+                }) {
+                    Image(systemName: allSelected ? "checkmark.square" : "square")
+                        .foregroundColor(Color(red: 121/255, green: 162/255, blue: 34/255))
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
             }
             .padding(.vertical, reports.isEmpty ? 8 : 0)
             
@@ -122,20 +148,21 @@ struct ReportTableView: View {
                     
                     if (reports.isEmpty) {
                         HStack {
-                                Text("No data available")
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                            }
-                            .padding(.vertical, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.gray.opacity(0.2))
-                            )
+                            Text("No data available")
+                                .frame(maxWidth: .infinity, alignment: .center)
+                        }
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.gray.opacity(0.2))
+                        )
                     } else {
                         ForEach(Array(reports.enumerated()), id: \.element.id) { index, report in
                             ReportRowView(
                                 id: String(index + 1),
                                 foremanId: foremanId,
-                                report: $reports[index] // ✅ binding ke row
+                                report: $reports[index],
+                                selectedIds: $selectedIds// ✅ binding ke row
                             )
                         }
                     }
@@ -148,7 +175,7 @@ struct ReportTableView: View {
         .background(.white)
         .cornerRadius(20)
         .onAppear {
-            print("Reports:", reports.count)
+//            print("Reports:", reports.count)
         }
     }
 }
@@ -159,6 +186,8 @@ struct ReportRowView: View {
     let id: String
     let foremanId: Int
     @Binding var report: DailyReport // ✅ binding
+    @Binding var selectedIds: [Int]
+    
     
     var body: some View {
         NavigationStack {
@@ -187,14 +216,19 @@ struct ReportRowView: View {
                 .frame(maxWidth: .infinity)
                 
                 Button(action: {
-                    report.isChecked.toggle() // ✅ toggle centang
-                    print("Checkbox tapped for \(report.id)")
-                }) {
-                    Image(systemName: report.isChecked ? "checkmark.square" : "square")
-                        .foregroundColor(Color(red: 121/255, green: 162/255, blue: 34/255))
-                }
-                .frame(maxWidth: .infinity)
-                .buttonStyle(PlainButtonStyle())
+                    report.isChecked.toggle()
+                    if report.isChecked {
+                        if !selectedIds.contains(report.id) {
+                            selectedIds.append(report.id)
+                        }
+                    } else {
+                        selectedIds.removeAll { $0 == report.id }
+                    }                }) {
+                        Image(systemName: report.isChecked ? "checkmark.square" : "square")
+                            .foregroundColor(Color(red: 121/255, green: 162/255, blue: 34/255))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .buttonStyle(PlainButtonStyle())
             }
             .padding(.vertical, 6)
             .background(
@@ -213,6 +247,8 @@ struct DailyReportView: View {
     @State private var startDate = Date()
     @State private var endDate = Date()
     
+    @State private var selectedIds: [Int] = []
+    
     var body: some View {
         
         NavigationStack {
@@ -228,17 +264,33 @@ struct DailyReportView: View {
                         // Header atas
                         HeaderView(foremanId: foremanId)
                         // Filter tanggal
-                        FilterView(startDate: $startDate, endDate: $endDate) {
-                            Task {
-                                await viewModel.fetchDailyReportByDateRange(
-                                    for: foremanId,
-                                    startDate: DateHelper.formatDateToDDMMYYYY(startDate),
-                                    endDate: DateHelper.formatDateToDDMMYYYY(endDate)
-                                )
+                        FilterView(
+                            startDate: $startDate,
+                            endDate: $endDate,
+                            selectedIds: $selectedIds,
+                            onSearch: {
+                                Task {
+                                    await viewModel.fetchDailyReportByDateRange(
+                                        for: foremanId,
+                                        startDate: DateHelper.formatDateToDDMMYYYY(startDate),
+                                        endDate: DateHelper.formatDateToDDMMYYYY(endDate)
+                                    )
+                                }
+                            },
+                            onExport: {
+                                Task {
+                                    await viewModel.exportFile(
+                                        for: foremanId,
+                                        dailyIds: selectedIds
+                                    )
+                                }
                             }
-                        }
+                        )
                         
-                        ReportTableView(reports: $viewModel.report, foremanId: foremanId)
+                        
+                        ReportTableView(reports: $viewModel.report, foremanId: foremanId,
+                                        selectedIds: $selectedIds
+                        )
                         
                     }
                     .padding()

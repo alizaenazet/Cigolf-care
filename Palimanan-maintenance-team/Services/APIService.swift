@@ -12,21 +12,49 @@ import Foundation
 final class APIService {
     static let shared = APIService()
     private init() {}
-
+    
     // MARK: - Base URL
     private let apiVersion = "v1"
-    private let baseHost =
-        "https://cigolf-backend-yebology3212-s53p6k3p.apn.leapcell.dev"
-    //    private let baseHost = "http://localhost:3000"
-
+        private let baseHost =
+            "https://cigolf-backend-yebology3212-s53p6k3p.apn.leapcell.dev"
+//    private let baseHost = "http://localhost:3000"
+    
     var baseURL: String {
         "\(baseHost)/api/\(apiVersion)"
     }
-
+    
     // MARK: - Session / Auth State
     @Published var accessToken: String? = nil
     @Published var userId: String? = nil
     @Published var role: String? = nil
+    
+    func requestRaw(_ path: String, method: String = "GET") async throws -> Data {
+        // Buat full URL String
+        let urlString = baseURL + path
+        print("Final URL String:", urlString)
+        
+        guard let url = URL(string: urlString) else {
+            throw URLError(.badURL)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue("application/zip", forHTTPHeaderField: "Accept")
+        
+        // Tambahkan Authorization Bearer
+        if let token = self.accessToken { // misal token disimpan di APIService
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200..<300).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        
+        return data
+    }
 
     func post<T: Decodable>(
         _ endpoint: String,

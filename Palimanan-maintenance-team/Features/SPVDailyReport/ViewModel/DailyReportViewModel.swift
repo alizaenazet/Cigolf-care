@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 @MainActor
 class DailyReportViewModel: ObservableObject {
@@ -250,6 +251,74 @@ class DailyReportViewModel: ObservableObject {
             self.errorMessage = "Failed to load report: \(error.localizedDescription)"
         }
     }
+    
+//    func exportFile(for foremanId: Int, dailyIds: [Int]) async {
+//        isLoading = true
+//        defer { isLoading = false }
+//        
+//        // gabungkan dailyIds jadi query string
+////        let query = dailyIds.map { String($0) }.joined(separator: ",")
+////        print(query)
+//        let urlString = "/foreman/\(foremanId)/daily-task/export?type=csv&daily_ids=\(dailyIds)"
+//        
+//        do {
+//            // Ambil raw data (ZIP)
+//            let data: Data = try await APIService.shared.requestRaw(
+//                urlString,
+//                method: .get
+//            )
+//            
+//            // Simpan ke temporary file
+//            let filename = "DailyReport.zip"
+//            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
+//            try data.write(to: tempURL)
+//            
+//            // Buka share sheet biar bisa "Save to Files" atau AirDrop
+//            DispatchQueue.main.async {
+//                let av = UIActivityViewController(activityItems: [tempURL], applicationActivities: nil)
+//                if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+//                   let root = scene.windows.first?.rootViewController {
+//                    root.present(av, animated: true)
+//                }
+//            }
+//            
+//        } catch {
+//            print("Export ZIP error:", error.localizedDescription)
+//            self.errorMessage = "Failed to export ZIP: \(error.localizedDescription)"
+//        }
+//    }
+    
+    func exportFile(for foremanId: Int, dailyIds: [Int]) async {
+        do {
+            // Buat string JSON mentah "[42,43,47]"
+            let dailyIdsString = "[\(dailyIds.map { String($0) }.joined(separator: ","))]"
+            
+            // Rakitan URL manual tanpa encoding
+            let path = "/foreman/\(foremanId)/daily-task/export?type=csv&daily_ids=\(dailyIdsString)"
+            print("Export Path:", path) // Harus persis: ...?daily_ids=[42,43,47]
+            
+            // Gunakan APIService.shared
+            let data = try await APIService.shared.requestRaw(path, method: "GET")
+            
+            // Simpan ke temporary file
+            let filename = "DailyReport.zip"
+            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
+            try data.write(to: tempURL)
+            
+            // Tampilkan share sheet
+            DispatchQueue.main.async {
+                let av = UIActivityViewController(activityItems: [tempURL], applicationActivities: nil)
+                if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let root = scene.windows.first?.rootViewController {
+                    root.present(av, animated: true)
+                }
+            }
+            
+        } catch {
+            print("Export ZIP error:", error.localizedDescription)
+        }
+    }
+
     
     func fetchReportDetail(for foremanId: Int, reportId: Int) async {
         isLoading = true
