@@ -64,6 +64,36 @@ class MandorDashboardViewModel: ObservableObject {
         isLoading = false
     }
     
+    func fetchLatestDailyPlanWithoutLoading() async {
+        guard let foremanId = SessionManager.shared.foremanId else {
+            self.errorMessage =
+            "Error: Foreman ID not found for this user. Please log in again."
+            return
+        }
+        
+        self.errorMessage = nil
+        self.foremanId = foremanId // Store foremanId for refetching
+        
+        do {
+            let response: APIResponse<DailyPlanData> =
+            try await APIService.shared.request(
+                "/foreman/\(foremanId)/daily-task/latest-day",
+                responseType: APIResponse<DailyPlanData>.self
+            )
+            
+            if let data = response.data {
+                self.dailyPlan = data
+            } else {
+                self.errorMessage = response.message
+            }
+            
+        } catch {
+            self.errorMessage =
+            "Failed to load data: \(error.localizedDescription)"
+        }
+        
+    }
+    
     // MARK: - Refetch Mechanism
     func stopRefetching() {
         timer?.invalidate()
@@ -80,7 +110,7 @@ class MandorDashboardViewModel: ObservableObject {
             Task {
                 // Panggil fungsi fetchLatestDailyPlan
                 if await (self.foremanId != nil) {
-                    await self.fetchLatestDailyPlan()
+                    await self.fetchLatestDailyPlanWithoutLoading()
                     print("success refetch mandor daily plan data")
                 }
             }
