@@ -14,8 +14,15 @@ class DashboardViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     
+    private var foremanId: Int? = nil
+    private var timer: Timer?
+    private let refetchInterval: TimeInterval = 3.0 // ✅ Atur interval di sini (misalnya 10 detik)
+    
+    
     func fetchReport(for foremanId: Int) async {
         isLoading = true
+        self.foremanId = foremanId
+        
         defer { isLoading = false }
         
         do {
@@ -80,6 +87,30 @@ class DashboardViewModel: ObservableObject {
                 print("🔍 Alamofire error:", afError.errorDescription ?? "")
             }
             self.errorMessage = "Failed to add new daily task: \(error.localizedDescription)"
+        }
+    }
+    
+    func stopRefetching() {
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    
+    func startRefetching() {
+        // Pastikan tidak ada timer yang sudah berjalan
+        stopRefetching()
+
+        // Jadwalkan timer untuk memanggil fetchReport setiap 'refetchInterval' detik
+        self.timer = Timer.scheduledTimer(withTimeInterval: refetchInterval, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            Task {
+                // Panggil fungsi fetchReport
+                // Anda perlu menyimpan foremanId atau meneruskannya
+                if await (self.foremanId != nil) { // 💡 Contoh: ambil dari data yang sudah ada
+                    await self.fetchReport(for: self.foremanId!)
+                    print("success refetch data")
+                }
+            }
         }
     }
 }
