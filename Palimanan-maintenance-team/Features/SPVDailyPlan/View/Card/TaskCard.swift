@@ -13,7 +13,7 @@ struct TaskCard: View {
     let columns: [GridItem]
     @State private var showPreview = false
     @State private var previewURL: URL?
-    
+
     var body: some View {
         LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
             Text(String(format: "%02d", index + 1))
@@ -21,13 +21,12 @@ struct TaskCard: View {
             Text(task.taskType)
             Text(task.area.joined(separator: ", "))
             Text(task.priority)
-            if let url = task.urlPhoto, !url.isEmpty {
+            if let url = task.imageUrl, !url.isEmpty {
                 Button {
                     FileDownloader.downloadTempFile(from: url) { fileURL in
                         if let fileURL = fileURL {
                             DispatchQueue.main.async {
-                                self.previewURL = fileURL
-                                self.showPreview = true
+                                QuickLookPresenter.present(fileURL: fileURL)  // 👈 show immediately
                             }
                         }
                     }
@@ -41,7 +40,8 @@ struct TaskCard: View {
                         .cornerRadius(4)
                 }
             } else {
-                Button {} label: {
+                Button {
+                } label: {
                     Label("Klik untuk melihat", systemImage: "")
                         .font(.subheadline)
                         .padding(.horizontal, 8)
@@ -54,19 +54,14 @@ struct TaskCard: View {
             }
             Text(task.description)
                 .lineLimit(1)
-            
+
             Text(task.isFinished ? "Selesai" : "Belum")
                 .lineLimit(1)
                 .foregroundColor(task.isFinished ? .green : .red)
-            
+
         }
         .font(.subheadline)
         .padding(.horizontal)
         .padding(.vertical, 10)
-        .sheet(isPresented: $showPreview) {
-            if let previewURL = previewURL {
-                QuickLookPreview(url: previewURL)
-            }
-        }
     }
 }

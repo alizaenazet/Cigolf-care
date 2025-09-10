@@ -13,7 +13,7 @@ struct DailyRepTaskCard: View {
     let columns: [GridItem]
     @State private var showPreview = false
     @State private var previewURL: URL?
-    
+
     var body: some View {
         LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
             Text(String(format: "%02d", index + 1))
@@ -24,13 +24,12 @@ struct DailyRepTaskCard: View {
             Text(String(task.needWorker ?? 0))
             Text(String(task.availableWorker ?? 0))
             Text(task.workerList?.joined(separator: ", ") ?? "")
-            if let url = task.urlPhoto, !url.isEmpty {
+            if let url = task.imageUrl, !url.isEmpty {
                 Button {
                     FileDownloader.downloadTempFile(from: url) { fileURL in
                         if let fileURL = fileURL {
                             DispatchQueue.main.async {
-                                self.previewURL = fileURL
-                                self.showPreview = true
+                                QuickLookPresenter.present(fileURL: fileURL)  // 👈 show immediately
                             }
                         }
                     }
@@ -44,7 +43,8 @@ struct DailyRepTaskCard: View {
                         .cornerRadius(4)
                 }
             } else {
-                Button {} label: {
+                Button {
+                } label: {
                     Label("Klik untuk melihat", systemImage: "")
                         .font(.subheadline)
                         .padding(.horizontal, 8)
@@ -63,10 +63,5 @@ struct DailyRepTaskCard: View {
         .font(.subheadline)
         .padding(.horizontal)
         .padding(.vertical, 10)
-        .sheet(isPresented: $showPreview) {
-            if let previewURL = previewURL {
-                QuickLookPreview(url: previewURL)
-            }
-        }
     }
 }
