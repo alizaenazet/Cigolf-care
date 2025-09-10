@@ -158,7 +158,7 @@ struct MandorDashboardView: View {
                             workerNeeded: neededWorkers,
                             availableWorker: availableWorker,
                             workerNameList: workerNames,
-                            image: image
+                            image: image,
                             description: description
                         )
     
