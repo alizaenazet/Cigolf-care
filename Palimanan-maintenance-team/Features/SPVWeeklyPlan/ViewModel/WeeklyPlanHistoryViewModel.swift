@@ -29,10 +29,11 @@ class WeeklyPlanHistoryViewModel: ObservableObject {
             // Properly assign the dates
             self.weeklyPlanHistoryPreview = response.data
             if let firstItem = response.data.first {
-                self.startAt = firstItem.startDate ?? Date()
+                self.endAt = firstItem.endDate ?? Date()
             }
+            
             if let lastItem = response.data.last {
-                self.endAt = lastItem.endDate ?? Date()
+                self.startAt = lastItem.startDate ?? Date()
             }
             
         } catch {

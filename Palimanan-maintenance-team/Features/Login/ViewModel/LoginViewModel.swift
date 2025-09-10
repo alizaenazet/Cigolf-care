@@ -5,6 +5,7 @@
 //  Created by Louis Mario Wijaya on 01/09/25.
 //
 
+import OneSignalFramework
 import Foundation
 
 class LoginViewModel: ObservableObject {
@@ -62,6 +63,9 @@ class LoginViewModel: ObservableObject {
                     self.errorMessage = nil
                     
                     completion(true, loginResponse.data.accessToken, loginResponse.data.user.role, loginResponse.data.user.id)
+                    
+                    OneSignal.login(String(loginResponse.data.user.id))
+                    OneSignal.User.addTag(key: "role", value: loginResponse.data.user.role)
                 
                 } else if let errorResponse = try? JSONDecoder().decode(LoginErrorResponse.self, from: data) {
                     print("❌ Error: Decoded LoginErrorResponse.")
