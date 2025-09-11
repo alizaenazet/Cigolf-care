@@ -37,14 +37,18 @@ struct MandorDashboardView: View {
                         .accessibilityLabel(
                             "Gagal memuat data."
                         )
-                    
+
                     Button(action: {
                         Task {
                             await viewModel.fetchLatestDailyPlan()
                         }
                     }) {
-                        Label("Coba Kembali", systemImage: "arrow.trianglehead.clockwise.rotate.90")
-                            .frame(maxWidth: .infinity)
+                        Label(
+                            "Coba Kembali",
+                            systemImage:
+                                "arrow.trianglehead.clockwise.rotate.90"
+                        )
+                        .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(.accentColor)
@@ -52,7 +56,7 @@ struct MandorDashboardView: View {
                     .accessibilityLabel(
                         "Coba Kembali."
                     )
-                    
+
                 } else if let plan = viewModel.dailyPlan {
                     if DateHelper.isToday(plan.createdAt) {
                         dashboardContent(plan: plan)
@@ -65,7 +69,9 @@ struct MandorDashboardView: View {
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                             .padding()
-                            .accessibilityLabel("Tidak ada pekerjaan, silakan menambahkan pekerjaan")
+                            .accessibilityLabel(
+                                "Tidak ada pekerjaan, silakan menambahkan pekerjaan"
+                            )
 
                             Button(action: { showAddTaskSheet = true }) {
                                 Label("Tambah Pekerjaan", systemImage: "plus")
@@ -118,22 +124,32 @@ struct MandorDashboardView: View {
                     area,
                     priority,
                     description in
-                    if let plan = viewModel.dailyPlan {
-                        if DateHelper.isToday(plan.createdAt) {
-                            await viewModel.addSelfNewDailyTask(
-                                for: SessionManager().foremanId!,
-                                taskId: plan.id,
-                                divisionId: divisionId,
-                                locationId: locationId,
-                                jobType: jobType,
-                                area: area,
-                                priority: priority,
-                                description: description
-                            )
-                            await viewModel.fetchLatestDailyPlan()
-                            return true
+                    do {
+                        if let plan = viewModel.dailyPlan {
+                            if DateHelper.isToday(plan.createdAt) {
+                                try await viewModel.addSelfNewDailyTask(
+                                    for: SessionManager().foremanId!,
+                                    taskId: plan.id,
+                                    divisionId: divisionId,
+                                    locationId: locationId,
+                                    jobType: jobType,
+                                    area: area,
+                                    priority: priority,
+                                    description: description
+                                )
+                            } else {
+                                try await viewModel.createNewDailyPlanAndTask(
+                                    for: SessionManager().foremanId!,
+                                    divisionId: divisionId,
+                                    locationId: locationId,
+                                    jobType: jobType,
+                                    area: area,
+                                    priority: priority,
+                                    description: description
+                                )
+                            }
                         } else {
-                            await viewModel.createNewDailyPlanAndTask(
+                            try await viewModel.createNewDailyPlanAndTask(
                                 for: SessionManager().foremanId!,
                                 divisionId: divisionId,
                                 locationId: locationId,
@@ -142,21 +158,16 @@ struct MandorDashboardView: View {
                                 priority: priority,
                                 description: description
                             )
-                            await viewModel.fetchLatestDailyPlan()
-                            return true
                         }
-                    } else {
-                        await viewModel.createNewDailyPlanAndTask(
-                            for: SessionManager().foremanId!,
-                            divisionId: divisionId,
-                            locationId: locationId,
-                            jobType: jobType,
-                            area: area,
-                            priority: priority,
-                            description: description
-                        )
+
                         await viewModel.fetchLatestDailyPlan()
                         return true
+                    } catch {
+                        print(
+                            "❌ Failed to add task:",
+                            error.localizedDescription
+                        )
+                        return false
                     }
                 }
             }
@@ -176,22 +187,30 @@ struct MandorDashboardView: View {
                     availableWorker,
                     workerNames,
                     image in
-                    await viewModel.updateTask(
-                        foremanId: SessionManager.shared.foremanId!,
-                        reportId: viewModel.dailyPlan?.id ?? 0,
-                        taskId: task.id,
-                        jobType: jobType,
-                        locationId: locationId,
-                        areas: area,
-                        workerNeeded: neededWorkers,
-                        availableWorker: availableWorker,
-                        workerNameList: workerNames,
-                        image: image,
-                        description: description
-                    )
-
-                    await viewModel.fetchLatestDailyPlan()
-                    return true
+                    do {
+                        try await viewModel.updateTask(
+                            foremanId: SessionManager.shared.foremanId!,
+                            reportId: viewModel.dailyPlan?.id ?? 0,
+                            taskId: task.id,
+                            jobType: jobType,
+                            locationId: locationId,
+                            areas: area,
+                            workerNeeded: neededWorkers,
+                            availableWorker: availableWorker,
+                            workerNameList: workerNames,
+                            image: image,
+                            description: description
+                        )
+                        
+                        await viewModel.fetchLatestDailyPlan()
+                        return true
+                    } catch {
+                        print(
+                            "❌ Failed to update task:",
+                            error.localizedDescription
+                        )
+                        return false 
+                    }
                 }
             }
         }
@@ -276,7 +295,9 @@ struct MandorDashboardView: View {
                             }
                             .background(Color(hex: "#79A222"))
                             .cornerRadius(16)
-                            .accessibilityHint("Tambah pekerjaan baru ke daftar")
+                            .accessibilityHint(
+                                "Tambah pekerjaan baru ke daftar"
+                            )
                         }
                     }
                     .padding(.horizontal)
@@ -351,7 +372,9 @@ struct MandorDashboardView: View {
         }
     }
 
-    private func taskRow(task: TaskDetail, locationId: Int, taskState: Bool) -> some View {
+    private func taskRow(task: TaskDetail, locationId: Int, taskState: Bool)
+        -> some View
+    {
         Button {
             selectedTask = task
             selectedTaskLocationId = locationId
