@@ -30,17 +30,18 @@ struct AddTaskView: View {
     private var today: String {
         DateHelper.formattedIndonesianDate(Date())
     }
-    
+
     let availableDivisions: [String] = [
         "Operasional",
         "Landscape",
         "Projek",
         "Irigasi",
-        "Mekanik"
+        "Mekanik",
     ]
 
     let availableLocations: [String] = [
-        "All", "Green", "Tee Box", "Fairway", "Apron", "Rough", "Bunker", "Nursery",
+        "All", "Green", "Tee Box", "Fairway", "Apron", "Rough", "Bunker",
+        "Nursery",
         "Driving Range", "Maingate", "Putting 10", "Paving Room", "Resto",
         "Mekanik", "Irigasi",
     ]
@@ -74,7 +75,8 @@ struct AddTaskView: View {
                     }
                     Picker("Divisi", selection: $selectedDivision) {
                         Text("Pilih Divisi").tag(-1)
-                        ForEach(availableDivisions.indices, id: \.self) { index in
+                        ForEach(availableDivisions.indices, id: \.self) {
+                            index in
                             Text(availableDivisions[index])
                                 .tag(index + 1)
                         }
@@ -82,7 +84,8 @@ struct AddTaskView: View {
 
                     Picker("Area", selection: $selectedLocation) {
                         Text("Pilih Area").tag(-1)
-                        ForEach(availableLocations.indices, id: \.self) { index in
+                        ForEach(availableLocations.indices, id: \.self) {
+                            index in
                             Text(availableLocations[index])
                                 .tag(index + 1)
                         }
@@ -175,14 +178,14 @@ struct AddTaskView: View {
                 }
             }
 
-            VStack {
+            VStack (spacing: 8) {
                 Button(action: {
                     Task {
                         guard selectedDivision != -1,
                             selectedLocation != -1, !jobType.isEmpty,
                             !selectedHoles.isEmpty
                         else { return }
-                        
+
                         isSending = true
                         errorMessage = nil
 
@@ -194,7 +197,7 @@ struct AddTaskView: View {
                             priority,
                             notes
                         )
-                        
+
                         isSending = false
                         if success {
                             dismiss()
@@ -205,7 +208,9 @@ struct AddTaskView: View {
                 }) {
                     if isSending {
                         ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .progressViewStyle(
+                                CircularProgressViewStyle(tint: .white)
+                            )
                             .frame(maxWidth: .infinity)
                             .padding()
                     } else {
@@ -219,14 +224,30 @@ struct AddTaskView: View {
                     }
                 }
                 .background(
-                        (selectedDivision == -1 || selectedLocation == -1 || jobType.isEmpty || selectedHoles.isEmpty)
+                    (selectedDivision == -1 || selectedLocation == -1
+                        || jobType.isEmpty || selectedHoles.isEmpty)
                         ? Color.gray
-                        : Color(red: 121/255, green: 162/255, blue: 34/255)
-                    )
+                        : Color(
+                            red: 121 / 255,
+                            green: 162 / 255,
+                            blue: 34 / 255
+                        )
+                )
                 .foregroundColor(.white)
                 .cornerRadius(12)
-                .disabled(selectedDivision == -1 || selectedLocation == -1 || jobType.isEmpty || selectedHoles.isEmpty || isSending)
+                .disabled(
+                    selectedDivision == -1 || selectedLocation == -1
+                        || jobType.isEmpty || selectedHoles.isEmpty || isSending
+                )
                 .padding()
+            }
+
+            if let error = errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
+                    .font(.footnote)
+                    .padding(.horizontal)
+                    .multilineTextAlignment(.center)
             }
         }
     }

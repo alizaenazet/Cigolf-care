@@ -154,55 +154,67 @@ struct UpdateTaskView: View {
     }
 
     private var saveButton: some View {
-        Button(action: {
-            Task {
-                guard let needed = Int(neededWorkers),
-                    let available = Int(availableWorkers)
-                else { return }
+        VStack(spacing: 8) {
+            Button(action: {
+                Task {
+                    guard let needed = Int(neededWorkers),
+                        let available = Int(availableWorkers)
+                    else { return }
 
-                isSaving = true
-                errorMessage = nil
+                    isSaving = true
+                    errorMessage = nil
 
-                let success = await onSubmit(
-                    task.taskType,
-                    locationId,
-                    "\(task.area)",
-                    task.priority,
-                    description,
-                    needed,
-                    available,
-                    "\([workerNames])",
-                    image
-                )
+                    let success = await onSubmit(
+                        task.taskType,
+                        locationId,
+                        "\(task.area)",
+                        task.priority,
+                        description,
+                        needed,
+                        available,
+                        "\([workerNames])",
+                        image
+                    )
 
-                isSaving = false
-                if success {
-                    dismiss()
-                } else {
-                    errorMessage = "Gagal menyimpan data"
+                    isSaving = false
+                    if success {
+                        dismiss()
+                    } else {
+                        errorMessage = "Gagal menyimpan data"
+                    }
                 }
-            }
-        }) {
-            if isSaving {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+            }) {
+                if isSaving {
+                    ProgressView()
+                        .progressViewStyle(
+                            CircularProgressViewStyle(tint: .white)
+                        )
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                } else {
+                    HStack {
+                        Image(systemName: "checkmark.circle")
+                        Text("Simpan Pekerjaan")
+                            .fontWeight(.semibold)
+                    }
                     .frame(maxWidth: .infinity)
                     .padding()
-            } else {
-                HStack {
-                    Image(systemName: "checkmark.circle")
-                    Text("Simpan Pekerjaan")
-                        .fontWeight(.semibold)
                 }
-                .frame(maxWidth: .infinity)
-                .padding()
+            }
+            .background(Color(red: 121 / 255, green: 162 / 255, blue: 34 / 255))
+            .foregroundColor(.white)
+            .cornerRadius(12)
+            .disabled(isSaving)
+
+            if let errorMessage = errorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+                    .font(.subheadline)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 4)
             }
         }
-        .background(Color(red: 121 / 255, green: 162 / 255, blue: 34 / 255))
-        .foregroundColor(.white)
-        .cornerRadius(12)
         .padding()
-        .disabled(isSaving)
     }
 
     private func labeledRow(_ label: String, value: String) -> some View {
