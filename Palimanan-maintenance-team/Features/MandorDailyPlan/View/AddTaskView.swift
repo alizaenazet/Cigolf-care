@@ -15,7 +15,7 @@ struct AddTaskView: View {
         (
             _ divisionId: Int, _ locationId: Int, _ jobType: String,
             _ area: [String], _ priority: Int, _ description: String
-        ) -> Void
+        ) async -> Bool
 
     @State private var selectedDivision: Int = -1
     @State private var selectedLocation: Int = -1
@@ -24,6 +24,8 @@ struct AddTaskView: View {
     @State private var selectedHoles: Set<String> = []
     @State private var notes: String = ""
     @State private var isNewDay: Bool = false
+    @State private var isSending: Bool = false
+    @State private var errorMessage: String?
 
     private var today: String {
         DateHelper.formattedIndonesianDate(Date())
@@ -175,37 +177,55 @@ struct AddTaskView: View {
 
             VStack {
                 Button(action: {
-                    guard selectedDivision != -1,
-                        selectedLocation != -1, !jobType.isEmpty,
-                        !selectedHoles.isEmpty
-                    else { return }
+                    Task {
+                        guard selectedDivision != -1,
+                            selectedLocation != -1, !jobType.isEmpty,
+                            !selectedHoles.isEmpty
+                        else { return }
+                        
+                        isSending = true
+                        errorMessage = nil
 
-                    onSubmit(
-                        selectedDivision,
-                        selectedLocation,
-                        jobType,
-                        Array(selectedHoles),
-                        priority,
-                        notes
-                    )
-                    dismiss()
-                }) {
-                    HStack {
-                        Image(systemName: "checkmark.circle")
-                        Text("Tambah Pekerjaan")
-                            .fontWeight(.semibold)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                            (selectedDivision == -1 || selectedLocation == -1 || jobType.isEmpty || selectedHoles.isEmpty)
-                            ? Color.gray
-                            : Color(red: 121/255, green: 162/255, blue: 34/255)
+                        let success = await onSubmit(
+                            selectedDivision,
+                            selectedLocation,
+                            jobType,
+                            Array(selectedHoles),
+                            priority,
+                            notes
                         )
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
+                        
+                        isSending = false
+                        if success {
+                            dismiss()
+                        } else {
+                            errorMessage = "Gagal menambahkan pekerjaan"
+                        }
+                    }
+                }) {
+                    if isSending {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    } else {
+                        HStack {
+                            Image(systemName: "checkmark.circle")
+                            Text("Tambah Pekerjaan")
+                                .fontWeight(.semibold)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                    }
                 }
-                .disabled(selectedDivision == -1 || selectedLocation == -1 || jobType.isEmpty || selectedHoles.isEmpty)
+                .background(
+                        (selectedDivision == -1 || selectedLocation == -1 || jobType.isEmpty || selectedHoles.isEmpty)
+                        ? Color.gray
+                        : Color(red: 121/255, green: 162/255, blue: 34/255)
+                    )
+                .foregroundColor(.white)
+                .cornerRadius(12)
+                .disabled(selectedDivision == -1 || selectedLocation == -1 || jobType.isEmpty || selectedHoles.isEmpty || isSending)
                 .padding()
             }
         }
@@ -225,13 +245,13 @@ extension View {
     }
 }
 
-#Preview {
-    AddTaskView(
-        foremanId: 1,
-        onSubmit: { divisionId, locationId, jobType, area, priority, notes in
-            print("--- Preview Submit Button Tapped ---")
-            print("Division: \(divisionId), Location: \(locationId), Job: \(jobType)")
-            print("Area: \(area), Priority: \(priority), Notes: \(notes)")
-        }
-    )
-}
+//#Preview {
+//    AddTaskView(
+//        foremanId: 1,
+//        onSubmit: { divisionId, locationId, jobType, area, priority, notes in
+//            print("--- Preview Submit Button Tapped ---")
+//            print("Division: \(divisionId), Location: \(locationId), Job: \(jobType)")
+//            print("Area: \(area), Priority: \(priority), Notes: \(notes)")
+//        }
+//    )
+//}

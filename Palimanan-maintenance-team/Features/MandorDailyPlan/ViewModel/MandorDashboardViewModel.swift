@@ -277,6 +277,8 @@ class MandorDashboardViewModel: ObservableObject {
         image: UIImage?,
         description: String?
     ) async {
+        isLoading = true
+        defer { isLoading = false }
         do {
             let endpoint =
             "/foreman/\(foremanId)/daily-task/\(reportId)/update-task/\(taskId)"
