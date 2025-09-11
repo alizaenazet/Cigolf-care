@@ -43,7 +43,7 @@ struct DailyRepForemanCard: View {
                                 .font(.caption)
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 6)
-                                .background(Color.green.opacity(0.2))
+                                .background(Color.accentColor.opacity(0.2))
                                 .cornerRadius(8)
                         }
                         .buttonStyle(.plain)
@@ -56,7 +56,7 @@ struct DailyRepForemanCard: View {
                                 .font(.caption)
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 6)
-                                .background(Color.green)
+                                .background(Color.accentColor)
                                 .foregroundColor(.white)
                                 .cornerRadius(8)
                         }

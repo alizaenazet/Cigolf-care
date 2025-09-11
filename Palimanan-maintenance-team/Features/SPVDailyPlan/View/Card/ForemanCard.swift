@@ -42,7 +42,7 @@ struct ForemanCard: View {
                                 .font(.caption)
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 6)
-                                .background(Color.green.opacity(0.2))
+                                .background(Color.accentColor.opacity(0.2))
                                 .cornerRadius(8)
                         }
                         .buttonStyle(.plain)
@@ -55,7 +55,7 @@ struct ForemanCard: View {
                                 .font(.caption)
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 6)
-                                .background(Color.green)
+                                .background(Color.accentColor)
                                 .foregroundColor(.white)
                                 .cornerRadius(8)
                         }
@@ -68,14 +68,14 @@ struct ForemanCard: View {
                     title: "Pekerjaan Selesai",
                     value: report.finishedTasks!,
                     total: report.totalTasks!,
-                    color: .green,
+                    color: .accentColor,
                     systemImage: "checkmark.circle"
                 )
                 progressCard(
                     title: "Dalam Pengerjaan",
                     value: report.pendingTasks!,
                     total: report.totalTasks!,
-                    color: .red,
+                    color: Color(hex: "2563EB"),
                     systemImage: "figure.walk"
                 )
             }
@@ -100,7 +100,7 @@ struct ForemanCard: View {
             }
             
             ProgressView(value: Double(value), total: Double(total))
-                .progressViewStyle(LinearProgressViewStyle(tint: .white))
+                .progressViewStyle(LinearProgressViewStyle(tint:  .white))
         }
         .padding()
         .frame(maxWidth: .infinity)

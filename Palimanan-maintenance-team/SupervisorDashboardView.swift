@@ -62,6 +62,7 @@ struct SupervisorDashboardView: View {
                 }
                 .listStyle(.automatic)
                 .navigationTitle("Menu")
+                .background(Color(.systemGray6))
                 
                 Button(action: {
                     SessionManager.shared.logout()
@@ -86,6 +87,7 @@ struct SupervisorDashboardView: View {
                 .buttonStyle(.plain)
                 .padding(.horizontal, 30)
                 .padding(.bottom, 30)
+                .background(Color(.systemGray6))
 
             } detail: {
                 switch selection {
@@ -105,6 +107,7 @@ struct SupervisorDashboardView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            .background(Color(.systemGray6))
         }
 }
 
