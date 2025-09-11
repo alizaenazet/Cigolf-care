@@ -13,30 +13,46 @@ struct MandorDashboardView: View {
     @State private var showAddTaskSheet: Bool = false
     @State private var selectedTask: TaskDetail? = nil
     @State private var selectedTaskLocationId: Int = -1
-    
+
     init() {
         _viewModel = StateObject(wrappedValue: MandorDashboardViewModel())
     }
-    
+
     init(viewModel: MandorDashboardViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
-    
+
     var body: some View {
         NavigationStack {
             VStack {
                 if viewModel.isLoading {
-                    ProgressView("Loading Data...")
+                    ProgressView("Memuat data...")
                         .padding()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .accessibilityLabel("Memuat data")
-                } else if let errorMessage = viewModel.errorMessage {
-                    Text("Error: \(errorMessage)")
+                        .accessibilityLabel("Sedang memuat data")
+                } else if viewModel.errorMessage != nil {
+                    Text("Gagal memuat data.")
                         .foregroundColor(.red)
                         .padding()
                         .accessibilityLabel(
-                            "Terjadi kesalahan: \(errorMessage)"
+                            "Gagal memuat data."
                         )
+                    
+                    Button(action: {
+                        Task {
+                            await viewModel.fetchLatestDailyPlan()
+                        }
+                    }) {
+                        Label("Coba Kembali", systemImage: "arrow.trianglehead.clockwise.rotate.90")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.accentColor)
+                    .padding(.horizontal)
+                    .accessibilityLabel(
+                        "Coba Kembali."
+                    )
+                    
                 } else if let plan = viewModel.dailyPlan {
                     if DateHelper.isToday(plan.createdAt) {
                         dashboardContent(plan: plan)
@@ -49,7 +65,8 @@ struct MandorDashboardView: View {
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                             .padding()
-                            
+                            .accessibilityLabel("Tidak ada pekerjaan, silakan menambahkan pekerjaan")
+
                             Button(action: { showAddTaskSheet = true }) {
                                 Label("Tambah Pekerjaan", systemImage: "plus")
                                     .frame(maxWidth: .infinity)
@@ -57,15 +74,18 @@ struct MandorDashboardView: View {
                             .buttonStyle(.borderedProminent)
                             .tint(.accentColor)
                             .padding(.horizontal)
+                            .accessibilityLabel(
+                                "Tambah Pekerjaan."
+                            )
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 } else {
-                    Text("No data available.")
+                    Text("Tidak ada data yang tersedia.")
                         .accessibilityLabel("Tidak ada data yang tersedia")
                 }
             }
-            
+
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Keluar", role: .destructive) {
@@ -74,7 +94,7 @@ struct MandorDashboardView: View {
                     .fontWeight(.semibold)
                 }
             }
-            
+
             .onAppear {
                 if viewModel.dailyPlan == nil {
                     Task {
@@ -84,12 +104,12 @@ struct MandorDashboardView: View {
                     }
                 }
             }
-            
+
             .onDisappear {
                 // Stop refetching when view disappears to prevent memory leaks
                 viewModel.stopRefetching()
             }
-            
+
             .sheet(isPresented: $showAddTaskSheet) {
                 AddTaskView(foremanId: SessionManager.shared.foremanId!) {
                     divisionId,
@@ -98,31 +118,20 @@ struct MandorDashboardView: View {
                     area,
                     priority,
                     description in
-                    Task {
-                        if let plan = viewModel.dailyPlan {
-                            if DateHelper.isToday(plan.createdAt) {
-                                await viewModel.addSelfNewDailyTask(
-                                    for: SessionManager().foremanId!,
-                                    taskId: plan.id,
-                                    divisionId: divisionId,
-                                    locationId: locationId,
-                                    jobType: jobType,
-                                    area: area,
-                                    priority: priority,
-                                    description: description
-                                )
-                            } else {
-                                await viewModel.createNewDailyPlanAndTask(
-                                    for: SessionManager().foremanId!,
-                                    divisionId: divisionId,
-                                    locationId: locationId,
-                                    jobType: jobType,
-                                    area: area,
-                                    priority: priority,
-                                    description: description
-                                )
-                            }
+                    if let plan = viewModel.dailyPlan {
+                        if DateHelper.isToday(plan.createdAt) {
+                            await viewModel.addSelfNewDailyTask(
+                                for: SessionManager().foremanId!,
+                                taskId: plan.id,
+                                divisionId: divisionId,
+                                locationId: locationId,
+                                jobType: jobType,
+                                area: area,
+                                priority: priority,
+                                description: description
+                            )
                             await viewModel.fetchLatestDailyPlan()
+                            return true
                         } else {
                             await viewModel.createNewDailyPlanAndTask(
                                 for: SessionManager().foremanId!,
@@ -134,11 +143,24 @@ struct MandorDashboardView: View {
                                 description: description
                             )
                             await viewModel.fetchLatestDailyPlan()
+                            return true
                         }
+                    } else {
+                        await viewModel.createNewDailyPlanAndTask(
+                            for: SessionManager().foremanId!,
+                            divisionId: divisionId,
+                            locationId: locationId,
+                            jobType: jobType,
+                            area: area,
+                            priority: priority,
+                            description: description
+                        )
+                        await viewModel.fetchLatestDailyPlan()
+                        return true
                     }
                 }
             }
-            
+
             .sheet(item: $selectedTask) { task in
                 UpdateTaskView(
                     task: task,
@@ -154,39 +176,38 @@ struct MandorDashboardView: View {
                     availableWorker,
                     workerNames,
                     image in
-                    Task {
-                        await viewModel.updateTask(
-                            foremanId: SessionManager.shared.foremanId!,
-                            reportId: viewModel.dailyPlan?.id ?? 0,
-                            taskId: task.id,
-                            jobType: jobType,
-                            locationId: locationId,
-                            areas: area,
-                            workerNeeded: neededWorkers,
-                            availableWorker: availableWorker,
-                            workerNameList: workerNames,
-                            image: image,
-                            description: description
-                        )
-    
-                        await viewModel.fetchLatestDailyPlan()
-                    }
+                    await viewModel.updateTask(
+                        foremanId: SessionManager.shared.foremanId!,
+                        reportId: viewModel.dailyPlan?.id ?? 0,
+                        taskId: task.id,
+                        jobType: jobType,
+                        locationId: locationId,
+                        areas: area,
+                        workerNeeded: neededWorkers,
+                        availableWorker: availableWorker,
+                        workerNameList: workerNames,
+                        image: image,
+                        description: description
+                    )
+
+                    await viewModel.fetchLatestDailyPlan()
+                    return true
                 }
             }
         }
     }
-    
+
     @ViewBuilder
     private func dashboardContent(plan: DailyPlanData) -> some View {
         VStack(alignment: .leading) {
-            
+
             Text("Program Hari Ini")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .padding(.horizontal)
                 .padding(.bottom, 4)
                 .accessibilityAddTraits(.isHeader)
-            
+
             HStack {
                 Image(systemName: "leaf.fill")
                     .foregroundColor(Color(hex: "#79A222"))
@@ -197,13 +218,13 @@ struct MandorDashboardView: View {
             }
             .padding(.horizontal)
             .padding(.bottom, 4)
-            
+
             Text("Hari: \(viewModel.formattedDate)")
                 .font(.footnote)
                 .fontWeight(.medium)
                 .foregroundStyle(Color(hex: "#A9A9A9"))
                 .padding(.horizontal)
-            
+
             if plan.approved.isApproved {
                 Text("Status: Sudah Disetujui")
                     .font(.footnote)
@@ -218,46 +239,52 @@ struct MandorDashboardView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 8)
             }
-            
+
             ZStack {
                 LinearGradient(
-                    colors: [Color(hex: "#F8F8F8"), Color(hex: "#79A222").opacity(0.6)],
+                    colors: [
+                        Color(hex: "#F8F8F8"),
+                        Color(hex: "#79A222").opacity(0.6),
+                    ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
                 .ignoresSafeArea()
-                
+
                 VStack(alignment: .leading) {
                     HStack {
                         Text("Daftar Pekerjaan")
                             .font(.title2)
                             .fontWeight(.semibold)
                             .accessibilityAddTraits(.isHeader)
-                        
+
                         Spacer()
-                        
-                        Button(action: { showAddTaskSheet = true }) {
-                            HStack {
-                                Image(systemName: "plus")
-                                    .font(.subheadline)
-                                    .foregroundStyle(Color.white)
-                                
-                                Text("Tambah")
-                                    .foregroundStyle(Color.white)
-                                    .font(.subheadline)
+
+                        if !plan.approved.isApproved {
+                            Button(action: { showAddTaskSheet = true }) {
+                                HStack {
+                                    Image(systemName: "plus")
+                                        .font(.subheadline)
+                                        .foregroundStyle(Color.white)
+
+                                    Text("Tambah")
+                                        .foregroundStyle(Color.white)
+                                        .font(.subheadline)
+                                }
+                                .padding(.vertical, 4)
+                                .padding(.horizontal, 12)
                             }
-                            .padding(.vertical, 4)
-                            .padding(.horizontal, 12)
+                            .background(Color(hex: "#79A222"))
+                            .cornerRadius(16)
+                            .accessibilityHint("Tambah pekerjaan baru ke daftar")
                         }
-                        .background(Color(hex: "#79A222"))
-                        .cornerRadius(16)
-                        .accessibilityHint("Tambah pekerjaan baru ke daftar")
                     }
                     .padding(.horizontal)
                     .padding(.top)
-                    
+
                     Menu {
-                        ForEach(viewModel.allDivisions, id: \.self) { division in
+                        ForEach(viewModel.allDivisions, id: \.self) {
+                            division in
                             Button(division) {
                                 viewModel.selectedDivisionName = division
                             }
@@ -267,7 +294,7 @@ struct MandorDashboardView: View {
                             Text(viewModel.selectedDivisionName)
                                 .font(.title3)
                                 .fontWeight(.semibold)
-                            
+
                             Image(systemName: "chevron.down")
                                 .font(.footnote)
                                 .fontWeight(.bold)
@@ -275,8 +302,10 @@ struct MandorDashboardView: View {
                         .foregroundColor(Color(hex: "#79A222"))
                         .padding(.horizontal)
                     }
-                    .accessibilityLabel("Pilih Divisi, saat ini \(viewModel.selectedDivisionName)")
-                    
+                    .accessibilityLabel(
+                        "Pilih Divisi, saat ini \(viewModel.selectedDivisionName)"
+                    )
+
                     List {
                         if viewModel.filteredLocations.isEmpty {
                             Text("Tidak ada pekerjaan hari ini.")
@@ -290,17 +319,27 @@ struct MandorDashboardView: View {
                         } else {
                             ForEach(viewModel.filteredLocations) { location in
                                 Section(
-                                    header: Text("\(location.locationName.uppercased())")
-                                        .padding(.vertical, 4)
-                                        .accessibilityAddTraits(.isHeader)
-                                        .accessibilityHint(
-                                            "Daftar pekerjaan di lokasi \(location.locationName)"
-                                        )
+                                    header: Text(
+                                        "\(location.locationName.uppercased())"
+                                    )
+                                    .padding(.vertical, 4)
+                                    .accessibilityAddTraits(.isHeader)
+                                    .accessibilityHint(
+                                        "Daftar pekerjaan di lokasi \(location.locationName)"
+                                    )
                                 ) {
-                                    ForEach(location.tasks.sorted(by: { $0.priority < $1.priority })) { task in
-                                        taskRow(task: task, locationId: location.locationId)
-                                            .listRowSeparator(.hidden)
-                                            .listRowBackground(Color.clear)
+                                    ForEach(
+                                        location.tasks.sorted(by: {
+                                            $0.priority < $1.priority
+                                        })
+                                    ) { task in
+                                        taskRow(
+                                            task: task,
+                                            locationId: location.locationId,
+                                            taskState: plan.approved.isApproved
+                                        )
+                                        .listRowSeparator(.hidden)
+                                        .listRowBackground(Color.clear)
                                     }
                                 }
                             }
@@ -311,9 +350,8 @@ struct MandorDashboardView: View {
             }
         }
     }
-    
-    
-    private func taskRow(task: TaskDetail, locationId: Int) -> some View {
+
+    private func taskRow(task: TaskDetail, locationId: Int, taskState: Bool) -> some View {
         Button {
             selectedTask = task
             selectedTaskLocationId = locationId
@@ -326,24 +364,25 @@ struct MandorDashboardView: View {
                     .background(Color.gray.opacity(0.1))
                     .clipShape(Circle())
                     .accessibilityHidden(true)
-                
-                
+
                 Text(task.taskType)
                     .font(.body)
                     .fontWeight(.light)
                     .lineLimit(1)
-                
+
                 Spacer()
-                
+
                 Text(task.area.joined(separator: ", "))
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
-                
-                Image(systemName: "chevron.right")
-                    .font(.headline)
-                    .foregroundColor(Color(hex: "#79A222"))
-                    .accessibilityHidden(true)
+
+                if !taskState {
+                    Image(systemName: "chevron.right")
+                        .font(.headline)
+                        .foregroundColor(Color(hex: "#79A222"))
+                        .accessibilityHidden(true)
+                }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 12)
@@ -356,6 +395,7 @@ struct MandorDashboardView: View {
                 "Ketuk untuk membuka detail pekerjaan \(task.taskType)"
             )
         }
+        .disabled(taskState)
     }
 }
 
@@ -391,7 +431,10 @@ extension MandorDashboardView {
                                     taskType: "Perapian TANAKA",
                                     description: "yy",
                                     priority: "P2",
-                                    area: ["CH", "FC", "H1", "H2", "H3", "H4", "H5"],
+                                    area: [
+                                        "CH", "FC", "H1", "H2", "H3", "H4",
+                                        "H5",
+                                    ],
                                     needWorker: nil,
                                     availableWorker: nil,
                                     workerList: [],
@@ -402,7 +445,10 @@ extension MandorDashboardView {
                                     taskType: "Perapian TANAKA",
                                     description: "yy",
                                     priority: "P2",
-                                    area: ["CH", "FC", "H1", "H2", "H3", "H4", "H5"],
+                                    area: [
+                                        "CH", "FC", "H1", "H2", "H3", "H4",
+                                        "H5",
+                                    ],
                                     needWorker: nil,
                                     availableWorker: nil,
                                     workerList: [],
@@ -413,12 +459,15 @@ extension MandorDashboardView {
                                     taskType: "Perapian TANAKA",
                                     description: "yy",
                                     priority: "P2",
-                                    area: ["CH", "FC", "H1", "H2", "H3", "H4", "H5"],
+                                    area: [
+                                        "CH", "FC", "H1", "H2", "H3", "H4",
+                                        "H5",
+                                    ],
                                     needWorker: nil,
                                     availableWorker: nil,
                                     workerList: [],
                                     isFinished: false
-                                )
+                                ),
                             ]
                         )
                     ]
@@ -476,7 +525,7 @@ extension MandorDashboardView {
                 ),
             ]
         )
-        
+
         return MandorDashboardViewModel(mockPlan: mockData)
     }()
 }
