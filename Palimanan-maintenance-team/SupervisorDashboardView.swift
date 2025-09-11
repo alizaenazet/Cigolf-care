@@ -70,7 +70,7 @@ struct SupervisorDashboardView: View {
                             .font(.subheadline)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(Color.green)
+                            .background(Color.accentColor)
                             .foregroundColor(.white)
                             .cornerRadius(4)
                     }

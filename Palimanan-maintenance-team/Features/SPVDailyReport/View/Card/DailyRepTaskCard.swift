@@ -38,7 +38,7 @@ struct DailyRepTaskCard: View {
                         .font(.subheadline)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.green)
+                        .background(Color.accentColor)
                         .foregroundColor(.white)
                         .cornerRadius(4)
                 }
@@ -58,7 +58,7 @@ struct DailyRepTaskCard: View {
             Text(task.description)
                 .lineLimit(1)
             Text(task.isFinished ? "Selesai" : "Belum")
-                .foregroundColor(task.isFinished ? .green : .red)
+                .foregroundColor(task.isFinished ? .accentColor : .red)
         }
         .font(.subheadline)
         .padding(.horizontal)

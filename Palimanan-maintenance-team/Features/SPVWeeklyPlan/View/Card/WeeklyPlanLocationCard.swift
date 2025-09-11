@@ -34,7 +34,7 @@ struct WeeklyPlanLocationCard: View {
                     }
                 } label: {
                     Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                        .foregroundColor(.green)
+                        .foregroundColor(.accentColor)
                 }
                 .buttonStyle(.plain)
             }
