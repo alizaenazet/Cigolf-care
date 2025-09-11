@@ -36,6 +36,21 @@ class DashboardViewModel: ObservableObject {
         }
     }
     
+    func fetchReportWithoutRefresh(for foremanId: Int) async {
+        self.foremanId = foremanId
+        
+        
+        do {
+            let response: DashboardResponse = try await APIService.shared.request(
+                "/foreman/\(foremanId)/daily-task/latest-day",
+                responseType: DashboardResponse.self
+            )
+            self.report = response.data
+        } catch {
+            self.errorMessage = "Failed to load report: \(error.localizedDescription)"
+        }
+    }
+    
     func approveReport(for foremanId: Int, taskId: Int) async {
         isLoading = true
         defer { isLoading = false }
@@ -107,7 +122,7 @@ class DashboardViewModel: ObservableObject {
                 // Panggil fungsi fetchReport
                 // Anda perlu menyimpan foremanId atau meneruskannya
                 if await (self.foremanId != nil) { // 💡 Contoh: ambil dari data yang sudah ada
-                    await self.fetchReport(for: self.foremanId!)
+                    await self.fetchReportWithoutRefresh(for: self.foremanId!)
                     print("success refetch data")
                 }
             }
