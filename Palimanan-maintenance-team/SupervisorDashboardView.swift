@@ -28,7 +28,7 @@ struct SupervisorDashboardView: View {
                     // MARK: Dashboard Dropdown
                     DisclosureGroup(isExpanded: $expandDashboard) {
                         NavigationLink(value: SidebarMenu.dashboard(.lembah)) {
-                            Label("Lembah", systemImage: "leaf")
+                            Label("Lembah", systemImage: "apple.meditate")
                         }
                         NavigationLink(value: SidebarMenu.dashboard(.danau)) {
                             Label("Danau", systemImage: "water.waves")
@@ -48,7 +48,7 @@ struct SupervisorDashboardView: View {
                     // MARK: Program Harian Dropdown
                     DisclosureGroup(isExpanded: $expandHarian) {
                         NavigationLink(value: SidebarMenu.programHarian(.lembah)) {
-                            Label("Lembah", systemImage: "leaf")
+                            Label("Lembah", systemImage: "apple.meditate")
                         }
                         NavigationLink(value: SidebarMenu.programHarian(.danau)) {
                             Label("Danau", systemImage: "water.waves")

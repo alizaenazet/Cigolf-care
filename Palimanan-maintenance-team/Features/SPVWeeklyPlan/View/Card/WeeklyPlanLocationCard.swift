@@ -9,7 +9,7 @@ import SwiftUI
 
 struct WeeklyPlanLocationCard: View {
     let location: WeeklyDetailLocation
-    @State private var isExpanded = false
+    @State private var isExpanded = true
     
     // Shared grid definition
     private let taskColumns: [GridItem] = [
