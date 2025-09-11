@@ -55,7 +55,7 @@ struct MandorDashboardView: View {
                                     .frame(maxWidth: .infinity)
                             }
                             .buttonStyle(.borderedProminent)
-                            .tint(.green)
+                            .tint(.accentColor)
                             .padding(.horizontal)
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)

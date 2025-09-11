@@ -55,15 +55,24 @@ struct DateHelper {
     }
 
     static func formattedDateWithoutDay(dateStr: String) -> String {
+        print("👉 Input Date String:", dateStr) // debug
+        
         let df = DateFormatter()
-        df.dateFormat = "yyyy-MM-dd"
+        df.dateFormat = "dd-MM-yyyy" // format input sesuai API
+
         if let date = df.date(from: dateStr) {
             df.locale = Locale(identifier: "id_ID")
-            df.dateFormat = "dd MMMM yyyy"
-            return df.string(from: date)
+            df.dateFormat = "dd/MM/yyyy" // format output
+            let result = df.string(from: date)
+            print("✅ Parsed result:", result) // debug
+            return result
         }
+        
+        print("❌ Failed to parse, returning original:", dateStr)
         return dateStr
     }
+
+    
 
     static func formattedIndonesianDate(_ date: Date) -> String {
         let formatter = DateFormatter()

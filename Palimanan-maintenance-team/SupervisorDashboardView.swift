@@ -122,6 +122,7 @@ struct SupervisorDashboardView: View {
                 }
                 .background(Color(.systemGray6))
             }
+            .background(Color(.systemGray6))
         }
         .background(Color(.systemGray6))
     }

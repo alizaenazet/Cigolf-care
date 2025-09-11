@@ -11,7 +11,7 @@ struct LocationCard: View {
     let location: Location
     let division: Division
     let isReportApproved: Bool
-    @State private var isExpanded = false
+    @State private var isExpanded = true
     var onAddTask: (Division, Location) -> Void
     
     // Shared grid definition
@@ -40,7 +40,7 @@ struct LocationCard: View {
                         Label("Tambahkan Pekerjaan", systemImage: "plus")
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(Color.green)
+                            .background(Color.accentColor)
                             .foregroundColor(.white)
                             .cornerRadius(6)
                     }
@@ -52,7 +52,7 @@ struct LocationCard: View {
                     }
                 } label: {
                     Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                        .foregroundColor(.green)
+                        .foregroundColor(.accentColor)
                 }
                 .buttonStyle(.plain)
             }
@@ -64,12 +64,18 @@ struct LocationCard: View {
                     // Table header
                     LazyVGrid(columns: taskColumns, spacing: 12) {
                         Text("Nomor")
+                            .lineLimit(1)
                         Text("Jenis Pengerjaan")
+                            .lineLimit(1)
                         Text("Hole/Area")
+                            .lineLimit(1)
                         Text("Prioritas")
+                            .lineLimit(1)
                         Text("Gambar")
+                            .lineLimit(1)
                         Text("Keterangan")
                         Text("Status")
+                            .lineLimit(1)
                     }
                     .font(.subheadline.bold())
                     .foregroundColor(.secondary)

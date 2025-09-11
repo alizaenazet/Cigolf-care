@@ -9,7 +9,7 @@ import SwiftUI
 
 struct WeeklyPlanLocationCard: View {
     let location: WeeklyDetailLocation
-    @State private var isExpanded = false
+    @State private var isExpanded = true
     
     // Shared grid definition
     private let taskColumns: [GridItem] = [
@@ -34,7 +34,7 @@ struct WeeklyPlanLocationCard: View {
                     }
                 } label: {
                     Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                        .foregroundColor(.green)
+                        .foregroundColor(.accentColor)
                 }
                 .buttonStyle(.plain)
             }

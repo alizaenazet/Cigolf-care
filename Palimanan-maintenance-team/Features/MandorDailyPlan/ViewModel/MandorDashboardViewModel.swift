@@ -312,11 +312,6 @@ class MandorDashboardViewModel: ObservableObject {
                             withName: "workerNameList"
                         )
                         
-                        multipart.append(
-                            Data((description ?? "").utf8),
-                            withName: "description"
-                        )
-                        
                         if let data = image?.jpegData(compressionQuality: 0.7) {
                             multipart.append(
                                 data,
@@ -325,6 +320,11 @@ class MandorDashboardViewModel: ObservableObject {
                                 mimeType: "image/jpeg"
                             )
                         }
+                        
+                        multipart.append(
+                            Data((description ?? "").utf8),
+                            withName: "description"
+                        )
                     },
                     responseType: NormalResponse.self
                 )

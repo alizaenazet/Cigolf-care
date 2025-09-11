@@ -171,7 +171,7 @@ struct AddTaskPopup: View {
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.green)
+                    .background(Color.accentColor)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }

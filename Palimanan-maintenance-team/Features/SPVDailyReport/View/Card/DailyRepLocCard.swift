@@ -43,7 +43,7 @@ struct DailyRepLocCard: View {
                         Label("Tambahkan Pekerjaan", systemImage: "plus")
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(Color.green)
+                            .background(Color.accentColor)
                             .foregroundColor(.white)
                             .cornerRadius(6)
                     }
@@ -55,7 +55,7 @@ struct DailyRepLocCard: View {
                     }
                 } label: {
                     Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                        .foregroundColor(.green)
+                        .foregroundColor(.accentColor)
                 }
                 .buttonStyle(.plain)
             }
