@@ -28,32 +28,93 @@ final class APIService {
     @Published var userId: String? = nil
     @Published var role: String? = nil
     
-    func requestRaw(_ path: String, method: String = "GET") async throws -> Data {
-        // Buat full URL String
-        let urlString = baseURL + path
-        print("Final URL String:", urlString)
+//    func requestRaw(_ path: String, method: String = "GET") async throws -> Data {
+//        // Buat full URL String
+//        let urlString = baseURL + path
+//        print("Final URL String:", urlString)
+//        
+//        guard let url = URL(string: urlString) else {
+//            throw URLError(.badURL)
+//        }
+//        
+//        var request = URLRequest(url: url)
+//        request.httpMethod = method
+//        request.setValue("application/zip", forHTTPHeaderField: "Accept")
+//        
+//        // Tambahkan Authorization Bearer
+//        if let token = self.accessToken { // misal token disimpan di APIService
+//            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+//        }
+//        
+//        let (data, response) = try await URLSession.shared.data(for: request)
+//        
+//        guard let httpResponse = response as? HTTPURLResponse,
+//              (200..<300).contains(httpResponse.statusCode) else {
+//            throw URLError(.badServerResponse)
+//        }
+//        
+//        return data
+//    }
+    func downloadFileDaily(
+        _ endpoint: String,
+        method: HTTPMethod = .get,
+        parameters: Parameters? = nil,
+        encoding: ParameterEncoding = URLEncoding.default,
+        headers: HTTPHeaders? = nil
+    ) async throws -> URL {
+        var finalHeaders: HTTPHeaders = headers ?? []
         
-        guard let url = URL(string: urlString) else {
-            throw URLError(.badURL)
+        // Inject Bearer token if available
+        if let token = accessToken {
+            finalHeaders.add(.authorization(bearerToken: token))
+            print(token)
         }
         
-        var request = URLRequest(url: url)
-        request.httpMethod = method
-        request.setValue("application/zip", forHTTPHeaderField: "Accept")
+        let url = "\(baseURL)\(endpoint)"
+        print(url)
         
-        // Tambahkan Authorization Bearer
-        if let token = self.accessToken { // misal token disimpan di APIService
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return try await withCheckedThrowingContinuation { continuation in
+            AF.request(
+                url,
+                method: method,
+                parameters: parameters,
+                encoding: encoding,
+                headers: finalHeaders
+            )
+            .validate()
+            .responseData { response in
+                switch response.result {
+                case .success(let data):
+                    print(data)
+                    print(response)
+                    let fileName = "daily_reports.zip"
+                    let destinationURL = FileManager.default.urls(
+                        for: .documentDirectory,
+                        in: .userDomainMask
+                    )[0].appendingPathComponent(fileName)
+                    
+                    do {
+                        if FileManager.default.fileExists(atPath: destinationURL.path) {
+                            try FileManager.default.removeItem(at: destinationURL)
+                        }
+                        try data.write(to: destinationURL)
+                        continuation.resume(returning: destinationURL)
+                    } catch {
+                        continuation.resume(throwing: error)
+                    }
+                case .failure(let error):
+                    print(
+                        "🚨 File download failed: \(error.localizedDescription)"
+                    )
+                    if let data = response.data {
+                        print(
+                            "📄 Raw response: \(String(data: data, encoding: .utf8) ?? "")"
+                        )
+                    }
+                    continuation.resume(throwing: error)
+                }
+            }
         }
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200..<300).contains(httpResponse.statusCode) else {
-            throw URLError(.badServerResponse)
-        }
-        
-        return data
     }
 
     func post<T: Decodable>(

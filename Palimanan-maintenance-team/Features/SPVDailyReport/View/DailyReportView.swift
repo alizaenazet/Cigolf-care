@@ -80,7 +80,7 @@ struct FilterView: View {
                     HStack {
                         Image(systemName: "square.and.arrow.up")
                             .foregroundStyle(.white)
-                        Text("Export")
+                        Text("Ekspor")
                             .fontWeight(.medium)
                             .font(.headline)
                             .foregroundColor(.white)
@@ -278,11 +278,37 @@ struct DailyReportView: View {
                                 }
                             },
                             onExport: {
+//                                Task {
+//                                    await viewModel.exportFile(
+//                                        for: foremanId,
+//                                        dailyIds: selectedIds
+//                                    )
+//                                }
                                 Task {
-                                    await viewModel.exportFile(
-                                        for: foremanId,
-                                        dailyIds: selectedIds
-                                    )
+                                    guard APIService.shared.accessToken != nil
+                                    else {
+                                        print("⚠️ No token yet, please login")
+                                        return
+                                    }
+                                    do {
+                                       
+                                        let ids = Array(selectedIds)
+                                        let query = ids.map { String($0) }
+                                            .joined(separator: ",")
+                                        let endpoint =
+                                            "/foreman/\(foremanId)/daily-task/export?type=csv&daily_ids=[\(query)]"
+
+                                        print("⬇️ Downloading:", endpoint)
+                                        let fileURL =
+                                            try await APIService.shared
+                                            .downloadFileDaily(endpoint)
+
+                                        DispatchQueue.main.async {
+                                            FilePresenter.shared.present(url: fileURL, action: .share)
+                                        }
+                                    } catch {
+                                        print("❌ Export failed:", error)
+                                    }
                                 }
                             }
                         )

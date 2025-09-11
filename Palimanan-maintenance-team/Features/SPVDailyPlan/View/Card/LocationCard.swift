@@ -11,7 +11,7 @@ struct LocationCard: View {
     let location: Location
     let division: Division
     let isReportApproved: Bool
-    @State private var isExpanded = false
+    @State private var isExpanded = true
     var onAddTask: (Division, Location) -> Void
     
     // Shared grid definition

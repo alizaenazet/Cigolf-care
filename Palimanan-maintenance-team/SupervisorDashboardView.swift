@@ -28,7 +28,7 @@ struct SupervisorDashboardView: View {
                     // MARK: Dashboard Dropdown
                     DisclosureGroup(isExpanded: $expandDashboard) {
                         NavigationLink(value: SidebarMenu.dashboard(.lembah)) {
-                            Label("Lembah", systemImage: "leaf")
+                            Label("Lembah", systemImage: "apple.meditate")
                         }
                         NavigationLink(value: SidebarMenu.dashboard(.danau)) {
                             Label("Danau", systemImage: "water.waves")
@@ -48,7 +48,7 @@ struct SupervisorDashboardView: View {
                     // MARK: Program Harian Dropdown
                     DisclosureGroup(isExpanded: $expandHarian) {
                         NavigationLink(value: SidebarMenu.programHarian(.lembah)) {
-                            Label("Lembah", systemImage: "leaf")
+                            Label("Lembah", systemImage: "apple.meditate")
                         }
                         NavigationLink(value: SidebarMenu.programHarian(.danau)) {
                             Label("Danau", systemImage: "water.waves")
@@ -59,25 +59,36 @@ struct SupervisorDashboardView: View {
                     } label: {
                         Label("Program Harian", systemImage: "list.bullet.clipboard")
                     }
-                    
-                    
-                    Spacer()
-                    
-                    Button {
-                        SessionManager.shared.logout()
-                    } label: {
-                        Label("Logout", systemImage: "")
-                            .font(.subheadline)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.accentColor)
-                            .foregroundColor(.white)
-                            .cornerRadius(4)
-                    }
                 }
                 .listStyle(.automatic)
                 .navigationTitle("Menu")
+                .background(Color(.systemGray6))
                 
+                Button(action: {
+                    SessionManager.shared.logout()
+                }) {
+                    HStack {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                            .font(.title2)
+                        Text("Keluar")
+                            .font(.headline)
+                            .bold()
+                        Spacer()
+                    }
+                    .foregroundColor(.red)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.white)
+                            .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                    )
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 30)
+                .padding(.bottom, 30)
+                .background(Color(.systemGray6))
+
             } detail: {
                 switch selection {
                 case .dashboard(let foreman):
@@ -96,6 +107,7 @@ struct SupervisorDashboardView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            .background(Color(.systemGray6))
         }
 }
 
