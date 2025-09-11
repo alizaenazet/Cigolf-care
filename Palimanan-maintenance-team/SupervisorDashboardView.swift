@@ -59,25 +59,34 @@ struct SupervisorDashboardView: View {
                     } label: {
                         Label("Program Harian", systemImage: "list.bullet.clipboard")
                     }
-                    
-                    
-                    Spacer()
-                    
-                    Button {
-                        SessionManager.shared.logout()
-                    } label: {
-                        Label("Logout", systemImage: "")
-                            .font(.subheadline)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.green)
-                            .foregroundColor(.white)
-                            .cornerRadius(4)
-                    }
                 }
                 .listStyle(.automatic)
                 .navigationTitle("Menu")
                 
+                Button(action: {
+                    SessionManager.shared.logout()
+                }) {
+                    HStack {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                            .font(.title2)
+                        Text("Keluar")
+                            .font(.headline)
+                            .bold()
+                        Spacer()
+                    }
+                    .foregroundColor(.red)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.white)
+                            .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                    )
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 30)
+                .padding(.bottom, 30)
+
             } detail: {
                 switch selection {
                 case .dashboard(let foreman):
