@@ -12,13 +12,20 @@ struct WeeklyPlanHistory: View {
     @State private var showShareSheet = false
     @State private var selectedWeeklyIds: Set<Int> = []
     @StateObject var viewModel = WeeklyPlanHistoryViewModel()
-    
-    func presentShareSheet(url: URL) {
-        guard let root = UIApplication.shared.connectedScenes
-            .compactMap({ ($0 as? UIWindowScene)?.keyWindow })
-            .first?.rootViewController else { return }
+    @State private var errorMessage: String?
+    @State private var isExporting: Bool = false
 
-        let vc = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+    func presentShareSheet(url: URL) {
+        guard
+            let root = UIApplication.shared.connectedScenes
+                .compactMap({ ($0 as? UIWindowScene)?.keyWindow })
+                .first?.rootViewController
+        else { return }
+
+        let vc = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
         root.present(vc, animated: true)
     }
 
@@ -60,41 +67,73 @@ struct WeeklyPlanHistory: View {
                                 Label("", systemImage: "magnifyingglass")
                             }.buttonStyle(.borderedProminent)
 
-                            Button("Ekspor", systemImage: "square.and.arrow.up")
-                            {
-                                Task {
-                                    guard APIService.shared.accessToken != nil
-                                    else {
-                                        print("⚠️ No token yet, please login")
-                                        return
-                                    }
-                                    do {
-                                        // Reset old file before starting
-                                        exportedFileURL = nil
-                                        showShareSheet = false
-
-                                        let ids = Array(selectedWeeklyIds)
-                                        let query = ids.map { String($0) }
-                                            .joined(separator: ",")
-                                        let endpoint =
-                                            "/weekly-plan/export?type=csv&weekly_ids=[\(query)]"
-
-                                        print("⬇️ Downloading:", endpoint)
-                                        let fileURL =
-                                            try await APIService.shared
-                                            .downloadFile(endpoint)
-
-                                        DispatchQueue.main.async {
-                                            FilePresenter.shared.present(url: fileURL, action: .share)
+                            VStack(spacing: 4) {
+                                Button {
+                                    Task {
+                                        guard
+                                            APIService.shared.accessToken != nil
+                                        else {
+                                            print(
+                                                "⚠️ No token yet, please login"
+                                            )
+                                            errorMessage = "Anda belum login."
+                                            return
                                         }
-                                    } catch {
-                                        print("❌ Export failed:", error)
+                                        do {
+                                            isExporting = true
+                                            errorMessage = nil
+
+                                            let ids = Array(selectedWeeklyIds)
+                                            let query = ids.map { String($0) }
+                                                .joined(separator: ",")
+                                            let endpoint =
+                                                "/weekly-plan/export?type=csv&weekly_ids=[\(query)]"
+
+                                            print("⬇️ Downloading:", endpoint)
+                                            let fileURL =
+                                                try await APIService.shared
+                                                .downloadFile(endpoint)
+
+                                            DispatchQueue.main.async {
+                                                FilePresenter.shared.present(
+                                                    url: fileURL,
+                                                    action: .share
+                                                )
+                                            }
+                                        } catch {
+                                            print("❌ Export failed:", error)
+                                            errorMessage = "Gagal mengekspor data."
+                                        }
+                                        isExporting = false
+                                    }
+                                } label: {
+                                    if isExporting {
+                                        ProgressView()
+                                            .progressViewStyle(
+                                                CircularProgressViewStyle(
+                                                    tint: .white
+                                                )
+                                            )
+                                    } else {
+                                        Label(
+                                            "Ekspor",
+                                            systemImage: "square.and.arrow.up"
+                                        )
                                     }
                                 }
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .disabled(selectedWeeklyIds.isEmpty)
+                                .buttonStyle(.borderedProminent)
+                                .disabled(
+                                    selectedWeeklyIds.isEmpty || isExporting
+                                )
 
+                                // 👇 error message
+                                if let errorMessage = errorMessage {
+                                    Text(errorMessage)
+                                        .foregroundColor(.red)
+                                        .font(.subheadline)
+                                }
+                            }
+                            .frame(maxWidth: 150)
                         }
                         .frame(width: 800)
                     }
@@ -122,7 +161,7 @@ struct WeeklyPlanHistory: View {
                     .buttonStyle(.borderedProminent)
                 }
             }
-            
+
             .task {
                 await viewModel.fetchLastWeeklyPlanHistory()
                 print(
@@ -192,8 +231,10 @@ struct TablePreviewRow: View {
 
             Text("\(index + 1)")
                 .frame(width: 53, alignment: .leading)
-            Text("\(weeklyPlan.startDate?.toFormattedString() ?? "-") - \(weeklyPlan.endDate?.toFormattedString() ?? "-")")
-                .frame(width: 325, alignment: .leading)
+            Text(
+                "\(weeklyPlan.startDate?.toFormattedString() ?? "-") - \(weeklyPlan.endDate?.toFormattedString() ?? "-")"
+            )
+            .frame(width: 325, alignment: .leading)
             Spacer()
             NavigationLink {
                 WeeklyPlanDetailViewWrapper(weeklyId: weeklyPlan.id)

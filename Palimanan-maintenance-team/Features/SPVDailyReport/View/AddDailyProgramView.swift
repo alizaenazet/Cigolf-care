@@ -120,6 +120,7 @@ struct AddDailyProgramView: View {
                 
                 if (viewModel.isLoading) {
                     ProgressView("Loading…")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 else {
                     VStack(spacing: 20) {
