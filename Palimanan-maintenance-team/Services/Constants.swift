@@ -9,5 +9,5 @@ import Foundation
 
 struct Constants {
 //    static let loginURL = "https://cigolf-backend-yebology3212-s53p6k3p.apn.leapcell.dev/api/v1/login"
-    static let loginURL = "http://localhost:3000/api/v1/login"
+    static let loginURL = APIService.shared.baseURL + "/login"
 }
