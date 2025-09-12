@@ -34,8 +34,7 @@ class MandorDashboardViewModel: ObservableObject {
 
     func fetchLatestDailyPlan() async {
         guard let foremanId = SessionManager.shared.foremanId else {
-            self.errorMessage =
-                "Error: Foreman ID not found for this user. Please log in again."
+            self.errorMessage = "ID pengguna tidak ditemukan. Silakan login kembali."
             return
         }
 
@@ -53,12 +52,11 @@ class MandorDashboardViewModel: ObservableObject {
             if let data = response.data {
                 self.dailyPlan = data
             } else {
-                self.errorMessage = response.message
+                self.errorMessage = "Tidak ada data yang tersedia."
             }
 
         } catch {
-            self.errorMessage =
-                "Failed to load data: \(error.localizedDescription)"
+            self.errorMessage = "Gagal memuat data. Silakan coba lagi nanti."
         }
 
         isLoading = false
@@ -66,8 +64,7 @@ class MandorDashboardViewModel: ObservableObject {
 
     func fetchLatestDailyPlanWithoutLoading() async {
         guard let foremanId = SessionManager.shared.foremanId else {
-            self.errorMessage =
-                "Error: Foreman ID not found for this user. Please log in again."
+            self.errorMessage = "ID pengguna tidak ditemukan. Silakan login kembali."
             return
         }
 
@@ -84,12 +81,11 @@ class MandorDashboardViewModel: ObservableObject {
             if let data = response.data {
                 self.dailyPlan = data
             } else {
-                self.errorMessage = response.message
+                self.errorMessage = "Tidak ada data yang tersedia."
             }
 
         } catch {
-            self.errorMessage =
-                "Failed to load data: \(error.localizedDescription)"
+            self.errorMessage = "Gagal memuat data. Silakan coba lagi nanti."
         }
 
     }
@@ -209,7 +205,7 @@ class MandorDashboardViewModel: ObservableObject {
                 print("🔍 Alamofire error:", afError.errorDescription ?? "")
             }
             self.errorMessage =
-                "Failed to add new daily task: \(error.localizedDescription)"
+                "Gagal dalam membuat jadwal harian. Silahkan coba lagi."
             throw error
         }
     }
@@ -264,7 +260,7 @@ class MandorDashboardViewModel: ObservableObject {
                 print("🔍 Alamofire error:", afError.errorDescription ?? "")
             }
             self.errorMessage =
-                "Failed to create daily plan: \(error.localizedDescription)"
+                "Gagal dalam membuat jadwal harian. Silahkan coba lagi."
             throw error
         }
     }

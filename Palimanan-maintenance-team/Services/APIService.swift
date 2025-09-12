@@ -24,7 +24,7 @@ final class APIService {
     }
     
     // MARK: - Session / Auth State
-    @Published var accessToken: String? = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJUcmVudDY3Iiwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzU3NjQyMTA0LCJleHAiOjE3NTc2NDU3MDR9.MFkCyuOKMVvjadNGAe1XFaMtGlBgzWxTNmGFaON-6O4"
+    @Published var accessToken: String? = nil
     @Published var userId: String? = nil
     @Published var role: String? = nil
     
