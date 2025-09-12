@@ -37,7 +37,7 @@ struct WeeklyPlanHistory: View {
                         .padding()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    // This is the responsive filter bar from the previous fix.
+                    // This responsive filter bar is correct.
                     HStack(spacing: 12) {
                         Text("Cari Riwayat")
                             .font(.title)
@@ -143,7 +143,7 @@ struct WeeklyPlanHistory: View {
                     .cornerRadius(16)
                     
                     ScrollView {
-                        // The TablePreviews view is now fully responsive.
+                        // This view now correctly contains the logic for both features.
                         TablePreviews(
                             selectedWeeklyIds: $selectedWeeklyIds,
                             weeklyHistory: $viewModel.weeklyPlanHistoryPreview
@@ -173,20 +173,22 @@ struct WeeklyPlanHistory: View {
 
 
 // =================================================================
-// MARK: CHANGED SECTION - The Table is rebuilt with Grid
-// This section is now fully responsive and will adapt to the sidebar.
+// MARK: CORRECTED SECTION - TablePreviews with "Select All" Logic
 // =================================================================
 
 struct TablePreviews: View {
     @Binding var selectedWeeklyIds: Set<Int>
     @Binding var weeklyHistory: [WeeklyPlanPreview]
     
+    // MARK: FIX 1 - The Missing State Variable
+    // This was the piece of code lost during the merge. It's needed to
+    // track the state of the "select all" checkbox in the header.
+    @State private var isAllSelected: Bool = false
+    
     var body: some View {
-        // CHANGE 1: The outer VStack now contains a Grid. A Grid is the
-        // correct tool for creating column-based layouts.
         Grid(alignment: .leading, horizontalSpacing: 20, verticalSpacing: 15) {
             
-            // This is the header row for the table.
+            // The responsive GridRow header is correct.
             GridRow {
                 Text("No")
                     .font(.title3)
@@ -199,33 +201,34 @@ struct TablePreviews: View {
                 Text("Detail")
                     .font(.title3)
                     .foregroundColor(.gray)
-                    .gridColumnAlignment(.center) // Center this column's content
+                    .gridColumnAlignment(.center)
                 
-                // 👉 Ganti "Pilih" dengan master checkbox
+                // MARK: FIX 2 - Teammate's "Select All" Checkbox
+                // This code implements your teammate's feature. It now works
+                // because it's correctly bound to the `isAllSelected` state variable.
                 Toggle(
                     "",
                     isOn: Binding(
                         get: { isAllSelected },
                         set: { newValue in
-                            isAllSelected = newValue
+                            // This logic is correct: when the toggle changes,
+                            // select or deselect all items.
                             if newValue {
-                                // select all
                                 selectedWeeklyIds = Set(weeklyHistory.map { $0.id })
                             } else {
-                                // deselect all
                                 selectedWeeklyIds.removeAll()
                             }
                         }
                     )
                 )
                 .toggleStyle(iOSCheckboxToggleStyle())
-                .frame(width: 45, alignment: .center)
-                .foregroundColor(Color(red: 121 / 255, green: 162 / 255, blue: 34 / 255))
+                .gridColumnAlignment(.center)
             }
             .bold()
 
             Divider()
             
+            // The ForEach loop for rows is correct.
             ForEach(weeklyHistory.indices, id: \.self) { index in
                 GridRow(alignment: .center) {
                     TablePreviewRow(
@@ -238,9 +241,12 @@ struct TablePreviews: View {
             }
         }
         .padding()
-        .onChange(of: selectedWeeklyIds) { newValue in
-            // sinkronkan state header dengan kondisi row
-            if newValue.count == weeklyHistory.count && !weeklyHistory.isEmpty {
+        // MARK: FIX 3 - State Synchronization
+        // This modifier is crucial. It watches for changes in the individual
+        // row selections and updates the header checkbox accordingly. This part
+        // was present but didn't work without the @State variable.
+        .onChange(of: selectedWeeklyIds) { newSelection in
+            if newSelection.count == weeklyHistory.count && !weeklyHistory.isEmpty {
                 isAllSelected = true
             } else {
                 isAllSelected = false
@@ -260,10 +266,7 @@ struct TablePreviewRow: View {
     }
 
     var body: some View {
-        // CHANGE 2: The HStack has been removed. The content is now directly
-        // placed as cells in the GridRow. All fixed .frame(width:) modifiers
-        // have been removed to allow the Grid to manage the layout.
-        
+        // Your responsive GridRow content is correct.
         Text("\(index + 1)")
         
         Text(
@@ -302,7 +305,7 @@ struct TablePreviewRow: View {
 // MARK: NO CHANGES below this line
 
 #Preview {
-    SupervisorDashboardView() // Preview with the parent to see the effect
+    SupervisorDashboardView()
 }
 
 struct iOSCheckboxToggleStyle: ToggleStyle {
