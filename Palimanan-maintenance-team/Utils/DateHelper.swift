@@ -105,7 +105,7 @@ extension Date {
 
     func toIndonesianFormat() -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "dd MMMM yyyy"
+        formatter.dateFormat = "dd/MM/yyyy"   // 👉 ubah ke format dd/mm/yyyy
         formatter.locale = Locale(identifier: "id_ID")
         return formatter.string(from: self)
     }

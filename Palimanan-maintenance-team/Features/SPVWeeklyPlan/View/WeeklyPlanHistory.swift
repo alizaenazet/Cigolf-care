@@ -178,10 +178,11 @@ struct WeeklyPlanHistory: View {
 struct TablePreviews: View {
     @Binding var selectedWeeklyIds: Set<Int>
     @Binding var weeklyHistory: [WeeklyPlanPreview]
+    @State private var isAllSelected = false   // <- state untuk header checkbox
+    
     var body: some View {
         VStack {
             HStack(spacing: 100) {
-
                 Text("No")
                     .frame(width: 53, alignment: .leading)
                     .font(.title3)
@@ -190,20 +191,37 @@ struct TablePreviews: View {
                     .frame(width: 325, alignment: .leading)
                     .font(.title3)
                     .foregroundColor(.gray)
-
+                
                 Spacer()
                 Text("Detail")
                     .frame(width: 88, alignment: .center)
                     .font(.title3)
                     .foregroundColor(.gray)
                 Spacer()
-                Text("Pilih")
-                    .frame(width: 55, alignment: .center)
-                    .font(.title3)
-                    .foregroundColor(.gray)
+                
+                // 👉 Ganti "Pilih" dengan master checkbox
+                Toggle(
+                    "",
+                    isOn: Binding(
+                        get: { isAllSelected },
+                        set: { newValue in
+                            isAllSelected = newValue
+                            if newValue {
+                                // select all
+                                selectedWeeklyIds = Set(weeklyHistory.map { $0.id })
+                            } else {
+                                // deselect all
+                                selectedWeeklyIds.removeAll()
+                            }
+                        }
+                    )
+                )
+                .toggleStyle(iOSCheckboxToggleStyle())
+                .frame(width: 45, alignment: .center)
+                .foregroundColor(Color(red: 121 / 255, green: 162 / 255, blue: 34 / 255))
             }
             Divider()
-
+            
             ForEach(weeklyHistory.indices, id: \.self) { index in
                 TablePreviewRow(
                     index: index,
@@ -211,10 +229,19 @@ struct TablePreviews: View {
                     selectedWeeklyIds: $selectedWeeklyIds
                 )
             }
-
-        }.padding()
+        }
+        .padding()
+        .onChange(of: selectedWeeklyIds) { newValue in
+            // sinkronkan state header dengan kondisi row
+            if newValue.count == weeklyHistory.count && !weeklyHistory.isEmpty {
+                isAllSelected = true
+            } else {
+                isAllSelected = false
+            }
+        }
     }
 }
+
 
 struct TablePreviewRow: View {
     let index: Int
