@@ -32,7 +32,7 @@ class DashboardViewModel: ObservableObject {
             )
             self.report = response.data
         } catch {
-            self.errorMessage = "Failed to load report: \(error.localizedDescription)"
+            self.errorMessage = "Gagal memuat data. Silakan coba lagi nanti."
         }
     }
     
@@ -47,7 +47,7 @@ class DashboardViewModel: ObservableObject {
             )
             self.report = response.data
         } catch {
-            self.errorMessage = "Failed to load report: \(error.localizedDescription)"
+            self.errorMessage = "Gagal memuat data. Silakan coba lagi nanti."
         }
     }
     
@@ -75,7 +75,7 @@ class DashboardViewModel: ObservableObject {
             if let afError = error.asAFError {
                 print("🔍 Alamofire error:", afError.errorDescription ?? "")
             }
-            self.errorMessage = "Failed to approve report: \(error.localizedDescription)"
+            self.errorMessage = "Gagal dalam menyetujui laporan. Silakan coba lagi nanti."
         }
     }
     
@@ -101,7 +101,7 @@ class DashboardViewModel: ObservableObject {
             if let afError = error.asAFError {
                 print("🔍 Alamofire error:", afError.errorDescription ?? "")
             }
-            self.errorMessage = "Failed to add new daily task: \(error.localizedDescription)"
+            self.errorMessage = "Gagal dalam membuat jadwal mingguan. Silakan coba lagi nanti."
         }
     }
     
