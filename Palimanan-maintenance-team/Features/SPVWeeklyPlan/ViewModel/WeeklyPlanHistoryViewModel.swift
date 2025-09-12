@@ -37,7 +37,7 @@ class WeeklyPlanHistoryViewModel: ObservableObject {
             }
             
         } catch {
-            self.errorMessage = "Failed to load report: \(error.localizedDescription)"
+            self.errorMessage = "Gagal Untuk Memuat Laporan: \(error.localizedDescription)"
         }
         
 //        isLoading = false
@@ -55,7 +55,7 @@ class WeeklyPlanHistoryViewModel: ObservableObject {
             self.weeklyPlanHistoryPreview = response.data
         } catch {
             print(error.localizedDescription)
-            self.errorMessage = "Failed to load report: \(error.localizedDescription)"
+            self.errorMessage = "Gagal Untuk Memuat Laporan: \(error.localizedDescription)"
         }
         
 //        isLoading = false
@@ -72,7 +72,7 @@ class WeeklyPlanHistoryViewModel: ObservableObject {
             )
             self.weeklyPlanDetail = response.data
         } catch {
-            self.errorMessage = "Failed to load report: \(error.localizedDescription)"
+            self.errorMessage = "Gagal Untuk Memuat Laporan: \(error.localizedDescription)"
         }
     }
 }

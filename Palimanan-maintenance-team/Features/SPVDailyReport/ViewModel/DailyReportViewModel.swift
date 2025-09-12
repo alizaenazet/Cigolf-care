@@ -210,7 +210,7 @@ class DailyReportViewModel: ObservableObject {
             }
 //            self.resetForm()
         } catch {
-            print("❌ Failed to create daily program:", error.localizedDescription)
+            print("❌ Gagal Membuat Program Harian:", error.localizedDescription)
             await MainActor.run {
                 self.successMessage = "Gagal membuat program: \(error.localizedDescription)"
                 self.showSuccessAlert = true
@@ -248,7 +248,7 @@ class DailyReportViewModel: ObservableObject {
             self.report = response.data ?? []
         } catch {
             print(error.localizedDescription)
-            self.errorMessage = "Failed to load report: \(error.localizedDescription)"
+            self.errorMessage = "Gagal untuk memuat laporan: \(error.localizedDescription)"
         }
     }
     
@@ -331,7 +331,7 @@ class DailyReportViewModel: ObservableObject {
             )
             self.reportDetail = response.data
         } catch {
-            self.errorMessage = "Failed to load report: \(error.localizedDescription)"
+            self.errorMessage = "Gagal untuk memuat laporan: \(error.localizedDescription)"
         }
     }
 }

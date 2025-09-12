@@ -365,12 +365,12 @@ class CreateWeeklyPlanViewModel: ObservableObject {
                     responseType: NormalResponse.self
                 )
 
-                print("✅ Weekly plan created: \(response.message)")
+                print("✅ Program Mingguan Terbuat: \(response.message)")
                 DispatchQueue.main.async {
                     onSuccess?()
                 }
             } catch {
-                print("❌ Failed to create weekly plan:", error)
+                print("❌ Gagal Membuat Program Mingguan:", error)
             }
         }
     }
