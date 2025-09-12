@@ -37,110 +37,113 @@ struct WeeklyPlanHistory: View {
                         .padding()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    HStack {
+                    // This is the responsive filter bar from the previous fix.
+                    HStack(spacing: 12) {
                         Text("Cari Riwayat")
                             .font(.title)
+                            .layoutPriority(1)
+                        
                         Spacer()
-                        HStack {
-                            Spacer()
-                            Text("Dari")
-                            DatePicker(
-                                "",
-                                selection: $viewModel.startAt,
-                                displayedComponents: .date
-                            )
-                            .frame(width: 131)
-                            Text("Hingga")
-                            DatePicker(
-                                "",
-                                selection: $viewModel.endAt,
-                                displayedComponents: .date
-                            )
-                            .frame(width: 131)
+                        
+                        Text("Dari")
+                            .minimumScaleFactor(0.8)
+                        
+                        DatePicker(
+                            "",
+                            selection: $viewModel.startAt,
+                            displayedComponents: .date
+                        )
+                        
+                        Text("Hingga")
+                            .minimumScaleFactor(0.8)
+                        
+                        DatePicker(
+                            "",
+                            selection: $viewModel.endAt,
+                            displayedComponents: .date
+                        )
 
-                            Button(action: {
+                        Button(action: {
+                            Task {
+                                await viewModel
+                                    .fetchLastWeeklyPlanHistoryByFilter()
+                            }
+                        }) {
+                            Label("", systemImage: "magnifyingglass")
+                        }.buttonStyle(.borderedProminent)
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Button {
                                 Task {
-                                    await viewModel
-                                        .fetchLastWeeklyPlanHistoryByFilter()
-                                }
-                            }) {
-                                Label("", systemImage: "magnifyingglass")
-                            }.buttonStyle(.borderedProminent)
-
-                            VStack(spacing: 4) {
-                                Button {
-                                    Task {
-                                        guard
-                                            APIService.shared.accessToken != nil
-                                        else {
-                                            print(
-                                                "⚠️ No token yet, please login"
-                                            )
-                                            errorMessage = "Anda belum login."
-                                            return
-                                        }
-                                        do {
-                                            isExporting = true
-                                            errorMessage = nil
-
-                                            let ids = Array(selectedWeeklyIds)
-                                            let query = ids.map { String($0) }
-                                                .joined(separator: ",")
-                                            let endpoint =
-                                                "/weekly-plan/export?type=csv&weekly_ids=[\(query)]"
-
-                                            print("⬇️ Downloading:", endpoint)
-                                            let fileURL =
-                                                try await APIService.shared
-                                                .downloadFile(endpoint)
-
-                                            DispatchQueue.main.async {
-                                                FilePresenter.shared.present(
-                                                    url: fileURL,
-                                                    action: .share
-                                                )
-                                            }
-                                        } catch {
-                                            print("❌ Export failed:", error)
-                                            errorMessage = "Gagal mengekspor data."
-                                        }
-                                        isExporting = false
-                                    }
-                                } label: {
-                                    if isExporting {
-                                        ProgressView()
-                                            .progressViewStyle(
-                                                CircularProgressViewStyle(
-                                                    tint: .white
-                                                )
-                                            )
-                                    } else {
-                                        Label(
-                                            "Ekspor",
-                                            systemImage: "square.and.arrow.up"
+                                    guard
+                                        APIService.shared.accessToken != nil
+                                    else {
+                                        print(
+                                            "⚠️ No token yet, please login"
                                         )
+                                        errorMessage = "Anda belum login."
+                                        return
                                     }
-                                }
-                                .buttonStyle(.borderedProminent)
-                                .disabled(
-                                    selectedWeeklyIds.isEmpty || isExporting
-                                )
+                                    do {
+                                        isExporting = true
+                                        errorMessage = nil
 
-                                // 👇 error message
-                                if let errorMessage = errorMessage {
-                                    Text(errorMessage)
-                                        .foregroundColor(.red)
-                                        .font(.subheadline)
+                                        let ids = Array(selectedWeeklyIds)
+                                        let query = ids.map { String($0) }
+                                            .joined(separator: ",")
+                                        let endpoint =
+                                            "/weekly-plan/export?type=csv&weekly_ids=[\(query)]"
+
+                                        print("⬇️ Downloading:", endpoint)
+                                        let fileURL =
+                                            try await APIService.shared
+                                            .downloadFile(endpoint)
+
+                                        DispatchQueue.main.async {
+                                            FilePresenter.shared.present(
+                                                url: fileURL,
+                                                action: .share
+                                            )
+                                        }
+                                    } catch {
+                                        print("❌ Export failed:", error)
+                                        errorMessage = "Gagal mengekspor data."
+                                    }
+                                    isExporting = false
+                                }
+                            } label: {
+                                if isExporting {
+                                    ProgressView()
+                                        .progressViewStyle(
+                                            CircularProgressViewStyle(
+                                                tint: .white
+                                            )
+                                        )
+                                } else {
+                                    Label(
+                                        "Ekspor",
+                                        systemImage: "square.and.arrow.up"
+                                    )
                                 }
                             }
-                            .frame(maxWidth: 150)
+                            .buttonStyle(.borderedProminent)
+                            .disabled(
+                                selectedWeeklyIds.isEmpty || isExporting
+                            )
+
+                            if let errorMessage = errorMessage {
+                                Text(errorMessage)
+                                    .foregroundColor(.red)
+                                    .font(.subheadline)
+                            }
                         }
-                        .frame(width: 800)
                     }
                     .padding()
                     .background(Color(uiColor: UIColor.systemBackground))
                     .cornerRadius(16)
+                    
                     ScrollView {
+                        // The TablePreviews view is now fully responsive.
                         TablePreviews(
                             selectedWeeklyIds: $selectedWeeklyIds,
                             weeklyHistory: $viewModel.weeklyPlanHistoryPreview
@@ -161,58 +164,66 @@ struct WeeklyPlanHistory: View {
                     .buttonStyle(.borderedProminent)
                 }
             }
-
             .task {
                 await viewModel.fetchLastWeeklyPlanHistory()
-                print(
-                    "fetchLastWeeklyPlanHistory",
-                    viewModel.weeklyPlanHistoryPreview
-                )
-
-                print("\n\n", viewModel.startAt, viewModel.endAt)
             }
         }
     }
 }
 
+
+// =================================================================
+// MARK: CHANGED SECTION - The Table is rebuilt with Grid
+// This section is now fully responsive and will adapt to the sidebar.
+// =================================================================
+
 struct TablePreviews: View {
     @Binding var selectedWeeklyIds: Set<Int>
     @Binding var weeklyHistory: [WeeklyPlanPreview]
+    
     var body: some View {
-        VStack {
-            HStack(spacing: 100) {
-
+        // CHANGE 1: The outer VStack now contains a Grid. A Grid is the
+        // correct tool for creating column-based layouts.
+        Grid(alignment: .leading, horizontalSpacing: 20, verticalSpacing: 15) {
+            
+            // This is the header row for the table.
+            GridRow {
                 Text("No")
-                    .frame(width: 53, alignment: .leading)
-                    .font(.title3)
-                    .foregroundColor(.gray)
-                Text("Tanggal Program")
-                    .frame(width: 325, alignment: .leading)
                     .font(.title3)
                     .foregroundColor(.gray)
 
-                Spacer()
+                Text("Tanggal Program")
+                    .font(.title3)
+                    .foregroundColor(.gray)
+
                 Text("Detail")
-                    .frame(width: 88, alignment: .center)
                     .font(.title3)
                     .foregroundColor(.gray)
-                Spacer()
+                    .gridColumnAlignment(.center) // Center this column's content
+
                 Text("Pilih")
-                    .frame(width: 55, alignment: .center)
                     .font(.title3)
                     .foregroundColor(.gray)
+                    .gridColumnAlignment(.center) // Center this column's content
             }
+            .bold()
+
             Divider()
 
+            // The ForEach loop now creates a GridRow for each item,
+            // ensuring perfect alignment with the header.
             ForEach(weeklyHistory.indices, id: \.self) { index in
-                TablePreviewRow(
-                    index: index,
-                    weeklyPlan: weeklyHistory[index],
-                    selectedWeeklyIds: $selectedWeeklyIds
-                )
+                GridRow(alignment: .center) {
+                    TablePreviewRow(
+                        index: index,
+                        weeklyPlan: weeklyHistory[index],
+                        selectedWeeklyIds: $selectedWeeklyIds
+                    )
+                }
+                Divider()
             }
-
-        }.padding()
+        }
+        .padding()
     }
 }
 
@@ -220,78 +231,69 @@ struct TablePreviewRow: View {
     let index: Int
     let weeklyPlan: WeeklyPlanPreview
     @Binding var selectedWeeklyIds: Set<Int>
-    //    @State private var isToggled = false
 
     var isSelected: Bool {
         selectedWeeklyIds.contains(weeklyPlan.id)
     }
 
     var body: some View {
-        HStack(spacing: 100) {
-
-            Text("\(index + 1)")
-                .frame(width: 53, alignment: .leading)
-            Text(
-                "\(weeklyPlan.startDate?.toFormattedString() ?? "-") - \(weeklyPlan.endDate?.toFormattedString() ?? "-")"
-            )
-            .frame(width: 325, alignment: .leading)
-            Spacer()
-            NavigationLink {
-                WeeklyPlanDetailViewWrapper(weeklyId: weeklyPlan.id)
-            } label: {
-                Text("Buka Detail")
-                    .bold()
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-            }
-            .buttonStyle(.borderedProminent)
-            .font(.caption2)
-            .frame(width: 128, alignment: .center)
-            Spacer()
-            //            Toggle("", isOn: $isToggled)
-            //                .toggleStyle(iOSCheckboxToggleStyle())
-            //                .frame(width: 45, alignment: .center)
-            Toggle(
-                "",
-                isOn: Binding(
-                    get: { isSelected },
-                    set: { newValue in
-                        if newValue {
-                            selectedWeeklyIds.insert(weeklyPlan.id)
-                        } else {
-                            selectedWeeklyIds.remove(weeklyPlan.id)
-                        }
-                    }
-                )
-            )
-            .toggleStyle(iOSCheckboxToggleStyle())
-            .frame(width: 45, alignment: .center)
+        // CHANGE 2: The HStack has been removed. The content is now directly
+        // placed as cells in the GridRow. All fixed .frame(width:) modifiers
+        // have been removed to allow the Grid to manage the layout.
+        
+        Text("\(index + 1)")
+        
+        Text(
+            "\(weeklyPlan.startDate?.toFormattedString() ?? "-") - \(weeklyPlan.endDate?.toFormattedString() ?? "-")"
+        )
+        
+        NavigationLink {
+            WeeklyPlanDetailViewWrapper(weeklyId: weeklyPlan.id)
+        } label: {
+            Text("Buka Detail")
+                .bold()
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
         }
+        .buttonStyle(.borderedProminent)
+        .font(.caption2)
+        
+        Toggle(
+            "",
+            isOn: Binding(
+                get: { isSelected },
+                set: { newValue in
+                    if newValue {
+                        selectedWeeklyIds.insert(weeklyPlan.id)
+                    } else {
+                        selectedWeeklyIds.remove(weeklyPlan.id)
+                    }
+                }
+            )
+        )
+        .toggleStyle(iOSCheckboxToggleStyle())
     }
 }
 
+
+// MARK: NO CHANGES below this line
+
 #Preview {
-    WeeklyPlanHistory()
+    SupervisorDashboardView() // Preview with the parent to see the effect
 }
 
 struct iOSCheckboxToggleStyle: ToggleStyle {
     func makeBody(configuration: Configuration) -> some View {
-        // 1
         Button(
             action: {
-
-                // 2
                 configuration.isOn.toggle()
-
             },
             label: {
                 HStack {
-                    // 3
                     Image(
                         systemName: configuration.isOn
                             ? "checkmark.square" : "square"
                     )
-
                     configuration.label
                 }
             }
