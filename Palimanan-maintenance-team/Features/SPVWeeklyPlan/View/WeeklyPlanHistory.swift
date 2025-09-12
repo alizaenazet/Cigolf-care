@@ -200,18 +200,32 @@ struct TablePreviews: View {
                     .font(.title3)
                     .foregroundColor(.gray)
                     .gridColumnAlignment(.center) // Center this column's content
-
-                Text("Pilih")
-                    .font(.title3)
-                    .foregroundColor(.gray)
-                    .gridColumnAlignment(.center) // Center this column's content
+                
+                // 👉 Ganti "Pilih" dengan master checkbox
+                Toggle(
+                    "",
+                    isOn: Binding(
+                        get: { isAllSelected },
+                        set: { newValue in
+                            isAllSelected = newValue
+                            if newValue {
+                                // select all
+                                selectedWeeklyIds = Set(weeklyHistory.map { $0.id })
+                            } else {
+                                // deselect all
+                                selectedWeeklyIds.removeAll()
+                            }
+                        }
+                    )
+                )
+                .toggleStyle(iOSCheckboxToggleStyle())
+                .frame(width: 45, alignment: .center)
+                .foregroundColor(Color(red: 121 / 255, green: 162 / 255, blue: 34 / 255))
             }
             .bold()
 
             Divider()
-
-            // The ForEach loop now creates a GridRow for each item,
-            // ensuring perfect alignment with the header.
+            
             ForEach(weeklyHistory.indices, id: \.self) { index in
                 GridRow(alignment: .center) {
                     TablePreviewRow(
@@ -224,8 +238,17 @@ struct TablePreviews: View {
             }
         }
         .padding()
+        .onChange(of: selectedWeeklyIds) { newValue in
+            // sinkronkan state header dengan kondisi row
+            if newValue.count == weeklyHistory.count && !weeklyHistory.isEmpty {
+                isAllSelected = true
+            } else {
+                isAllSelected = false
+            }
+        }
     }
 }
+
 
 struct TablePreviewRow: View {
     let index: Int
