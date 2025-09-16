@@ -16,9 +16,9 @@ struct CreateWeeklyPlan: View {
     private let taskColumns: [GridItem] = [
         GridItem(.fixed(50), alignment: .leading),  // Nomor
         GridItem(.flexible(), alignment: .leading),  // Jenis Pekerjaan
-        GridItem(.flexible(maximum: 100), alignment: .leading),  // Hole/Area
-        GridItem(.flexible(maximum: 120), alignment: .center),  // Hari
-        GridItem(.flexible(minimum: 200), alignment: .leading),  // Keterangan
+        GridItem(.fixed( 120), alignment: .leading),  // Hole/Area
+        GridItem(.fixed( 130), alignment: .center),  // Hari
+        GridItem(.flexible(), alignment: .leading),  // Keterangan
         GridItem(.fixed(50), alignment: .center),  // Delete button
     ]
 
