@@ -4,6 +4,7 @@
 //
 //  Created by Ali zaenal on 02/09/25.
 //
+
 import SwiftUI
 
 struct CreateWeeklyPlan: View {
@@ -11,6 +12,15 @@ struct CreateWeeklyPlan: View {
     @State private var showSaveConfirmation = false
     @State private var expandedDivisions: Set<Int> = []
     @Environment(\.presentationMode) var presentationMode
+
+    private let taskColumns: [GridItem] = [
+        GridItem(.fixed(50), alignment: .leading),  // Nomor
+        GridItem(.flexible(), alignment: .leading),  // Jenis Pekerjaan
+        GridItem(.fixed( 120), alignment: .leading),  // Hole/Area
+        GridItem(.fixed( 130), alignment: .center),  // Hari
+        GridItem(.flexible(), alignment: .leading),  // Keterangan
+        GridItem(.fixed(50), alignment: .center),  // Delete button
+    ]
 
     var body: some View {
         ScrollView {
@@ -31,7 +41,7 @@ struct CreateWeeklyPlan: View {
         .alert("Konfirmasi Simpan", isPresented: $showSaveConfirmation) {
             Button("Batal", role: .cancel) {}
             Button("Simpan") {
-                viewModel.createWeeklyPlan() {
+                viewModel.createWeeklyPlan {
                     presentationMode.wrappedValue.dismiss()
                 }
             }
@@ -43,27 +53,34 @@ struct CreateWeeklyPlan: View {
     // MARK: - Header Section
     private var headerSection: some View {
         VStack(alignment: .leading) {
-    
-            
-            HStack() {
-                HStack(){
+
+            HStack {
+                HStack {
                     Text("Dari")
                         .fontWeight(.semibold)
                         .font(.title3)
-                    DatePicker("", selection: $viewModel.startAt, displayedComponents: .date)
-                        .labelsHidden()
-                        .padding(9)
-                        .background(Color.white.opacity(0.1))
-                        .cornerRadius(6)
-                    
+                    DatePicker(
+                        "",
+                        selection: $viewModel.startAt,
+                        displayedComponents: .date
+                    )
+                    .labelsHidden()
+                    .padding(9)
+                    .background(Color.white.opacity(0.1))
+                    .cornerRadius(6)
+
                     Text("Hingga")
                         .fontWeight(.semibold)
                         .font(.title3)
-                    DatePicker("", selection: $viewModel.endAt, displayedComponents: .date)
-                        .labelsHidden()
-                        .padding(9)
-                        .background(Color.white.opacity(0.1))
-                        .cornerRadius(6)
+                    DatePicker(
+                        "",
+                        selection: $viewModel.endAt,
+                        displayedComponents: .date
+                    )
+                    .labelsHidden()
+                    .padding(9)
+                    .background(Color.white.opacity(0.1))
+                    .cornerRadius(6)
                 }
                 Spacer()
                 Button("Simpan Program") {
@@ -117,15 +134,15 @@ struct CreateWeeklyPlan: View {
                                     }
                                 }
                             }
-                        } label : {
-                            HStack() {
+                        } label: {
+                            HStack {
                                 Text(division.name)
                                     .font(.title2)
                                     .fontWeight(.medium)
                                     .multilineTextAlignment(.leading)
                                     .foregroundStyle(.black)
                             }
-                            .frame(width: 120, alignment: .leading)
+                            .frame(alignment: .leading)
                             .padding(6)
                             .background(Color.white.opacity(0.9))
                             .cornerRadius(6)
@@ -136,14 +153,14 @@ struct CreateWeeklyPlan: View {
                         Button {
                             viewModel.deleteDivision(DivisionId: division.id)
                         } label: {
-//                            Image(systemName: "xmark")
-//                                .font(.title3)
-//                                .foregroundColor(.white.opacity(0.6))
+                            //                            Image(systemName: "xmark")
+                            //                                .font(.title3)
+                            //                                .foregroundColor(.white.opacity(0.6))
                             Text("Hapus")
                                 .foregroundStyle(.red)
                                 .underline()
                                 .padding(.horizontal, 10)
-                            
+
                         }
                         .buttonStyle(.plain)
                     }
@@ -167,7 +184,7 @@ struct CreateWeeklyPlan: View {
             ForEach(division.locations, id: \.locationId) { location in
                 locationSection(for: location, in: division)
             }
-            
+
             Button {
                 addLocationToDivision(division)
             } label: {
@@ -177,7 +194,6 @@ struct CreateWeeklyPlan: View {
                     .background(Color.accent)
                     .foregroundColor(.white)
                     .cornerRadius(10)
-                    .animation(nil)
             }
             .transition(.opacity)
         }
@@ -214,7 +230,7 @@ struct CreateWeeklyPlan: View {
                         }
                     }
                 } label: {
-                    HStack() {
+                    HStack {
                         Text(location.location)
                             .font(.title3)
                             .fontWeight(.medium)
@@ -227,7 +243,7 @@ struct CreateWeeklyPlan: View {
                     .shadow(radius: 2)
                 }
                 .disabled(division.getAvailableLocation().isEmpty)
-                
+
                 Spacer()
                 Button {
                     division.deleteLocation(locationId: location.locationId)
@@ -237,42 +253,34 @@ struct CreateWeeklyPlan: View {
                         .foregroundStyle(.gray.opacity(0.3))
                 }
                 .buttonStyle(.plain)
-                
+
             }
             .padding(.horizontal)
             .padding(.vertical, 5)
 
             // Task Headers
-            HStack(spacing: 10) {
-                Text("Nomor")
-                    .frame(width: 55, alignment: .leading)
-                    .font(.body)
-                    .foregroundColor(.secondary)
-
-                Text("Jenis Pekerjaan")
-                    .frame(width: 550, alignment: .leading)
-                    .font(.body)
-                    .foregroundColor(.secondary)
-
-                Text("Hole/Area")
-                    .frame(width: 250, alignment: .center)
-                    .font(.body)
-                    .foregroundColor(.secondary)
-
-                Text("Hari")
-                    .frame(width: 100, alignment: .center)
-                    .font(.body)
-                    .foregroundColor(.secondary)
-
-                Text("Keterangan")
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .font(.body)
-                    .foregroundColor(.secondary)
-
-                Text("")
-                    .frame(width: 30)
+            LazyVGrid(columns: taskColumns, spacing: 12) {
+                Text("No.").bold()
+                    .lineLimit(nil)  // unlimited lines
+                    .multilineTextAlignment(.leading)
+                Text("Jenis Pekerjaan").bold()
+                    .lineLimit(nil)  // unlimited lines
+                    .multilineTextAlignment(.leading)
+                Text("Hole/Area").bold()
+                    .lineLimit(nil)  // unlimited lines
+                    .multilineTextAlignment(.leading)
+                Text("Hari").bold()
+                    .lineLimit(nil)  // unlimited lines
+                    .multilineTextAlignment(.leading)
+                Text("Keterangan").bold()
+                    .lineLimit(nil)  // unlimited lines
+                    .multilineTextAlignment(.leading)
+                Text("")  // for delete button
             }
-            .padding(.horizontal)
+            .font(.subheadline)
+            .foregroundColor(.secondary)
+            .padding(.vertical, 8)
+            .padding(.leading, 16)
 
             Divider()
 
@@ -296,24 +304,27 @@ struct CreateWeeklyPlan: View {
         at index: Int,
         in location: DivisionLocation
     ) -> some View {
-        HStack(spacing: 10) {
+        LazyVGrid(columns: taskColumns, spacing: 12) {
             // Nomor
             Text(String(format: "%02d", index + 1))
-                .frame(width: 50, alignment: .leading)
+//                .frame(width: 50, alignment: .leading)
                 .font(.body)
-            
+
             // Jenis Pekerjaan
-            TextField("Jenis Pekerjaan", text: Binding(
-                get: { task.taskType },
-                set: { newValue in
-                    task.taskType = newValue
-                    checkAndAddNewTaskIfNeeded(for: location, at: index)
-                }
-            ))
-                .textFieldStyle(.roundedBorder)
-                .frame(width: 550)
-                .font(.body)
-            
+            TextField(
+                "Jenis Pekerjaan",
+                text: Binding(
+                    get: { task.taskType },
+                    set: { newValue in
+                        task.taskType = newValue
+                        checkAndAddNewTaskIfNeeded(for: location, at: index)
+                    }
+                )
+            )
+            .font(.body)
+            .textFieldStyle(.roundedBorder)
+            .lineLimit(nil)
+
             // Hole/Area - Using available locations as options
             Menu {
                 ForEach(availableAreas, id: \.self) { area in
@@ -342,15 +353,18 @@ struct CreateWeeklyPlan: View {
                 }
             } label: {
                 HStack {
-                    Text(task.area.isEmpty ? "Pilih" : task.area.joined(separator: ", "))
-                        .foregroundColor(task.area.isEmpty ? .secondary : .primary)
-                        .font(.body)
-                        .lineLimit(1)
+                    Text(
+                        task.area.isEmpty
+                            ? "Pilih" : task.area.joined(separator: ", ")
+                    )
+                    .foregroundColor(task.area.isEmpty ? .secondary : .primary)
+                    .font(.body)
+                    .lineLimit(nil)
                     Spacer()
                     Image(systemName: "chevron.down")
                         .font(.body)
                 }
-                .frame(width: 250)
+//                .frame(width: 250)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 6)
                 .background(Color.white.opacity(0.1))
@@ -361,8 +375,9 @@ struct CreateWeeklyPlan: View {
             Menu {
                 ForEach(viewModel.getBahasaDays(), id: \.self) { day in
                     Button(day) {
-                        if let englishDay = viewModel.getEnglishDay(fromBahasa: day)
-                        {
+                        if let englishDay = viewModel.getEnglishDay(
+                            fromBahasa: day
+                        ) {
                             task.day = englishDay  // ✅ store English ("Monday", "Tuesday")
                             print(englishDay)
                         }
@@ -371,14 +386,17 @@ struct CreateWeeklyPlan: View {
                 }
             } label: {
                 HStack {
-                    Text(viewModel.getBahasaDay(fromEnglish: task.day) ?? (task.day.isEmpty ? "Pilih" : task.day))
-                        .foregroundColor(task.day.isEmpty ? .secondary : .primary)
-                        .font(.body)
+                    Text(
+                        viewModel.getBahasaDay(fromEnglish: task.day)
+                            ?? (task.day.isEmpty ? "Pilih" : task.day)
+                    )
+                    .foregroundColor(task.day.isEmpty ? .secondary : .primary)
+                    .font(.body)
                     Spacer()
                     Image(systemName: "chevron.down")
                         .font(.body)
                 }
-                .frame(width: 80)
+//                .frame(width: 80)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 6)
                 .background(Color.white.opacity(0.1))
@@ -386,17 +404,20 @@ struct CreateWeeklyPlan: View {
             }
 
             // Keterangan
-            TextField("Potong dengan ukuran...", text: Binding(
-                get: { task.description },
-                set: { newValue in
-                    task.description = newValue
-                    checkAndAddNewTaskIfNeeded(for: location, at: index)
-                }
-            ))
-                .textFieldStyle(.roundedBorder)
-                .frame(maxWidth: .infinity)
-                .font(.body)
-            
+            TextField(
+                "Potong dengan ukuran...",
+                text: Binding(
+                    get: { task.description },
+                    set: { newValue in
+                        task.description = newValue
+                        checkAndAddNewTaskIfNeeded(for: location, at: index)
+                    }
+                )
+            )
+            .textFieldStyle(.roundedBorder)
+//            .frame(maxWidth: .infinity)
+            .font(.body)
+
             // Delete Button
             Button {
                 location.deleteTask(taskId: task.id)
@@ -406,14 +427,178 @@ struct CreateWeeklyPlan: View {
                     .font(.title2)
             }
             .buttonStyle(.plain)
-            .frame(width: 30)
+//            .frame(width: 30)
         }
         .padding(.horizontal)
     }
 
+    //    private func taskRow(
+    //        for task: DivisionTask,
+    //        at index: Int,
+    //        in location: DivisionLocation
+    //    ) -> some View {
+    //        LazyVGrid(columns: taskColumns, spacing: 12) {
+    //            // Nomor
+    //            Text(String(format: "%02d", index + 1))
+    //                .font(.body)
+    //
+    //            // Jenis Pekerjaan
+    //            TextField("Jenis Pekerjaan", text: Binding(
+    //                get: { task.taskType },
+    //                set: { newValue in
+    //                    task.taskType = newValue
+    //                    checkAndAddNewTaskIfNeeded(for: location, at: index)
+    //                }
+    //            ))
+    //            .textFieldStyle(.roundedBorder)
+    //            .lineLimit(nil)
+    //            .fixedSize(horizontal: false, vertical: true)
+    //
+    //            // Hole/Area
+    //            Menu {
+    //                ForEach(availableAreas, id: \.self) { area in
+    //                    Button {
+    //                        if task.area.contains(area) {
+    //                            task.area.removeAll { $0 == area }
+    //                        } else {
+    //                            task.area.append(area)
+    //                        }
+    //                        checkAndAddNewTaskIfNeeded(for: location, at: index)
+    //                    } label: {
+    //                        HStack {
+    //                            if task.area.contains(area) {
+    //                                Image(systemName: "checkmark")
+    //                                    .foregroundColor(.blue)
+    //                            }
+    //                            Text(area)
+    //                        }
+    //                    }
+    //                }
+    //            } label: {
+    //                Text(task.area.isEmpty ? "Pilih" : task.area.joined(separator: ", "))
+    //                    .foregroundColor(task.area.isEmpty ? .secondary : .primary)
+    //                    .lineLimit(1)
+    //            }
+    //            .frame(maxWidth: .infinity, alignment: .leading)
+    //            // Hole/Area - Using available locations as options
+    //            Menu {
+    //                ForEach(availableAreas, id: \.self) { area in
+    //                    Button {
+    //                        if task.area.contains(area) {
+    //                            task.area.removeAll { $0 == area }
+    //                        } else {
+    //                            task.area.append(area)
+    //                        }
+    //                        checkAndAddNewTaskIfNeeded(for: location, at: index)
+    //                    } label: {
+    //                        HStack {
+    //                            if task.area.contains(area) {
+    //                                Image(systemName: "checkmark")
+    //                                    .foregroundColor(.blue)
+    //                            } else {
+    //                                Image(systemName: "circle")
+    //                                    .foregroundColor(.white)
+    //                            }
+    //                            Text(area)
+    //                                .foregroundColor(
+    //                                    task.area.contains(area) ? .blue : .primary
+    //                                )
+    //                        }
+    //                    }
+    //                }
+    //            } label: {
+    //                HStack {
+    //                    Text(
+    //                        task.area.isEmpty
+    //                            ? "Pilih" : task.area.joined(separator: ", ")
+    //                    )
+    //                    .foregroundColor(task.area.isEmpty ? .secondary : .primary)
+    //                    .font(.body)
+    //                    .lineLimit(1)
+    //                    Spacer()
+    //                    Image(systemName: "chevron.down")
+    //                        .font(.body)
+    //                }
+    //                .frame(width: 250)
+    //                .padding(.horizontal, 8)
+    //                .padding(.vertical, 6)
+    //                .background(Color.white.opacity(0.1))
+    //                .cornerRadius(6)
+    //            }
+    //
+    //            // Hari
+    //            Menu {
+    //                ForEach(viewModel.getBahasaDays(), id: \.self) { day in
+    //                    Button(day) {
+    //                        if let englishDay = viewModel.getEnglishDay(fromBahasa: day) {
+    //                            task.day = englishDay
+    //                        }
+    //                        checkAndAddNewTaskIfNeeded(for: location, at: index)
+    //                    }
+    //                }
+    //            } label: {
+    //                Text(viewModel.getBahasaDay(fromEnglish: task.day)
+    //                     ?? (task.day.isEmpty ? "Pilih" : task.day))
+    //                    .foregroundColor(task.day.isEmpty ? .secondary : .primary)
+    //            }
+    //
+    //            Menu {
+    //                ForEach(viewModel.getBahasaDays(), id: \.self) { day in
+    //                    Button(day) {
+    //                        if let englishDay = viewModel.getEnglishDay(
+    //                            fromBahasa: day
+    //                        ) {
+    //                            task.day = englishDay  // ✅ store English ("Monday", "Tuesday")
+    //                            print(englishDay)
+    //                        }
+    //                        checkAndAddNewTaskIfNeeded(for: location, at: index)
+    //                    }
+    //                }
+    //            } label: {
+    //                HStack {
+    //                    Text(
+    //                        viewModel.getBahasaDay(fromEnglish: task.day)
+    //                            ?? (task.day.isEmpty ? "Pilih" : task.day)
+    //                    )
+    //                    .foregroundColor(task.day.isEmpty ? .secondary : .primary)
+    //                    .font(.body)
+    //                    Spacer()
+    //                    Image(systemName: "chevron.down")
+    //                        .font(.body)
+    //                }
+    //                .frame(width: 80)
+    //                .padding(.horizontal, 8)
+    //                .padding(.vertical, 6)
+    //                .background(Color.white.opacity(0.1))
+    //                .cornerRadius(6)
+    //            }
+    //
+    //            // Keterangan
+    //            TextField("Keterangan", text: Binding(
+    //                get: { task.description },
+    //                set: { newValue in
+    //                    task.description = newValue
+    //                    checkAndAddNewTaskIfNeeded(for: location, at: index)
+    //                }
+    //            ))
+    //            .textFieldStyle(.roundedBorder)
+    //
+    //            // Delete
+    //            Button {
+    //                location.deleteTask(taskId: task.id)
+    //            } label: {
+    //                Image(systemName: "xmark.circle.fill")
+    //                    .foregroundColor(.gray.opacity(0.3))
+    //                    .font(.title2)
+    //            }
+    //            .buttonStyle(.plain)
+    //        }
+    //        .padding(.vertical, 6)
+    //    }
+
     // MARK: - Footer Section
     private var footerSection: some View {
-        VStack{
+        VStack {
             Button {
                 addDivision()
             } label: {
@@ -423,11 +608,10 @@ struct CreateWeeklyPlan: View {
                     .foregroundColor(Color.accent)
                     .background(Color.white)
                     .cornerRadius(8)
-                    .animation(nil)
             }
             .transition(.opacity)
         }
-        .padding(.vertical,15)
+        .padding(.vertical, 15)
     }
 
     // MARK: - Helper Functions
@@ -516,6 +700,6 @@ struct CreateWeeklyPlan: View {
     }
 }
 
-#Preview {
-    CreateWeeklyPlan()
-}
+//#Preview {
+//    CreateWeeklyPlan()
+//}

@@ -13,7 +13,7 @@ struct WeeklyPlanDetailView: View {
     var body: some View {
         if viewModel.isLoading {
             VStack {
-                ProgressView("Loading…")
+                ProgressView("Memuat…")
                     .padding()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }

@@ -184,7 +184,7 @@ struct ReportTableView: View {
 
                     if reports.isEmpty {
                         HStack {
-                            Text("No data available")
+                            Text("Tidak ada data yang tersedia.")
                                 .frame(maxWidth: .infinity, alignment: .center)
                         }
                         .padding(.vertical, 12)
@@ -302,7 +302,7 @@ struct DailyReportView: View {
         NavigationStack {
             ScrollView {
                 if viewModel.isLoading {
-                    ProgressView("Loading…")
+                    ProgressView("Memuat…")
                         .padding()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if let error = viewModel.errorMessage {

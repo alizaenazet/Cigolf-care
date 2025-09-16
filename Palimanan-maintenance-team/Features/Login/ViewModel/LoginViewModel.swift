@@ -32,10 +32,6 @@ class LoginViewModel: ObservableObject {
         let body = ["username": username, "password": password]
         request.httpBody = try? JSONEncoder().encode(body)
 
-        print("--- Starting Login Request ---")
-        print("URL: \(url.absoluteString)")
-        print("Body: \(String(data: request.httpBody ?? Data(), encoding: .utf8) ?? "{}")")
-
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 self.isLoading = false

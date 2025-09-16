@@ -16,7 +16,7 @@ struct DashboardView: View {
     var body: some View {
         ZStack {
             if viewModel.isLoading {
-                ProgressView("Loading…")
+                ProgressView("Memuat…")
                     .padding()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let report = viewModel.report {
@@ -42,7 +42,7 @@ struct DashboardView: View {
                 Text(error)
                     .foregroundColor(.red)
             } else {
-                Text("No data available")
+                Text("Tidak ada data yang dapat ditampilkan.")
                     .foregroundStyle(.secondary)
             }
         }
@@ -81,7 +81,7 @@ struct DashboardView: View {
                         .presentationCornerRadius(24)
                     }
                     else {
-                        Text("You don't have permission to view this report.")
+                        Text("Anda tidak memiliki akses untuk melihat halaman ini.")
                             .foregroundColor(.red)
                     }
                 }

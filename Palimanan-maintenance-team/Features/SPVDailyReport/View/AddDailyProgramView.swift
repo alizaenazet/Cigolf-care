@@ -119,7 +119,7 @@ struct AddDailyProgramView: View {
             ScrollView {
                 
                 if (viewModel.isLoading) {
-                    ProgressView("Loading…")
+                    ProgressView("Memuat…")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 else {
