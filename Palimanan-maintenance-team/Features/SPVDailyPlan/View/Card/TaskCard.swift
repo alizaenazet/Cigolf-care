@@ -45,6 +45,7 @@ struct TaskCard: View {
                         .background(Color.accentColor)
                         .foregroundColor(.white)
                         .cornerRadius(4)
+                        .multilineTextAlignment(.center)
                 }
             } else {
                 Button {
@@ -56,6 +57,7 @@ struct TaskCard: View {
                         .background(Color.gray)
                         .foregroundColor(.white)
                         .cornerRadius(4)
+                        .multilineTextAlignment(.center)
                 }
                 .disabled(true)
             }
@@ -63,7 +65,8 @@ struct TaskCard: View {
                 .lineLimit(nil)  // unlimited lines
                 .multilineTextAlignment(.leading)
             Text(task.isFinished ? "Selesai" : "Belum")
-                .lineLimit(1)
+                .lineLimit(nil)
+                .multilineTextAlignment(.leading)
                 .foregroundColor(task.isFinished ? .accentColor : .red)
 
         }
