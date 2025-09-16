@@ -17,11 +17,11 @@ struct LocationCard: View {
     // Shared grid definition
     private let taskColumns: [GridItem] = [
         GridItem(.fixed(50), alignment: .leading),  // Nomor
-        GridItem(.flexible(minimum: 230), alignment: .leading),  // Jenis Pengerjaan
-        GridItem(.flexible(maximum: 100), alignment: .leading),  // Hole/Area
-        GridItem(.flexible(maximum: 90), alignment: .center),  // Prioritas
-        GridItem(.flexible(maximum: 100), alignment: .center),  // Gambar
-        GridItem(.flexible(minimum: 200), alignment: .leading),  // Keterangan
+        GridItem(.flexible(), alignment: .leading),  // Jenis Pengerjaan
+        GridItem(.fixed(100), alignment: .leading),  // Hole/Area
+        GridItem(.fixed(90), alignment: .center),  // Prioritas
+        GridItem(.fixed(120), alignment: .center),  // Gambar
+        GridItem(.flexible(), alignment: .leading),  // Keterangan
         GridItem(.fixed(70), alignment: .center),  // Status
     ]
 
