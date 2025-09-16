@@ -16,11 +16,20 @@ struct WeeklyPlanTaskCard: View {
         LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
             Text(String(format: "%02d", index + 1))
                 .padding(.leading)
+                .lineLimit(nil)  // unlimited lines
+                .multilineTextAlignment(.leading)
             Text(task.taskType)
+                .lineLimit(nil)  // unlimited lines
+                .multilineTextAlignment(.leading)
             Text(task.area.joined(separator: ", "))
+                .lineLimit(nil)  // unlimited lines
+                .multilineTextAlignment(.center)
             Text(task.day?.toDate()?.getDayOfWeekID() ?? "-")
+                .lineLimit(nil)  // unlimited lines
+                .multilineTextAlignment(.center)
             Text(task.description)
-                .lineLimit(1)
+                .lineLimit(nil)  // unlimited lines
+                .multilineTextAlignment(.leading)
         }
         .font(.subheadline)
         .padding(.horizontal)
