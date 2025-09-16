@@ -56,7 +56,7 @@ struct DailyRepTaskCard: View {
                 .disabled(true)
             }
             Text(task.description)
-                .lineLimit(1)
+//                .lineLimit(1)
             Text(task.isFinished ? "Selesai" : "Belum")
                 .foregroundColor(task.isFinished ? .accentColor : .red)
         }

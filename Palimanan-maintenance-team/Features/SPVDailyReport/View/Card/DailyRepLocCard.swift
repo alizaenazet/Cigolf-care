@@ -22,10 +22,10 @@ struct DailyRepLocCard: View {
         GridItem(.fixed(100), alignment: .leading),  // Hole/Area
         GridItem(.fixed(70), alignment: .center),    // Tk Diminta
         GridItem(.fixed(70), alignment: .center),    // Tk Tersedia
-        GridItem(.fixed(150), alignment: .center),   // Nama Tk
-        GridItem(.fixed(225), alignment: .center),   // Gambar
-        GridItem(.flexible(), alignment: .leading),  // Keterangan
-        GridItem(.fixed(50), alignment: .center)     // Status
+        GridItem(.fixed(100), alignment: .center),   // Nama Tk
+        GridItem(.fixed(100), alignment: .center),   // Gambar
+        GridItem(.flexible(minimum: 150), alignment: .leading),  // Keterangan
+        GridItem(.fixed(80), alignment: .center)     // Status
     ]
     
     var body: some View {
