@@ -33,7 +33,7 @@ struct WeeklyPlanHistory: View {
         NavigationStack {
             VStack(spacing: 20) {
                 if viewModel.isLoading {
-                    ProgressView("Loading…")
+                    ProgressView("Memuat…")
                         .padding()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
@@ -189,7 +189,7 @@ struct TablePreviews: View {
         VStack(alignment: .leading, spacing: 0) {
             LazyVGrid(columns: columns, spacing: 12) {
                 // Header row
-                Text("No")
+                Text("No.")
                     .font(.title3).foregroundColor(.gray).bold()
                 Text("Tanggal Program")
                     .font(.title3).foregroundColor(.gray).bold()

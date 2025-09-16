@@ -25,7 +25,7 @@ struct ContentView: View {
                         Text("Received Role: \(session.userRole ?? "Not Provided")")
                             .padding()
                         
-                        Button("Logout") {
+                        Button("Keluar") {
                             session.logout()
                         }
                     }
