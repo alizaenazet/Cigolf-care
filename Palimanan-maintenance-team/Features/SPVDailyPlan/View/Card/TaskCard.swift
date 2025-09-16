@@ -19,14 +19,21 @@ struct TaskCard: View {
             Text(String(format: "%02d", index + 1))
                 .padding(.leading)
             Text(task.taskType)
+                .lineLimit(nil)  // unlimited lines
+                .multilineTextAlignment(.leading)
             Text(task.area.joined(separator: ", "))
+                .lineLimit(nil)  // unlimited lines
+                .multilineTextAlignment(.leading)
             Text(task.priority)
             if let url = task.imageUrl, !url.isEmpty {
                 Button {
                     FileDownloader.downloadTempFile(from: url) { fileURL in
                         if let fileURL = fileURL {
                             DispatchQueue.main.async {
-                                FilePresenter.shared.present(url: fileURL, action: .preview)
+                                FilePresenter.shared.present(
+                                    url: fileURL,
+                                    action: .preview
+                                )
                             }
                         }
                     }
@@ -53,6 +60,8 @@ struct TaskCard: View {
                 .disabled(true)
             }
             Text(task.description)
+                .lineLimit(nil)  // unlimited lines
+                .multilineTextAlignment(.leading)
             Text(task.isFinished ? "Selesai" : "Belum")
                 .lineLimit(1)
                 .foregroundColor(task.isFinished ? .accentColor : .red)

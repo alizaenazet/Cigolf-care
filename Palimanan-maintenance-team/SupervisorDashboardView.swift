@@ -31,24 +31,57 @@ struct SupervisorDashboardView: View {
                     // MARK: Dashboard Dropdown
                     DisclosureGroup(isExpanded: $expandDashboard) {
                         NavigationLink(value: SidebarMenu.dashboard(.lembah)) {
-                            Label("Lembah", systemImage: "apple.meditate")
+                            Label {
+                                Text("Lembah")
+                            } icon: {
+                                Image(systemName: "apple.meditate")
+                                    .imageScale(.small)
+                                    .dynamicTypeSize(.medium)
+                            }
                         }
                         NavigationLink(value: SidebarMenu.dashboard(.danau)) {
-                            Label("Danau", systemImage: "water.waves")
+                            Label {
+                                Text("Danau")
+                            } icon: {
+                                Image(systemName: "water.waves")
+                                    .imageScale(.small)
+                                    .dynamicTypeSize(.medium)  // keep icon steady
+                            }
                         }
                         NavigationLink(value: SidebarMenu.dashboard(.bukit)) {
-                            Label("Bukit", systemImage: "mountain.2")
+//                            Label("Bukit", systemImage: "mountain.2")
+                            Label {
+                                Text("Bukit")
+                            } icon: {
+                                Image(systemName: "mountain.2")
+                                    .imageScale(.small)
+                                    .dynamicTypeSize(.medium)
+                            }
                         }
                     } label: {
-                        Label("Dashboard", systemImage: "rectangle.grid.2x2")
+//                        Label("Dashboard", systemImage: "rectangle.grid.2x2")
+                        Label {
+                            Text("Dashboard")
+                        } icon: {
+                            Image(systemName: "rectangle.grid.2x2")
+                                .imageScale(.small)
+                                .dynamicTypeSize(.medium)  // keep icon steady
+                        }
                     }
 
                     // MARK: Program Mingguan (standalone)
                     NavigationLink(value: SidebarMenu.programMingguan) {
-                        Label(
-                            "Program Mingguan",
-                            systemImage: "calendar.badge.plus"
-                        )
+//                        Label(
+//                            "Program Mingguan",
+//                            systemImage: "calendar.badge.plus"
+//                        )
+                        Label {
+                            Text("Program Mingguan")
+                        } icon: {
+                            Image(systemName: "calendar.badge.plus")
+                                .imageScale(.small)
+                                .dynamicTypeSize(.medium)  // keep icon steady
+                        }
                     }
 
                     // MARK: Program Harian Dropdown
@@ -56,21 +89,42 @@ struct SupervisorDashboardView: View {
                         NavigationLink(
                             value: SidebarMenu.programHarian(.lembah)
                         ) {
-                            Label("Lembah", systemImage: "apple.meditate")
+                            Label {
+                                Text("Lembah")
+                            } icon: {
+                                Image(systemName: "apple.meditate")
+                                    .imageScale(.small)
+                                    .dynamicTypeSize(.medium)
+                            }
                         }
                         NavigationLink(value: SidebarMenu.programHarian(.danau))
                         {
-                            Label("Danau", systemImage: "water.waves")
+                            Label {
+                                Text("Danau")
+                            } icon: {
+                                Image(systemName: "water.waves")
+                                    .imageScale(.small)
+                                    .dynamicTypeSize(.medium)  // keep icon steady
+                            }
                         }
                         NavigationLink(value: SidebarMenu.programHarian(.bukit))
                         {
-                            Label("Bukit", systemImage: "mountain.2")
+                            Label {
+                                Text("Bukit")
+                            } icon: {
+                                Image(systemName: "mountain.2")
+                                    .imageScale(.small)
+                                    .dynamicTypeSize(.medium)
+                            }
                         }
                     } label: {
-                        Label(
-                            "Program Harian",
-                            systemImage: "list.bullet.clipboard"
-                        )
+                        Label {
+                            Text("Harian")
+                        } icon: {
+                            Image(systemName: "list.bullet.clipboard")
+                                .imageScale(.small)
+                                .dynamicTypeSize(.medium)
+                        }
                     }
                 }
                 .listStyle(.automatic)

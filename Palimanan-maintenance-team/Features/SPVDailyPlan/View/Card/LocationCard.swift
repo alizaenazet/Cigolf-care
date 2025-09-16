@@ -16,13 +16,13 @@ struct LocationCard: View {
     
     // Shared grid definition
     private let taskColumns: [GridItem] = [
-        GridItem(.fixed(50), alignment: .leading),   // Nomor
+        GridItem(.flexible(minimum:50), alignment: .leading),   // Nomor
         GridItem(.flexible(minimum: 120), alignment: .leading), // Jenis Pengerjaan
-        GridItem(.fixed(100), alignment: .leading),  // Hole/Area
-        GridItem(.fixed(70), alignment: .center),    // Prioritas
-        GridItem(.fixed(120), alignment: .center),   // Gambar
+        GridItem(.flexible(minimum:100), alignment: .leading),  // Hole/Area
+        GridItem(.flexible(minimum:70), alignment: .center),    // Prioritas
+        GridItem(.flexible(minimum:120), alignment: .center),   // Gambar
         GridItem(.flexible(), alignment: .leading),  // Keterangan
-        GridItem(.fixed(50), alignment: .center)     // Status
+        GridItem(.flexible(minimum:50), alignment: .center)     // Status
     ]
     
     var body: some View {
@@ -63,19 +63,27 @@ struct LocationCard: View {
                 VStack(spacing: 0) {
                     // Table header
                     LazyVGrid(columns: taskColumns, spacing: 12) {
-                        Text("Nomor")
-                            .lineLimit(1)
+                        Text("No.")
+                            .lineLimit(nil)         // unlimited lines
+                                .multilineTextAlignment(.leading)
                         Text("Jenis Pengerjaan")
-                            .lineLimit(1)
+                            .lineLimit(nil)         // unlimited lines
+                                .multilineTextAlignment(.leading)
                         Text("Hole/Area")
-                            .lineLimit(1)
+                            .lineLimit(nil)         // unlimited lines
+                                .multilineTextAlignment(.leading)
                         Text("Prioritas")
-                            .lineLimit(1)
+                            .lineLimit(nil)         // unlimited lines
+                                .multilineTextAlignment(.leading)
                         Text("Gambar")
-                            .lineLimit(1)
+                            .lineLimit(nil)         // unlimited lines
+                                .multilineTextAlignment(.leading)
                         Text("Keterangan")
+                            .lineLimit(nil)         // unlimited lines
+                                .multilineTextAlignment(.leading)
                         Text("Status")
-                            .lineLimit(1)
+                            .lineLimit(nil)         // unlimited lines
+                                .multilineTextAlignment(.leading)
                     }
                     .font(.subheadline.bold())
                     .foregroundColor(.secondary)
