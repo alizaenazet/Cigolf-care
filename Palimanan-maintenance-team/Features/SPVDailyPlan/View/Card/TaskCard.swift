@@ -13,6 +13,7 @@ struct TaskCard: View {
     let columns: [GridItem]
     @State private var showPreview = false
     @State private var previewURL: URL?
+    @State private var isTryToOpen: Bool = false
 
     var body: some View {
         LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
@@ -27,25 +28,33 @@ struct TaskCard: View {
             Text(task.priority)
             if let url = task.imageUrl, !url.isEmpty {
                 Button {
+                    isTryToOpen = true
                     FileDownloader.downloadTempFile(from: url) { fileURL in
                         if let fileURL = fileURL {
+                            isTryToOpen = false
                             DispatchQueue.main.async {
-                                FilePresenter.shared.present(
-                                    url: fileURL,
-                                    action: .preview
-                                )
+                                FilePresenter.shared.present(url: fileURL, action: .preview)
                             }
                         }
                     }
                 } label: {
-                    Label("Klik untuk melihat", systemImage: "")
-                        .font(.subheadline)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.accentColor)
-                        .foregroundColor(.white)
-                        .cornerRadius(4)
-                        .multilineTextAlignment(.center)
+                    if isTryToOpen {
+                        ProgressView()
+                            .progressViewStyle(
+                                CircularProgressViewStyle(
+                                    tint: .black
+                                )
+                            )
+                    } else {
+                        Label("Klik untuk melihat", systemImage: "")
+                            .font(.subheadline)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.accentColor)
+                            .foregroundColor(.white)
+                            .cornerRadius(4)
+                            .lineLimit(nil)
+                    }
                 }
             } else {
                 Button {
