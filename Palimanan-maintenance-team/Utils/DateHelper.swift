@@ -20,6 +20,18 @@ struct DateHelper {
         }
 
         return Calendar.current.isDateInToday(date)
+//        let formatter = DateFormatter()
+//            formatter.dateFormat = "yyyy-MM-dd"
+//            formatter.locale = Locale(identifier: "id_ID")
+//            formatter.timeZone = TimeZone.current
+//
+//            guard let date = formatter.date(from: dateString) else {
+//                print("❌ Failed to parse date: \(dateString)")
+//                return false
+//            }
+//
+//            let calendar = Calendar.current
+//            return calendar.isDateInToday(date) || calendar.isDateInYesterday(date)
     }
 
     static func formattedDate(_ dateString: String) -> String {

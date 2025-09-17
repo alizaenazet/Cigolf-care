@@ -55,6 +55,8 @@ class MandorDashboardViewModel: ObservableObject {
             )
             
             if let data = response.data {
+                print("resss")
+                print(response.data)
                 self.dailyPlan = data
             } else {
                 self.errorMessage = "Tidak ada data yang tersedia."

@@ -58,9 +58,13 @@ struct MandorDashboardView: View {
                     )
                     
                 } else if let plan = viewModel.dailyPlan {
-                    if DateHelper.isToday(plan.createdAt) {
+                    //                    if DateHelper.isToday(plan.createdAt) {
+                    //                        dashboardContent(plan: plan)
+                    //                    }
+                    if plan != nil {
                         dashboardContent(plan: plan)
-                    } else {
+                    }
+                    else {
                         VStack(spacing: 12) {
                             Text(
                                 "Tidak ada pekerjaan, silakan menambahkan pekerjaan"
