@@ -60,7 +60,7 @@ class LoginViewModel: ObservableObject {
                     
                     completion(true, loginResponse.data.accessToken, loginResponse.data.user.role, loginResponse.data.user.id)
                     
-                    OneSignal.login(String(loginResponse.data.user.id))
+                    OneSignal.login("User-\(loginResponse.data.user.id)")
                     OneSignal.User.addTag(key: "role", value: loginResponse.data.user.role)
                 
                 } else if let errorResponse = try? JSONDecoder().decode(LoginErrorResponse.self, from: data) {
