@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OneSignalFramework
 
 class SessionManager: ObservableObject {
     
@@ -87,6 +88,9 @@ class SessionManager: ObservableObject {
             self.userId = nil
             self.foremanId = nil
         }
+        
+        OneSignal.User.removeTag("role")
+        OneSignal.logout()
         
         print(#function, "User has been logged out. IsLoggedIn: \(self.isLoggedIn)")
     }
