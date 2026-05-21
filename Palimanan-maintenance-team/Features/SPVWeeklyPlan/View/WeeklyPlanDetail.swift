@@ -13,7 +13,7 @@ struct WeeklyPlanDetailView: View {
     var body: some View {
         if viewModel.isLoading {
             VStack {
-                ProgressView("Loading…")
+                ProgressView("Memuat…")
                     .padding()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
@@ -27,12 +27,12 @@ struct WeeklyPlanDetailView: View {
                             Text("Dari")
                             Text(detail.startAt.toDate()?.toIndonesianFormat() ?? "-")
                                 .padding(6)
-                                .background(Color(.systemGray3))
+//                                .background(Color(.systemGray3))
                                 .cornerRadius(8)
                             Text("Hingga")
                             Text(detail.endAt.toDate()?.toIndonesianFormat() ?? "-")
                                 .padding(6)
-                                .background(Color(.systemGray3))
+//                                .background(Color(.systemGray3))
                                 .cornerRadius(8)
                         }
                         .font(.subheadline)

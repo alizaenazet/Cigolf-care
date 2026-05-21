@@ -17,7 +17,7 @@ struct DailyReportDetailView: View {
     var body: some View {
         ZStack {
             if viewModel.isLoading {
-                ProgressView("Loading…")
+                ProgressView("Memuat…")
                     .padding()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let report = viewModel.reportDetail {
@@ -43,34 +43,12 @@ struct DailyReportDetailView: View {
                 Text(error)
                     .foregroundColor(.red)
             } else {
-                Text("No data available")
+                Text("Tidak ada data yang tersedia.")
                     .foregroundStyle(.secondary)
             }
         }
         
         .background(Color(.systemGray6))
-//        .sheet(isPresented: $showApprovalPopup) {
-//            if let report = viewModel.reportDetail {
-//                ApprovalPopup(
-//                    date: DateHelper.formattedDate(report.createdAt),
-//                    provider: report.outsourceCompany ?? "-",
-//                    finishedCount: report.finishedTasks ?? 0,
-//                    totalCount: report.totalTasks ?? 0,
-//                    inProgressCount: report.pendingTasks ?? 0,
-//                    onApprove: {
-//                        viewModel.reportDetail?.approved.isApproved = true
-//                        withAnimation { showApprovalPopup = false }
-//                    },
-//                    onClose: {
-//                        withAnimation { showApprovalPopup = false }
-//                    }
-//                )
-//                .transition(.opacity.combined(with: .scale))
-//                .presentationDetents([.medium, .large])
-//                .interactiveDismissDisabled(true)
-//                .presentationCornerRadius(24)
-//            }
-//        }
         .sheet(isPresented: $showApprovalPopup) {
             if let report = viewModel.reportDetail {
                 if SessionManager.shared.isLoggedIn {
@@ -98,7 +76,7 @@ struct DailyReportDetailView: View {
                         .presentationCornerRadius(24)
                     }
                     else {
-                        Text("You don't have permission to view this report.")
+                        Text("Anda tidak memiliki akses untuk melakukan approval laporan.")
                             .foregroundColor(.red)
                     }
                 }

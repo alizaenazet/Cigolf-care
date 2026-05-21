@@ -29,14 +29,15 @@ class WeeklyPlanHistoryViewModel: ObservableObject {
             // Properly assign the dates
             self.weeklyPlanHistoryPreview = response.data
             if let firstItem = response.data.first {
-                self.startAt = firstItem.startDate ?? Date()
+                self.endAt = firstItem.endDate ?? Date()
             }
+            
             if let lastItem = response.data.last {
-                self.endAt = lastItem.endDate ?? Date()
+                self.startAt = lastItem.startDate ?? Date()
             }
             
         } catch {
-            self.errorMessage = "Failed to load report: \(error.localizedDescription)"
+            self.errorMessage = "Gagal Untuk Memuat Laporan: \(error.localizedDescription)"
         }
         
 //        isLoading = false
@@ -54,7 +55,7 @@ class WeeklyPlanHistoryViewModel: ObservableObject {
             self.weeklyPlanHistoryPreview = response.data
         } catch {
             print(error.localizedDescription)
-            self.errorMessage = "Failed to load report: \(error.localizedDescription)"
+            self.errorMessage = "Gagal Untuk Memuat Laporan: \(error.localizedDescription)"
         }
         
 //        isLoading = false
@@ -71,7 +72,7 @@ class WeeklyPlanHistoryViewModel: ObservableObject {
             )
             self.weeklyPlanDetail = response.data
         } catch {
-            self.errorMessage = "Failed to load report: \(error.localizedDescription)"
+            self.errorMessage = "Gagal Untuk Memuat Laporan: \(error.localizedDescription)"
         }
     }
 }

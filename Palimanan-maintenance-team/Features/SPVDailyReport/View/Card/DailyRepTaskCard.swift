@@ -14,34 +14,58 @@ struct DailyRepTaskCard: View {
     @State private var showPreview = false
     @State private var previewURL: URL?
     
+    @State private var isTryToOpen: Bool = false
+
     var body: some View {
         LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
             Text(String(format: "%02d", index + 1))
                 .padding(.leading)
-            Text(task.taskType)
-            Text(task.area.joined(separator: ", "))
+                .lineLimit(nil)
             Text(task.priority)
-            if let url = task.urlPhoto, !url.isEmpty {
+                .lineLimit(nil)
+            Text(task.taskType)
+                .lineLimit(nil)
+            Text(task.area.joined(separator: ", "))
+                .lineLimit(nil)
+            Text(String(task.needWorker ?? 0))
+                .lineLimit(nil)
+            Text(String(task.availableWorker ?? 0))
+                .lineLimit(nil)
+            Text(task.workerList?.joined(separator: ", ") ?? "")
+                .lineLimit(nil)
+            if let url = task.imageUrl, !url.isEmpty {
                 Button {
+                    isTryToOpen = true
                     FileDownloader.downloadTempFile(from: url) { fileURL in
                         if let fileURL = fileURL {
+                            isTryToOpen = false
                             DispatchQueue.main.async {
-                                self.previewURL = fileURL
-                                self.showPreview = true
+                                FilePresenter.shared.present(url: fileURL, action: .preview)
                             }
                         }
                     }
                 } label: {
-                    Label("Klik untuk melihat", systemImage: "")
-                        .font(.subheadline)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(4)
+                    if isTryToOpen {
+                        ProgressView()
+                            .progressViewStyle(
+                                CircularProgressViewStyle(
+                                    tint: .black
+                                )
+                            )
+                    } else {
+                        Label("Klik untuk melihat", systemImage: "")
+                            .font(.subheadline)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.accentColor)
+                            .foregroundColor(.white)
+                            .cornerRadius(4)
+                            .lineLimit(nil)
+                    }
                 }
             } else {
-                Button {} label: {
+                Button {
+                } label: {
                     Label("Klik untuk melihat", systemImage: "")
                         .font(.subheadline)
                         .padding(.horizontal, 8)
@@ -49,21 +73,18 @@ struct DailyRepTaskCard: View {
                         .background(Color.gray)
                         .foregroundColor(.white)
                         .cornerRadius(4)
+                        .lineLimit(nil)
                 }
                 .disabled(true)
             }
             Text(task.description)
-                .lineLimit(1)
-            Image(systemName: task.isFinished ? "checkmark.circle" : "xmark.circle")
-                .foregroundColor(task.isFinished ? .green : .red)
+                .lineLimit(nil)
+            Text(task.isFinished ? "Selesai" : "Belum")
+                .foregroundColor(task.isFinished ? .accentColor : .red)
+                .lineLimit(nil)
         }
         .font(.subheadline)
         .padding(.horizontal)
         .padding(.vertical, 10)
-        .sheet(isPresented: $showPreview) {
-            if let previewURL = previewURL {
-                QuickLookPreview(url: previewURL)
-            }
-        }
     }
 }

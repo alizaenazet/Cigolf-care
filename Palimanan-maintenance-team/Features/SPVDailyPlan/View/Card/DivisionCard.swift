@@ -11,7 +11,7 @@ import SwiftUI
 struct DivisionCard: View {
     let division: Division
     let isReportApproved: Bool
-    @State private var isExpanded = false
+    @State private var isExpanded = true
     var onAddTask: (Division, Location) -> Void
     
     var body: some View {

@@ -20,8 +20,9 @@ struct HeaderViewAddDailyProgram: View {
     
     var body: some View {
         VStack {
+            
             HStack {
-                Spacer()
+                
                 Text("Tanggal: ")
                     .fontWeight(.regular)
                     .font(.title3)
@@ -37,10 +38,9 @@ struct HeaderViewAddDailyProgram: View {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.gray.opacity(0.2))
                 )
-            }
-            
-            HStack {
+                
                 Spacer()
+
                 Button(action: {
                     submitProgram()
                 }) {
@@ -119,7 +119,8 @@ struct AddDailyProgramView: View {
             ScrollView {
                 
                 if (viewModel.isLoading) {
-                    ProgressView("Loading…")
+                    ProgressView("Memuat…")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 else {
                     VStack(spacing: 20) {
@@ -179,35 +180,34 @@ struct DivisionSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(division.name)
-                    .font(.title)
-                    .fontWeight(.bold)
-                Button {
-                    division.isSelected = false
-                    division.locations.removeAll()
-                } label: {
-                    Image(systemName: "trash")
-                        .foregroundColor(.red)
-                }
-                Spacer()
-                
                 Button {
                     withAnimation {
                         isExpanded.toggle()
                     }
                 } label: {
                     Image(systemName: isExpanded ? "chevron.down" : "chevron.up")
-                        .padding(8)
+                        .padding(6)
                         .bold(true)
                         .foregroundColor(.black)
                         .overlay(
                             Rectangle()
-                                .foregroundStyle(Color.secondary.opacity(0.2))
+                                .foregroundStyle(Color.secondary.opacity(0.1))
                                 .cornerRadius(8)
+                                .shadow(radius: 4)
                         )
-                        .shadow(radius: 2)
                 }
-                
+                Text(division.name)
+                    .font(.title)
+                    .fontWeight(.bold)
+                Spacer()
+                Button {
+                    division.isSelected = false
+                    division.locations.removeAll()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.secondary.opacity(0.3))
+                        .font(.title)
+                }
             }
             
             if isExpanded {
@@ -277,14 +277,19 @@ struct LocationSection: View {
             HStack {
                 Picker("Lokasi", selection: $selectedLocation) {
                     
-                    Text("Pilih Lokasi")
+                    Text("Lokasi")
                         .tag("Pilih Lokasi")
                         .frame(alignment: .leading)
+                        .foregroundStyle(.secondary)
                     
                     ForEach(locationsPicker, id: \.self) { loc in
                         Text(loc).tag(loc)
                     }
                 }
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                )
                 .pickerStyle(MenuPickerStyle())
                 .onChange(of: selectedLocation) { newValue in
                     
@@ -306,38 +311,19 @@ struct LocationSection: View {
                     }
                 }
                 
+                Spacer()
+                
                 Button {
                     onDeleteLocation()
                 } label: {
-                    Image(systemName: "trash")
-                        .foregroundColor(.red)
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.secondary.opacity(0.3))
+                        .font(.title2)
                 }
-                Spacer()
                 
             }
             
             JobTable()
-            
-//            ForEach(location.jobs.indices, id: \.self) { index in
-//                JobRow(
-//                    job: $location.jobs[index],
-//                    number: index + 1,
-//                    viewModel: viewModel, isLastRow: index == location.jobs.count - 1,
-//                    onAddRow: {
-//                        viewModel.addJob(divId: division.id - 1, locId: locIndex)
-//                    },
-//                    onDelete: {
-//                        if index >= 0 && index < location.jobs.count {
-//                            location.jobs.remove(at: index)
-//                            if location.jobs.isEmpty {
-//                                onDeleteLocation()
-//                            }
-//                        } else {
-//                            print("⚠️ Index \(index) out of range, tidak bisa menghapus job")
-//                        }
-//                    }
-//                )
-//            }
             
             ForEach($location.jobs, id: \.id) { $job in
                 JobRow(
@@ -384,22 +370,22 @@ struct JobTable : View {
             Text("Jenis Pekerjaan")
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
+                .frame(width: 250, alignment: .center)
+
             Text("Hole/Area")
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
-                .frame(width: 150, alignment: .leading)
+                .frame(width: 150, alignment: .center)
             
             Text("Prioritas")
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
-                .frame(width: 80, alignment: .leading)
+                .frame(width: 80, alignment: .center)
             
             Text("Keterangan")
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .center)
         }
         .padding(.vertical, 8)
         
@@ -423,17 +409,17 @@ struct JobRow: View {
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
                 .frame(width: 60, alignment: .leading)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 4)
-                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                )
+//                .overlay(
+//                    RoundedRectangle(cornerRadius: 4)
+//                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+//                )
                 .foregroundStyle(.secondary)
             
             TextField("Jenis Pekerjaan", text: $job.jobType)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .onChange(of: job.jobType) { _ in triggerAddRowIfNeeded() } // ✅ cek otomatis
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
+                .frame(width: 250, alignment: .leading)
+
             Menu {
                 ForEach(holes, id: \.self) { hole in
                     Button {
@@ -484,8 +470,9 @@ struct JobRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             Button(action: onDelete) {
-                Image(systemName: "trash")
-                    .foregroundColor(.red)
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundColor(.secondary.opacity(0.3))
+                    .font(.title3)
             }
         }
         .padding(.vertical, 4)

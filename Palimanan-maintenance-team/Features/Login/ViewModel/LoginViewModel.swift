@@ -5,6 +5,7 @@
 //  Created by Louis Mario Wijaya on 01/09/25.
 //
 
+import OneSignalFramework
 import Foundation
 
 class LoginViewModel: ObservableObject {
@@ -17,7 +18,7 @@ class LoginViewModel: ObservableObject {
 
     func login(completion: @escaping (Bool, String?, String?, Int?) -> Void) {
         guard let url = URL(string: loginURL) else {
-            self.errorMessage = "Error: Invalid URL."
+            self.errorMessage = "Alamat login tidak valid."
             completion(false, nil, nil, nil)
             return
         }
@@ -31,10 +32,6 @@ class LoginViewModel: ObservableObject {
         let body = ["username": username, "password": password]
         request.httpBody = try? JSONEncoder().encode(body)
 
-        print("--- Starting Login Request ---")
-        print("URL: \(url.absoluteString)")
-        print("Body: \(String(data: request.httpBody ?? Data(), encoding: .utf8) ?? "{}")")
-
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 self.isLoading = false
@@ -42,14 +39,14 @@ class LoginViewModel: ObservableObject {
 
                 if let error = error {
                     print("Network Error: \(error.localizedDescription)")
-                    self.errorMessage = "Failed to connect to the server."
+                    self.errorMessage = "Tidak bisa terhubung. Periksa koneksi internet Anda."
                     completion(false, nil, nil, nil)
                     return
                 }
 
                 guard let data = data else {
                     print("Error: No data received from server.")
-                    self.errorMessage = "No data received."
+                    self.errorMessage = "Tidak ada data yang diterima. Coba lagi nanti."
                     completion(false, nil, nil, nil)
                     return
                 }
@@ -62,15 +59,18 @@ class LoginViewModel: ObservableObject {
                     self.errorMessage = nil
                     
                     completion(true, loginResponse.data.accessToken, loginResponse.data.user.role, loginResponse.data.user.id)
+                    
+                    OneSignal.login("User-\(loginResponse.data.user.id)")
+                    OneSignal.User.addTag(key: "role", value: loginResponse.data.user.role)
                 
                 } else if let errorResponse = try? JSONDecoder().decode(LoginErrorResponse.self, from: data) {
                     print("❌ Error: Decoded LoginErrorResponse.")
-                    self.errorMessage = errorResponse.message
+                    self.errorMessage = "Username atau password tidak sesuai. Silakan coba lagi."
                     completion(false, nil, nil, nil)
 
                 } else {
                     print("🚨 Fatal: Failed to decode JSON into either LoginResponse or LoginErrorResponse.")
-                    self.errorMessage = "An unexpected error occurred. Could not read server response."
+                    self.errorMessage = "Terjadi kesalahan yang tidak terduga. Silakan coba lagi."
                     completion(false, nil, nil, nil)
                 }
             }

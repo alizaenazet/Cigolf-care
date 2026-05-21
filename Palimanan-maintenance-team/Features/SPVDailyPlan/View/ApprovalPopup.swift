@@ -45,7 +45,7 @@ struct ApprovalPopup: View {
             
             HStack {
                 Label("Pekerjaan Selesai", systemImage: "checkmark.circle.fill")
-                    .foregroundColor(.green)
+                    .foregroundColor(.accentColor)
                 Spacer()
                 Text("\(finishedCount)/\(totalCount)")
             }
@@ -64,7 +64,7 @@ struct ApprovalPopup: View {
                     .bold()
                     .padding(.horizontal, 24)
                     .padding(.vertical, 10)
-                    .background(Color.green)
+                    .background(Color.accentColor)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
